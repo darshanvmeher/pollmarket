@@ -59,6 +59,22 @@ class Admin extends CI_Controller
     }
 
     public function categories()
+{
+    $this->load->model('Category_model');
+
+    $data = array(
+        'active' => 'categories',
+     'title' => 'Categories',
+    'subtitle' => 'Category structure for plastic and paper packaging catalog.',
+        'categories' => $this->Category_model->get_categories(), // ✅ DB DATA
+        'status_options' => array('Active', 'Review', 'Draft')
+    );
+
+    $this->render('categories', $data);
+}
+
+ /*
+    public function categories()
     {
         $data = array(
             'active' => 'categories',
@@ -110,7 +126,7 @@ class Admin extends CI_Controller
         );
 
         $this->render('categories', $data);
-    }
+    }*/
 
     public function orders()
     {

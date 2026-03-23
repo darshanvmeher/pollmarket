@@ -18,6 +18,8 @@
     </style>
 </head>
 <body>
+<form method="post" action="<?= base_url('index.php/Middle/log_in') ?>" autocomplete="off">
+
 <div class="auth-wrap">
     <div class="auth-card row g-0">
         <div class="col-lg-5 auth-hero d-flex flex-column justify-content-between">
@@ -30,16 +32,30 @@
         <div class="col-lg-7 auth-form">
             <h2 class="h4 fw-bold">Sign in</h2>
             <p class="text-muted">Use your administrator credentials.</p>
-            <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" placeholder="admin@packmart.com"></div>
-            <div class="mb-3"><label class="form-label">Password</label><input class="form-control" type="password" placeholder="********"></div>
+            <?php if (!empty($error)) : ?>
+        <div class="alert alert-danger text-center">
+        <?= $error ?>
+        </div>
+        <?php endif; ?>
+            <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" name="email" placeholder="admin@packmart.com"></div>
+            <div class="mb-3"><label class="form-label">Password</label><input class="form-control" type="password" name="password"  placeholder="********"></div>
             <div class="d-flex justify-content-between mb-3">
                 <div class="form-check"><input class="form-check-input" type="checkbox" id="remember"><label class="form-check-label" for="remember">Remember me</label></div>
                 <a href="#" class="text-decoration-none">Forgot password?</a>
             </div>
-            <a href="<?php echo site_url('admin'); ?>" class="btn btn-primary w-100 py-2">Login to Dashboard</a>
+        
+          <!--  <a href="/
+            /*<?php echo site_url('admin'); ?>*/
+            " class="btn btn-primary w-100 py-2">Login to Dashboard</a>-->
+
+            <!-- ✅ FIXED BUTTON -->
+<button type="submit" class="btn btn-primary w-100 py-2">
+    Login to Dashboard
+</button>
         </div>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</form>
 </body>
 </html>

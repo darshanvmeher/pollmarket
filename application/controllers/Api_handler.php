@@ -65,10 +65,10 @@ class Api_handler extends CI_Controller {
  public function admin_login()
 {
     $email = $this->input->post('email');
-    $phone_no = $this->input->post('phone_no');
+  //  $phone_no = $this->input->post('phone_no');
     $password = $this->input->post('password');
 
-    if (empty($email) || empty($phone_no) || empty($password)) {
+    if (empty($email) ||  empty($password)) {
         echo json_encode([
             'status' => false,
             'message' => 'All fields are required'
@@ -78,6 +78,9 @@ class Api_handler extends CI_Controller {
 
     // Check email
     $admin = $this->Admin_model->get_admin_by_email($email);
+
+
+    
 
     if (!$admin) {
         echo json_encode([
@@ -89,7 +92,7 @@ class Api_handler extends CI_Controller {
 
     // Check phone number
    
-    $phone = $this->Admin_model->check_admin_phone($email, $phone_no);
+   /* $phone = $this->Admin_model->check_admin_phone($email, $phone_no);
 
     if (!$phone) {
         echo json_encode([
@@ -97,7 +100,7 @@ class Api_handler extends CI_Controller {
             'message' => 'Incorrect phone number'
         ]);
         return;
-    }
+    }*/
 
     // Check password
     if (!password_verify($password, $admin['password'])) {
@@ -124,8 +127,17 @@ class Api_handler extends CI_Controller {
     echo json_encode([
         "status" => true,
         "message" => "Login successful",
+        "data" => [
+            "id" => $admin['id'],
+            "firstname" => $admin['firstname'] ?? '',
+            "lastname" => $admin['lastname'] ?? '',
+            "email" => $admin['email'],
+            "role" => "admin"
+        ],
         "token" => $jwt
     ]);
+
+
 }
 //verfy token
 
@@ -274,6 +286,7 @@ public function update_category()
     $data = [
         "category_name" => $this->input->post('category_name'),
         "description" => $this->input->post('description'),
+        "status"=>$this->input->post('status'),
         "updated_at" => date("Y-m-d H:i:s")
     ];
 
