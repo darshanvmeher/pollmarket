@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PackMart Admin - Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="<?php echo base_url('assets/admin/css/styles.css'); ?>" rel="stylesheet">
+    <style>
+        .auth-wrap { min-height: 100vh; display: grid; place-items: center; padding: 1.2rem; }
+        .auth-card { width: min(920px, 100%); background: #fff; border: 1px solid #dde5ea; border-radius: 22px; box-shadow: var(--pm-shadow); overflow: hidden; }
+        .auth-hero { background: radial-gradient(circle at 20% 20%, #1c3242 0%, #0f1720 58%); color: #fff; padding: 2rem; }
+        .auth-form { padding: 2rem; }
+    </style>
+</head>
+<body>
+<div class="auth-wrap">
+    <div class="auth-card row g-0">
+        <div class="col-lg-5 auth-hero d-flex flex-column justify-content-between">
+            <div>
+                <h1 class="h3 fw-bold">PackMart Admin</h1>
+                <p class="mb-0">Control ecommerce operations for plastic garbage bags, stationery supplies, silver foils, RFID seals, and packaging inventory.</p>
+            </div>
+            <div class="small text-white-50">Secure admin portal v2.0</div>
+        </div>
+        <div class="col-lg-7 auth-form">
+            <h2 class="h4 fw-bold">Sign in</h2>
+            <p class="text-muted">Use your administrator credentials.</p>
+            <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" placeholder="admin@packmart.com"></div>
+            <div class="mb-3"><label class="form-label">Password</label><input class="form-control" type="password" placeholder="********"></div>
+            <div class="d-flex justify-content-between mb-3">
+                <div class="form-check"><input class="form-check-input" type="checkbox" id="remember"><label class="form-check-label" for="remember">Remember me</label></div>
+                <a href="#" class="text-decoration-none">Forgot password?</a>
+            </div>
+            <a href="<?php echo site_url('admin'); ?>" class="btn btn-primary w-100 py-2">Login to Dashboard</a>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
