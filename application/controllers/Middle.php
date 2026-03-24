@@ -255,4 +255,135 @@ public function adding_categories()
         'message' => 'Category added successfully'
     ]);
 }
+
+public function updating_categories()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $postData = [
+        'id'            =>$this->input->post('id'),
+        'category_name' => $this->input->post('category_name'),
+        'description'   => $this->input->post('description'),
+        'status'        => $this->input->post('status')
+    ];
+
+    $url = base_url('index.php/api_handler/update_category');
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $token
+]);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+
+    // ✅ SUCCESS RESPONSE (IMPORTANT)
+    echo json_encode([
+        'status' => true,
+        'message' => 'Category updated successfully'
+    ]);
+}
+
+public function deleting_categories()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $postData = [
+        'id'        => $this->input->post('id')
+    ];
+
+    $url = base_url('index.php/api_handler/delete_category');
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $token
+]);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+
+    // ✅ SUCCESS RESPONSE (IMPORTANT)
+    echo json_encode([
+        'status' => true,
+        'message' => 'Category deleted successfully'
+    ]);
+}
 }

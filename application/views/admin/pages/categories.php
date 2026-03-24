@@ -61,14 +61,11 @@
                         data-category-description="<?php echo html_escape($category['description'] ?? ''); ?>">
                                                     <i class="bi bi-pencil-square"></i> Edit
                         </button>
-                        <button
-                            class="btn btn-sm btn-outline-danger"
+                       <button
+                            class="btn btn-sm btn-outline-danger delete-btn"
                             type="button"
-                            data-bs-toggle="modal"
-                            data-bs-target="#categoryDeleteModal"
-                            data-category-id="<?php echo $category['id'] ?? ''; ?>"
-                            data-category-name="<?php echo html_escape($category['name'] ?? ''); ?>"
-                            data-category-products="0"
+                            data-id="<?php echo $category['id']; ?>"
+                            data-name="<?php echo html_escape($category['category_name']); ?>"
                         >
                             <i class="bi bi-trash"></i> Delete
                         </button>
@@ -85,7 +82,7 @@
     </div>
 </section>
 
-<div class="modal fade" id="categoryFormModal" tabindex="-1" aria-hidden="true">
+<!--<div class="modal fade" id="categoryFormModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <form id="categoriesForm" class="row g-3">
 
@@ -118,6 +115,7 @@
                     </div>
 
             
+           
 
         </div>
             <div class="modal-footer border-0 pt-0">
@@ -125,15 +123,85 @@
                 <button type="submit" class="btn btn-primary" data-category-submit-label>Save Category</button>
             </div>
 
-         </div>
+                        
 
 
-         
+
+                         
             
         </form>
         
+        </div>
     </div>
-</div>
+
+   
+</div>-->
+
+<div class="modal fade" id="categoryFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content category-modal">
+
+            <form id="categoriesForm" class="row g-3">
+
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h5 class="modal-title fw-bold" data-category-modal-title>Add Category</h5>
+                        <p class="text-muted small mb-0" data-category-modal-subtitle>
+                            Create a new category master for the catalog.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body pt-3">
+
+                    <input type="hidden" name="id" id="categories_id">
+
+                    <div class="col-12">
+                        <label class="form-label">Category Name</label>
+                        <input type="text" class="form-control"
+                               data-category-input="name"
+                               name="category_name"
+                               placeholder="Paper Bags">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Status</label>
+                        <select class="form-select"
+                                data-category-input="status"
+                                name="status">
+                            <?php foreach ($status_options as $status_option): ?>
+                                <option value="<?php echo html_escape($status_option); ?>">
+                                    <?php echo html_escape($status_option); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" rows="4"
+                                  data-category-input="description"
+                                  name="description"
+                                  placeholder="Short category summary"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-category-submit-label>
+                        Save Category
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>           
 
 <div class="modal fade" id="categoryDeleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -156,7 +224,9 @@
             </div>
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-danger">Delete Category</button>
+                <button type="button" class="btn btn-outline-danger" id="confirmDeleteBtn">
+                    Delete Category
+                </button>
             </div>
         </div>
     </div>
@@ -265,5 +335,72 @@ modal.addEventListener('show.bs.modal', function (event) {
         idInput.value = "";
     }
 
-}); // ✅ IMPORTANT
+}); 
 </script>
+
+<!--delete script-->
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    let deleteCategoryId = null;
+
+    // When delete button clicked → open modal
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+
+        btn.addEventListener('click', function () {
+
+            deleteCategoryId = this.dataset.id;
+
+            // Set category name
+            document.querySelector('[data-category-delete-name]').textContent =
+                this.dataset.name || 'Category';
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('categoryDeleteModal'));
+            modal.show();
+        });
+
+    });
+
+    // Confirm delete button (use ID instead of class)
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+
+        if (!deleteCategoryId) return;
+
+        fetch("<?= base_url('index.php/middle/deleting_categories'); ?>", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "id=" + deleteCategoryId
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status) {
+
+                showUpdatePopup('Category deleted successfully ✅');
+
+                // Remove row
+                document.querySelector(`.delete-btn[data-id="${deleteCategoryId}"]`)
+                    ?.closest('tr').remove();
+
+                // Close modal
+                bootstrap.Modal.getInstance(
+                    document.getElementById('categoryDeleteModal')
+                ).hide();
+                document.body.focus();
+
+            } else {
+                showUpdatePopup(data.message || 'Delete failed ❌', true);
+            }
+        })
+        .catch(() => {
+            showUpdatePopup('Server error ❌', true);
+        });
+
+    });
+
+});
+</script>
+
