@@ -193,7 +193,7 @@ class Admin extends CI_Controller
 
     $data = array(
         'active' => 'subcategories',
-       'title' => 'subcategories',
+       'title' => 'Subcategories',
        'subtitle' => 'Manage subcategories linked with categories.',
         'categories' => $this->Category_model->get_categories(),
         'subcategories' => $this->Sub_category_model->get_all_subcategories()
