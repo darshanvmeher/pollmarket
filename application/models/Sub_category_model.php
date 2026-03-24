@@ -40,5 +40,12 @@ class Sub_category_model extends CI_Model {
         return $this->db->get('sub_category_tbl')->row_array();
     }
 
-   
+    public function get_all_subcategories()
+{
+    $this->db->select('sc.*, c.category_name');
+    $this->db->from('sub_category_tbl sc');
+    $this->db->join('category_tbl c', 'c.id = sc.category_id');
+    $this->db->where('sc.delete_status', 0);
+    return $this->db->get()->result_array();
+}
 }

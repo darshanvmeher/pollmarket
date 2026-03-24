@@ -185,6 +185,22 @@ class Admin extends CI_Controller
         $this->render('master_table', $data);
     }
 
+
+    public function subcategories()
+{
+    $this->load->model('Category_model');
+    $this->load->model('Sub_category_model');
+
+    $data = array(
+        'active' => 'subcategories',
+       'title' => 'subcategories',
+       'subtitle' => 'Manage subcategories linked with categories.',
+        'categories' => $this->Category_model->get_categories(),
+        'subcategories' => $this->Sub_category_model->get_all_subcategories()
+    );
+
+    $this->render('subcategories', $data);
+}
     public function suppliers()
     {
         $data = array(

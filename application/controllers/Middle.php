@@ -386,4 +386,226 @@ public function deleting_categories()
         'message' => 'Category deleted successfully'
     ]);
 }
+
+//subcategories
+
+public function subcategories_view()
+{//
+   // if (!$this->session->userdata('is_logged')) {
+     //   redirect('middle/login_view');
+    //}
+
+    $this->load->model('Sub_category_model');
+    $this->load->model('Category_model');
+
+
+    $data['subcategories'] = $this->Sub_category_model->get_all_subcategories();
+    $data['categories'] = $this->Category_model->get_categories();
+
+
+    // ✅ ADD THIS LINE (VERY IMPORTANT)
+    $data['status_options'] = ['Active', 'Draft', 'Review'];
+
+    $this->load->view('admin/pages/subcategories', $data);
+}
+
+public function adding_subcategories()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $postData = [
+        'category_id'=> $this->input->post('category_id'),
+        'sub_category_name' => $this->input->post('sub_category_name'),
+        'description'   => $this->input->post('description'),
+        'status'        => $this->input->post('status')
+    ];
+
+    $url = base_url('index.php/api_handler/add_subcategory');
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $token
+]);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+
+    // ✅ SUCCESS RESPONSE (IMPORTANT)
+    echo json_encode([
+        'status' => true,
+        'message' => 'Sub Category added successfully'
+    ]);
+}
+
+public function updating_subcategories()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $postData = [
+        'id'            =>$this->input->post('id'),
+        'category_id'   =>$this->input->post('category_id'),
+        'sub_category_name' => $this->input->post('sub_category_name'),
+        'description'   => $this->input->post('description'),
+        'status'        => $this->input->post('status')
+    ];
+
+    $url = base_url('index.php/api_handler/update_sub_category');
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $token
+]);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+
+    // ✅ SUCCESS RESPONSE (IMPORTANT)
+    echo json_encode([
+        'status' => true,
+        'message' => 'Sub Category updated successfully'
+    ]);
+}
+
+public function deleting_subcategories()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $postData = [
+        'id'        => $this->input->post('id')
+    ];
+
+    $url = base_url('index.php/api_handler/delete_sub_category');
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $token
+]);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+
+    // ✅ SUCCESS RESPONSE (IMPORTANT)
+    echo json_encode([
+        'status' => true,
+        'message' => 'Sub Category deleted successfully'
+    ]);
+}
+
 }
