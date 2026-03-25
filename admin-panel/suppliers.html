@@ -1,1 +1,162 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PackMart Admin - Suppliers</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet"><link href="assets/css/styles.css" rel="stylesheet"></head><body><div class="admin-shell"><aside class="sidebar" id="sidebar"><a class="brand" href="index.html"><span class="brand-mark"><i class="bi bi-box-seam"></i></span>PackMart Admin</a><div class="menu-label">Main</div><nav class="nav flex-column"><a data-nav-item class="nav-link" href="index.html"><i class="bi bi-grid"></i> Dashboard</a><a data-nav-item class="nav-link" href="products.html"><i class="bi bi-bag"></i> Products</a><a data-nav-item class="nav-link" href="categories.html"><i class="bi bi-tags"></i> Categories</a><a data-nav-item class="nav-link" href="orders.html"><i class="bi bi-receipt"></i> Orders</a><a data-nav-item class="nav-link" href="customers.html"><i class="bi bi-people"></i> Customers</a><a data-nav-item class="nav-link" href="inventory.html"><i class="bi bi-boxes"></i> Inventory</a><a data-nav-item class="nav-link" href="suppliers.html"><i class="bi bi-truck"></i> Suppliers</a><a data-nav-item class="nav-link" href="promotions.html"><i class="bi bi-megaphone"></i> Promotions</a><a data-nav-item class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> Reports</a><a data-nav-item class="nav-link" href="settings.html"><i class="bi bi-gear"></i> Settings</a></nav><div class="sidebar-footer"><a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div></aside><div class="sidebar-overlay" id="sidebarOverlay"></div><main class="main"><div class="topbar d-flex justify-content-between align-items-center flex-wrap gap-2"><div class="d-flex align-items-center gap-2"><button class="btn btn-light d-lg-none" data-sidebar-toggle><i class="bi bi-list"></i></button><div><h1 class="h4 page-title">Suppliers</h1><p class="page-subtitle">Vendor contracts for plastic and paper sourcing.</p></div></div><button class="btn btn-primary">Add Supplier</button></div><div class="row g-3 mt-1"><div class="col-lg-8"><div class="panel-card"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Supplier</th><th>Category</th><th>Lead Time</th><th>Quality Score</th><th>Contract</th></tr></thead><tbody><tr><td>Nova Polychem</td><td>Plastic Bags</td><td>4 days</td><td>96%</td><td><span class="status-pill status-live">Active</span></td></tr><tr><td>SilvoWrap Industries</td><td>Silver Foil</td><td>6 days</td><td>89%</td><td><span class="status-pill status-live">Active</span></td></tr><tr><td>TagSecure Systems</td><td>RFID Seals</td><td>5 days</td><td>92%</td><td><span class="status-pill status-live">Active</span></td></tr><tr><td>PaperNest LLP</td><td>Paper Bags</td><td>8 days</td><td>83%</td><td><span class="status-pill status-low">Expiring</span></td></tr></tbody></table></div></div></div><div class="col-lg-4"><div class="panel-card"><h2 class="panel-title mb-3">Upcoming Deliveries</h2><div class="list-item"><strong>Nova Polychem</strong><p class="small text-muted mb-0">600 packs - due 07 Mar</p></div><div class="list-item"><strong>TagSecure Systems</strong><p class="small text-muted mb-0">1200 RFID strips - due 08 Mar</p></div><div class="list-item"><strong>PaperNest LLP</strong><p class="small text-muted mb-0">1000 paper bags - due 09 Mar</p></div></div></div></div></main></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script><script src="assets/js/app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PackMart Admin - Suppliers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/css/styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="index.html"
+          ><span class="brand-mark"><i class="bi bi-box-seam"></i></span
+          >PackMart Admin</a
+        >
+        <div class="menu-label">Main</div>
+        <nav class="nav flex-column">
+          <a data-nav-item class="nav-link" href="index.html"
+            ><i class="bi bi-grid"></i> Dashboard</a
+          ><a data-nav-item class="nav-link" href="products.html"
+            ><i class="bi bi-bag"></i> Products</a
+          ><a data-nav-item class="nav-link" href="categories.html"
+            ><i class="bi bi-tags"></i> Categories</a
+          ><a data-nav-item class="nav-link" href="subcategories.html"><i class="bi bi-tags"></i>Subcategories</a>
+          <a data-nav-item class="nav-link" href="orders.html"
+            ><i class="bi bi-receipt"></i> Orders</a
+          ><a data-nav-item class="nav-link" href="customers.html"
+            ><i class="bi bi-people"></i> Customers</a
+          ><a data-nav-item class="nav-link" href="inventory.html"
+            ><i class="bi bi-boxes"></i> Inventory</a
+          ><a data-nav-item class="nav-link" href="suppliers.html"
+            ><i class="bi bi-truck"></i> Suppliers</a
+          ><a data-nav-item class="nav-link" href="promotions.html"
+            ><i class="bi bi-megaphone"></i> Promotions</a
+          ><a data-nav-item class="nav-link" href="reports.html"
+            ><i class="bi bi-bar-chart"></i> Reports</a
+          ><a data-nav-item class="nav-link" href="settings.html"
+            ><i class="bi bi-gear"></i> Settings</a
+          >
+        </nav>
+        <div class="sidebar-footer">
+          <a class="nav-link" href="login.html"
+            ><i class="bi bi-box-arrow-right"></i> Logout</a
+          >
+        </div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+      <main class="main">
+        <div
+          class="topbar d-flex justify-content-between align-items-center flex-wrap gap-2"
+        >
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-light d-lg-none" data-sidebar-toggle>
+              <i class="bi bi-list"></i>
+            </button>
+            <div>
+              <h1 class="h4 page-title">Suppliers</h1>
+              <p class="page-subtitle">
+                Vendor contracts for plastic and paper sourcing.
+              </p>
+            </div>
+          </div>
+          <button class="btn btn-primary">Add Supplier</button>
+        </div>
+        <div class="row g-3 mt-1">
+          <div class="col-lg-8">
+            <div class="panel-card">
+              <div class="table-responsive">
+                <table class="table align-middle">
+                  <thead>
+                    <tr>
+                      <th>Supplier</th>
+                      <th>Category</th>
+                      <th>Lead Time</th>
+                      <th>Quality Score</th>
+                      <th>Contract</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Nova Polychem</td>
+                      <td>Plastic Bags</td>
+                      <td>4 days</td>
+                      <td>96%</td>
+                      <td>
+                        <span class="status-pill status-live">Active</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>SilvoWrap Industries</td>
+                      <td>Silver Foil</td>
+                      <td>6 days</td>
+                      <td>89%</td>
+                      <td>
+                        <span class="status-pill status-live">Active</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>TagSecure Systems</td>
+                      <td>RFID Seals</td>
+                      <td>5 days</td>
+                      <td>92%</td>
+                      <td>
+                        <span class="status-pill status-live">Active</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>PaperNest LLP</td>
+                      <td>Paper Bags</td>
+                      <td>8 days</td>
+                      <td>83%</td>
+                      <td>
+                        <span class="status-pill status-low">Expiring</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="panel-card">
+              <h2 class="panel-title mb-3">Upcoming Deliveries</h2>
+              <div class="list-item">
+                <strong>Nova Polychem</strong>
+                <p class="small text-muted mb-0">600 packs - due 07 Mar</p>
+              </div>
+              <div class="list-item">
+                <strong>TagSecure Systems</strong>
+                <p class="small text-muted mb-0">
+                  1200 RFID strips - due 08 Mar
+                </p>
+              </div>
+              <div class="list-item">
+                <strong>PaperNest LLP</strong>
+                <p class="small text-muted mb-0">
+                  1000 paper bags - due 09 Mar
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>

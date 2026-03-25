@@ -57,6 +57,7 @@ $route['admin'] = 'admin/index';
 $route['admin/login'] = 'admin/login';
 $route['admin/products'] = 'admin/products';
 $route['admin/categories'] = 'admin/categories';
+$route['admin/subcategories'] = 'admin/subcategories';
 $route['admin/orders'] = 'admin/orders';
 $route['admin/customers'] = 'admin/customers';
 $route['admin/inventory'] = 'admin/inventory';

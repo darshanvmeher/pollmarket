@@ -13,6 +13,7 @@ class Admin extends CI_Controller
         'dashboard' => array('label' => 'Dashboard', 'icon' => 'bi bi-grid', 'url' => 'admin'),
         'products' => array('label' => 'Products', 'icon' => 'bi bi-bag', 'url' => 'admin/products'),
         'categories' => array('label' => 'Categories', 'icon' => 'bi bi-tags', 'url' => 'admin/categories'),
+        'subcategories' => array('label' => 'Subcategories', 'icon' => 'bi bi-diagram-3', 'url' => 'admin/subcategories'),
         'orders' => array('label' => 'Orders', 'icon' => 'bi bi-receipt', 'url' => 'admin/orders'),
         'customers' => array('label' => 'Customers', 'icon' => 'bi bi-people', 'url' => 'admin/customers'),
         'inventory' => array('label' => 'Inventory', 'icon' => 'bi bi-boxes', 'url' => 'admin/inventory'),

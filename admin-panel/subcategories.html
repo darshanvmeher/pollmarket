@@ -1,1 +1,146 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PackMart Admin - Subcategories</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet"><link href="assets/css/styles.css" rel="stylesheet"></head><body><div class="admin-shell"><aside class="sidebar" id="sidebar"><a class="brand" href="index.html"><span class="brand-mark"><i class="bi bi-box-seam"></i></span>PackMart Admin</a><div class="menu-label">Main</div><nav class="nav flex-column"><a data-nav-item class="nav-link" href="index.html"><i class="bi bi-grid"></i> Dashboard</a><a data-nav-item class="nav-link" href="products.html"><i class="bi bi-bag"></i> Products</a><a data-nav-item class="nav-link" href="categories.html"><i class="bi bi-tags"></i> Categories</a><a data-nav-item class="nav-link" href="subcategories.html"><i class="bi bi-tags"></i> Subcategories</a><a data-nav-item class="nav-link" href="orders.html"><i class="bi bi-receipt"></i> Orders</a><a data-nav-item class="nav-link" href="customers.html"><i class="bi bi-people"></i> Customers</a><a data-nav-item class="nav-link" href="inventory.html"><i class="bi bi-boxes"></i> Inventory</a><a data-nav-item class="nav-link" href="suppliers.html"><i class="bi bi-truck"></i> Suppliers</a><a data-nav-item class="nav-link" href="promotions.html"><i class="bi bi-megaphone"></i> Promotions</a><a data-nav-item class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> Reports</a><a data-nav-item class="nav-link" href="settings.html"><i class="bi bi-gear"></i> Settings</a></nav><div class="sidebar-footer"><a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div></aside><div class="sidebar-overlay" id="sidebarOverlay"></div><main class="main"><div class="topbar d-flex justify-content-between align-items-center flex-wrap gap-2"><div class="d-flex align-items-center gap-2"><button class="btn btn-light d-lg-none" data-sidebar-toggle><i class="bi bi-list"></i></button><div><h1 class="h4 page-title">Categories</h1><p class="page-subtitle">Category structure for plastic and paper packaging catalog.</p></div></div><button class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> New Category</button></div><div class="row g-3 mt-1"><div class="col-lg-7"><div class="panel-card h-100"><h2 class="panel-title mb-3">Category List</h2><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Category</th><th>Subcategories</th><th>Products</th><th>Status</th></tr></thead><tbody><tr><td>Plastic Garbage Bags</td><td>Compostable, Heavy Duty</td><td>84</td><td><span class="status-pill status-live">Active</span></td></tr><tr><td>Stationery Materials</td><td>Paper, Adhesives</td><td>142</td><td><span class="status-pill status-live">Active</span></td></tr><tr><td>Silver Foil Papers</td><td>Rolls, Sheets</td><td>26</td><td><span class="status-pill status-live">Active</span></td></tr><tr><td>RFID Seals</td><td>Tamper, Barcode</td><td>12</td><td><span class="status-pill status-live">Active</span></td></tr><tr><td>Paper Bags</td><td>Carry, Grocery</td><td>53</td><td><span class="status-pill status-low">Review</span></td></tr></tbody></table></div></div></div><div class="col-lg-5"><div class="panel-card"><h2 class="panel-title mb-3">Create Category</h2><div class="mb-2"><label class="form-label">Name</label><input class="form-control"></div><div class="mb-2"><label class="form-label">Parent</label><select class="form-select"><option>None</option><option>Plastic Bags</option><option>Paper Bags</option></select></div><div class="mb-2"><label class="form-label">Description</label><textarea class="form-control" rows="4"></textarea></div><button class="btn btn-primary w-100">Save Category</button></div></div></div></main></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script><script src="assets/js/app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PackMart Admin - Subcategories</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="assets/css/styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="admin-shell">
+        <aside class="sidebar" id="sidebar">
+            <a class="brand" href="index.html"><span class="brand-mark"><i class="bi bi-box-seam"></i></span>PackMart
+                Admin</a>
+            <div class="menu-label">Main</div>
+            <nav class="nav flex-column">
+                <a data-nav-item class="nav-link" href="index.html"><i class="bi bi-grid"></i> Dashboard</a><a
+                    data-nav-item class="nav-link" href="products.html"><i class="bi bi-bag"></i> Products</a><a
+                    data-nav-item class="nav-link" href="categories.html"><i class="bi bi-tags"></i> Categories</a><a
+                    data-nav-item class="nav-link" href="subcategories.html"><i class="bi bi-tags"></i>Subcategories</a>
+                    <a data-nav-item class="nav-link" href="orders.html"><i class="bi bi-receipt"></i>
+                    Orders</a><a data-nav-item class="nav-link" href="customers.html"><i class="bi bi-people"></i>
+                    Customers</a><a data-nav-item class="nav-link" href="inventory.html"><i class="bi bi-boxes"></i>
+                    Inventory</a><a data-nav-item class="nav-link" href="suppliers.html"><i class="bi bi-truck"></i>
+                    Suppliers</a><a data-nav-item class="nav-link" href="promotions.html"><i
+                        class="bi bi-megaphone"></i> Promotions</a><a data-nav-item class="nav-link"
+                    href="reports.html"><i class="bi bi-bar-chart"></i> Reports</a><a data-nav-item class="nav-link"
+                    href="settings.html"><i class="bi bi-gear"></i> Settings</a>
+            </nav>
+            <div class="sidebar-footer">
+                <a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <main class="main">
+            <div class="topbar d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-light d-lg-none" data-sidebar-toggle>
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div>
+                        <h1 class="h4 page-title">Sub Categories</h1>
+                        <p class="page-subtitle">
+                            Category structure for plastic and paper packaging catalog.
+                        </p>
+                    </div>
+                </div>
+                <button class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> New Category
+                </button>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-lg-7">
+                    <div class="panel-card h-100">
+                        <h2 class="panel-title mb-3">Category List</h2>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Subcategories</th>
+                                        <th>Products</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Plastic Garbage Bags</td>
+                                        <td>Compostable, Heavy Duty</td>
+                                        <td>84</td>
+                                        <td>
+                                            <span class="status-pill status-live">Active</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Stationery Materials</td>
+                                        <td>Paper, Adhesives</td>
+                                        <td>142</td>
+                                        <td>
+                                            <span class="status-pill status-live">Active</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Silver Foil Papers</td>
+                                        <td>Rolls, Sheets</td>
+                                        <td>26</td>
+                                        <td>
+                                            <span class="status-pill status-live">Active</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>RFID Seals</td>
+                                        <td>Tamper, Barcode</td>
+                                        <td>12</td>
+                                        <td>
+                                            <span class="status-pill status-live">Active</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Paper Bags</td>
+                                        <td>Carry, Grocery</td>
+                                        <td>53</td>
+                                        <td>
+                                            <span class="status-pill status-low">Review</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="panel-card">
+                        <h2 class="panel-title mb-3">Create Category</h2>
+                        <div class="mb-2">
+                            <label class="form-label">Name</label><input class="form-control" />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Parent</label><select class="form-select">
+                                <option>None</option>
+                                <option>Plastic Bags</option>
+                                <option>Paper Bags</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Description</label><textarea class="form-control"
+                                rows="4"></textarea>
+                        </div>
+                        <button class="btn btn-primary w-100">Save Category</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>

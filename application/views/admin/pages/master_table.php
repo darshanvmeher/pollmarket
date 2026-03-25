@@ -5,7 +5,7 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table align-middle">
+        <table  id="myTable" class="table align-middle">
             <thead>
             <tr>
                 <?php foreach ($headers as $header): ?>
@@ -26,7 +26,10 @@
                     </td>
                 </tr>
             <?php endforeach; ?>
+                            
             </tbody>
         </table>
     </div>
 </section>
+
+

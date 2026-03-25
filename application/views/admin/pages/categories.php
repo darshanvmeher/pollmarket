@@ -16,7 +16,7 @@
     </div>
     <div class="table-responsive">
         
-        <table class="table align-middle">
+        <table id="myTable"class="table align-middle">
             <thead>
             <tr>
                 <th>Category</th>

@@ -390,10 +390,10 @@ public function deleting_categories()
 //subcategories
 
 public function subcategories_view()
-{//
-   // if (!$this->session->userdata('is_logged')) {
-     //   redirect('middle/login_view');
-    //}
+{
+    if (!$this->session->userdata('is_logged')) {
+     redirect('middle/login_view');
+    }
 
     $this->load->model('Sub_category_model');
     $this->load->model('Category_model');
@@ -472,7 +472,7 @@ public function adding_subcategories()
     // ✅ SUCCESS RESPONSE (IMPORTANT)
     echo json_encode([
         'status' => true,
-        'message' => 'Sub Category added successfully'
+        'message' => 'Subcategory added successfully'
     ]);
 }
 
@@ -540,7 +540,7 @@ public function updating_subcategories()
     // ✅ SUCCESS RESPONSE (IMPORTANT)
     echo json_encode([
         'status' => true,
-        'message' => 'Sub Category updated successfully'
+        'message' => 'Subcategory updated successfully'
     ]);
 }
 
@@ -604,8 +604,12 @@ public function deleting_subcategories()
     // ✅ SUCCESS RESPONSE (IMPORTANT)
     echo json_encode([
         'status' => true,
-        'message' => 'Sub Category deleted successfully'
+        'message' => 'Subcategory deleted successfully'
     ]);
 }
+
+
+
+
 
 }
