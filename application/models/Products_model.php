@@ -153,6 +153,7 @@ $this->db->select('
         }
 
         $product['attributes'] = $this->get_product_attributes($product['id']);
+        
 
         return $products;
     }

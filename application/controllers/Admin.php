@@ -40,7 +40,7 @@ class Admin extends CI_Controller
         $this->render('dashboard', $data);
     }
 
-    public function products()
+    /*public function products()
     {
         $data = array(
             'active' => 'products',
@@ -57,6 +57,33 @@ class Admin extends CI_Controller
         );
 
         $this->render('master_table', $data);
+    }*/
+
+    public function products()
+    {
+        $this->load->model('Products_model');
+        $this->load->model('Category_model');
+        $this->load->model('Sub_category_model');
+        $this->load->model('Attribute_model');
+
+
+        $data = array(
+        'active' => 'products',
+        'title' => 'Products',
+       'subtitle' => 'Manage catalog across all packaging and stationery categories.',
+        'products' => $this->Products_model->get_product_list(), // ✅ DB DATA
+        'categories' => $this->Category_model->get_categories(),
+        'subcategories' => $this->Sub_category_model->get_all_subcategories(),
+        'attributes' => $this->Attribute_model->get_attributes(),
+        'status_options' => array('Active', 'Review', 'Draft')
+
+        );
+
+        $this->render('products', $data);
+
+
+
+
     }
 
     public function categories()
