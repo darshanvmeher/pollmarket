@@ -16,6 +16,8 @@ class Api_handler extends CI_Controller {
         $this->load->model('Products_model');
         $this->load->model('Order_model');
         $this->load->model('Attribute_model');
+        $this->load->library('upload');
+
 
         
     }
@@ -619,53 +621,77 @@ $this->Products_model->insert_product_attribute($attr_data);    }
 }
 
     // MEDIA UPLOAD
+    // -------- MEDIA UPLOAD (COMBINED PHOTO + VIDEO LIKE WORK MODULE) --------
 
-    if(!empty($_FILES['media']['name'][0]))
-    {
-        $upload_path = 'uploads/products/';
+// Folders
+$photoDir = './uploads/products/photos/';
+$videoDir = './uploads/products/videos/';
 
-        if(!is_dir($upload_path)){
-            mkdir($upload_path,0777,true);
+if (!is_dir($photoDir)) mkdir($photoDir, 0777, true);
+if (!is_dir($videoDir)) mkdir($videoDir, 0777, true);
+
+$this->load->library('upload');
+
+// Check media[]
+if (!empty($_FILES['media']['name'][0])) {
+
+    $files = $_FILES['media'];
+
+    for ($i = 0; $i < count($files['name']); $i++) {
+
+        $_FILES['file'] = [
+            'name'     => $files['name'][$i],
+            'type'     => $files['type'][$i],
+            'tmp_name' => $files['tmp_name'][$i],
+            'error'    => $files['error'][$i],
+            'size'     => $files['size'][$i],
+        ];
+
+        $fileType = $_FILES['file']['type'];
+
+        // ---------- PHOTO ----------
+        if (in_array($fileType, ['image/jpeg','image/png','image/jpg'])) {
+
+            $this->upload->initialize([
+                'upload_path'   => $photoDir,
+                'allowed_types' => 'jpg|jpeg|png',
+                'encrypt_name'  => true
+            ]);
+
+            if ($this->upload->do_upload('file')) {
+                $file = $this->upload->data();
+
+                $this->db->insert('product_media_tbl', [
+                    'product_id' => $product_id,   // or $id in update
+                    'media_type' => 'photo',
+                    'media_path' => 'uploads/products/photos/' . $file['file_name'],
+                    'status'     => 1
+                ]);
+            }
         }
 
-        $files = $_FILES['media'];
-        $count = count($files['name']);
+        // ---------- VIDEO ----------
+        elseif (in_array($fileType, ['video/mp4','video/avi','video/mov','video/mkv'])) {
 
-        for($i=0;$i<$count;$i++)
-        {
-            $_FILES['file']['name'] = $files['name'][$i];
-            $_FILES['file']['type'] = $files['type'][$i];
-            $_FILES['file']['tmp_name'] = $files['tmp_name'][$i];
-            $_FILES['file']['error'] = $files['error'][$i];
-            $_FILES['file']['size'] = $files['size'][$i];
+            $this->upload->initialize([
+                'upload_path'   => $videoDir,
+                'allowed_types' => 'mp4|avi|mov|mkv',
+                'encrypt_name'  => true
+            ]);
 
-            $config['upload_path'] = $upload_path;
-            $config['allowed_types'] = 'jpg|jpeg|png|mp4|mov|avi';
-            $config['encrypt_name'] = TRUE;
+            if ($this->upload->do_upload('file')) {
+                $file = $this->upload->data();
 
-            $this->load->library('upload', $config);
-
-            if($this->upload->do_upload('file'))
-            {
-                $uploadData = $this->upload->data();
-
-                $type = "photos";
-
-                if(in_array($uploadData['file_ext'], ['.mp4','.mov','.avi'])){
-                    $type = "videos";
-                }
-
-                $media_data = [
-                    "product_id" => $product_id,
-                    "media_types" => $type,
-                    "media_path" => $upload_path.$uploadData['file_name'],
-                    "status" => 1
-                ];
-
-                $this->db->insert("product_media_tbl", $media_data);
+                $this->db->insert('product_media_tbl', [
+                    'product_id' => $product_id,   // or $id in update
+                    'media_type' => 'video',
+                    'media_path' => 'uploads/products/videos/' . $file['file_name'],
+                    'status'     => 1
+                ]);
             }
         }
     }
+}
 
     echo json_encode([
         "status" => true,
@@ -731,6 +757,14 @@ public function update_product()
 
     $id = $this->input->post('id');
 
+        if(empty($id)){
+            echo json_encode([
+                "status"=>false,
+                "message"=>"ID missing "
+            ]);
+            return;
+        }
+
     $product = $this->Products_model->get_product_by_id($id);
 
     if (!$product) {
@@ -758,85 +792,110 @@ public function update_product()
         "product_name" => $this->input->post('product_name'),
         "price" => $this->input->post('price'),
         "description" => $this->input->post('description'),
-        "stock" => $this->input->post('stock')
+        "stock" => $this->input->post('stock'),
+        "status" => $this->input->post('status'),
     ];
 
     $update = $this->Products_model->update_product($id,$data);
 
-    $attributes = $this->input->post('attributes');
+
+// 🔥 DELETE ALL ATTRIBUTES FIRST
+$this->db->where('product_id', $id);
+$this->db->delete('product_attribute_tbl');
+
+// 🔥 INSERT ALL AGAIN (MULTIPLE ALLOWED)
+$attributes = $this->input->post('attributes');
 
 if (!empty($attributes)) {
     foreach ($attributes as $attr) {
 
         if (!empty($attr['attribute_id']) && !empty($attr['value'])) {
 
-            $attr_data = [
+            $this->db->insert('product_attribute_tbl', [
                 "product_id" => $id,
                 "attribute_id" => $attr['attribute_id'],
-                "value" => $attr['value'],
-            ];
-
-            $this->Products_model->upsert_product_attribute($attr_data);
+                "value" => $attr['value']
+            ]);
         }
     }
 }
+// -------- MEDIA UPLOAD (COMBINED PHOTO + VIDEO LIKE WORK MODULE) --------
 
-    // -------- MULTIPLE MEDIA UPLOAD --------
+// Folders
+$photoDir = './uploads/products/photos/';
+$videoDir = './uploads/products/videos/';
 
-    if (!empty($_FILES['media']['name'][0])) {
+if (!is_dir($photoDir)) mkdir($photoDir, 0777, true);
+if (!is_dir($videoDir)) mkdir($videoDir, 0777, true);
 
-        $upload_path = 'uploads/products/';
+$this->load->library('upload');
 
-        if (!is_dir($upload_path)) {
-            mkdir($upload_path,0777,true);
-        }
+// Check media[]
+if (!empty($_FILES['media']['name'][0])) {
 
-        $files = $_FILES['media'];
-        $count = count($files['name']);
+    $files = $_FILES['media'];
 
-        for ($i=0; $i<$count; $i++) {
+    for ($i = 0; $i < count($files['name']); $i++) {
 
-            $_FILES['file']['name'] = $files['name'][$i];
-            $_FILES['file']['type'] = $files['type'][$i];
-            $_FILES['file']['tmp_name'] = $files['tmp_name'][$i];
-            $_FILES['file']['error'] = $files['error'][$i];
-            $_FILES['file']['size'] = $files['size'][$i];
+        $_FILES['file'] = [
+            'name'     => $files['name'][$i],
+            'type'     => $files['type'][$i],
+            'tmp_name' => $files['tmp_name'][$i],
+            'error'    => $files['error'][$i],
+            'size'     => $files['size'][$i],
+        ];
 
-            $config['upload_path'] = $upload_path;
-            $config['allowed_types'] = 'jpg|jpeg|png|webp|mp4|mov|avi';
-            $config['encrypt_name'] = TRUE;
+        $fileType = $_FILES['file']['type'];
 
-            $this->load->library('upload', $config);
+        // ---------- PHOTO ----------
+        if (in_array($fileType, ['image/jpeg','image/png','image/jpg'])) {
+
+            $this->upload->initialize([
+                'upload_path'   => $photoDir,
+                'allowed_types' => 'jpg|jpeg|png',
+                'encrypt_name'  => true
+            ]);
 
             if ($this->upload->do_upload('file')) {
+                $file = $this->upload->data();
 
-                $uploadData = $this->upload->data();
+                $this->db->insert('product_media_tbl', [
+                    'product_id' => $id,   // or $id in update
+                    'media_type' => 'photo',
+                    'media_path' => 'uploads/products/photos/' . $file['file_name'],
+                    'status'     => 1
+                ]);
+            }
+        }
 
-                // detect media type
-                $media_type = 'photos';
+        // ---------- VIDEO ----------
+        elseif (in_array($fileType, ['video/mp4','video/avi','video/mov','video/mkv'])) {
 
-                if (in_array($uploadData['file_ext'], ['.mp4','.mov','.avi'])) {
-                    $media_type = 'videos';
-                }
+            $this->upload->initialize([
+                'upload_path'   => $videoDir,
+                'allowed_types' => 'mp4|avi|mov|mkv',
+                'encrypt_name'  => true
+            ]);
 
-                $media_data = [
-                    "product_id" => $id,
-                    "media_types" => $media_type,
-                    "media_path" => $upload_path.$uploadData['file_name'],
-                    "status" => 1
-                ];
+            if ($this->upload->do_upload('file')) {
+                $file = $this->upload->data();
 
-                $this->db->insert('product_media_tbl', $media_data);
+                $this->db->insert('product_media_tbl', [
+                    'product_id' => $id,   // or $id in update
+                    'media_type' => 'video',
+                    'media_path' => 'uploads/products/videos/' . $file['file_name'],
+                    'status'     => 1
+                ]);
             }
         }
     }
-
-    echo json_encode([
-        "status" => $update ? true : false,
-        "message" => $update ? "Product updated successfully" : "Update failed"
-    ]);
 }
-
+echo json_encode([
+    "status" => true,
+    "message" => "Product updated successfully"
+]);
+exit;
+}
 //delete
 
 public function delete_product()
@@ -864,6 +923,8 @@ public function delete_product()
         "status" => $delete ? true : false,
         "message" => $delete ? "Product deleted" : "Delete failed"
     ]);
+
+
 }
 
 
@@ -892,6 +953,58 @@ $admin_id = $decoded->admin_id;
     }
 }
 
+//previous media fetch
+
+public function product_media_by_id()
+{
+    // -------- VALIDATION --------
+    $product_id = $this->input->post('product_id');
+
+    if (empty($product_id)) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Product ID required',
+            'data' => []
+        ]);
+        return;
+    }
+
+    // -------- FETCH MEDIA --------
+    $this->db->select('id, media_type, media_path');
+    $this->db->from('product_media_tbl');
+    $this->db->where('product_id', $product_id);
+    $this->db->where('delete_status', 0);
+
+    $query = $this->db->get()->result_array();
+
+    // -------- RESPONSE --------
+    echo json_encode([
+        'status'  => true,
+        'message' => 'Media fetched successfully',
+        'data'    => $query
+    ]);
+}
+
+
+//delete previous media 
+
+public function delete_product_media()
+{
+    $media_id = $this->input->post('media_id');
+
+    if (!$media_id) {
+        echo json_encode(['status'=>false,'message'=>'Media ID required']);
+        return;
+    }
+
+    $this->db->where('id', $media_id)
+             ->update('product_media_tbl', ['delete_status' => 1]);
+
+    echo json_encode([
+        'status' => true,
+        'message' => 'Media deleted successfully'
+    ]);
+}
 //order api 
 
 //add
@@ -1354,7 +1467,31 @@ public function list_attribute()
     ]);
 }
 
+
+
+
+private function upload_file($field, $path, $types)
+{
+    $config = [
+        'upload_path'   => $path,
+        'allowed_types' => $types,
+        'max_size'      => 51200, // 50MB
+        'encrypt_name'  => true
+    ];
+
+    $this->upload->initialize($config);
+
+    if (!$this->upload->do_upload($field)) {
+        log_message('error', $this->upload->display_errors());
+        return false;
+    }
+
+    $data = $this->upload->data();
+    return $path . $data['file_name'];
 }
+
+}
+
 
 
 

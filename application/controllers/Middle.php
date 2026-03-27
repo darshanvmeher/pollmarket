@@ -631,7 +631,6 @@ public function product_view()
 }
 
 //add products
-
 public function adding_product()
 {
     if (!$this->session->userdata('is_logged')) {
@@ -644,7 +643,7 @@ public function adding_product()
 
     $url = base_url('index.php/api_handler/add_product');
 
-    // POST DATA
+    // ---------- POST DATA ----------
     $postData = [
         'sub_category_id' => $this->input->post('sub_category_id'),
         'product_name'    => $this->input->post('product_name'),
@@ -654,8 +653,123 @@ public function adding_product()
         'status'          => $this->input->post('status')
     ];
 
-    // ✅ ATTRIBUTES (IMPORTANT)
-    $attributes = $this->input->post('attributes'); // should be array
+    // ---------- ATTRIBUTES ----------
+    $attributes = $this->input->post('attributes');
+    if (!empty($attributes)) {
+        foreach ($attributes as $key => $attr) {
+            $postData["attributes[$key][attribute_id]"] = $attr['attribute_id'];
+            $postData["attributes[$key][value]"] = $attr['value'];
+        }
+    }
+
+    // ---------- CURL INIT ----------
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+
+    // ---------- MEDIA FILE ----------
+    
+  // COMBINE ALL FILES INTO media[]
+$mediaIndex = 0;
+
+// PHOTOS
+if (!empty($_FILES['photo']['name'][0])) {
+    foreach ($_FILES['photo']['name'] as $i => $name) {
+        $postData["media[$mediaIndex]"] = new CURLFile(
+            $_FILES['photo']['tmp_name'][$i],
+            $_FILES['photo']['type'][$i],
+            $_FILES['photo']['name'][$i]
+        );
+        $mediaIndex++;
+    }
+}
+
+// VIDEOS
+if (!empty($_FILES['video']['name'][0])) {
+    foreach ($_FILES['video']['name'] as $i => $name) {
+        $postData["media[$mediaIndex]"] = new CURLFile(
+            $_FILES['video']['tmp_name'][$i],
+            $_FILES['video']['type'][$i],
+            $_FILES['video']['name'][$i]
+        );
+        $mediaIndex++;
+    }
+}
+
+
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    // ---------- TOKEN ----------
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $token
+    ]);
+
+    // ---------- EXEC ----------
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    if (!$response) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Empty API response'
+        ]);
+        return;
+    }
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    echo json_encode([
+        'status' => $result['status'],
+        'message' => $result['message']
+    ]);
+}
+//updating
+
+public function updating_product()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $url = base_url('index.php/api_handler/update_product');
+
+    // POST DATA
+    $postData = [
+        'id'              => $this->input->post('id'),
+        'sub_category_id' => $this->input->post('sub_category_id'),
+        'product_name'    => $this->input->post('product_name'),
+        'price'           => $this->input->post('price'),
+        'description'     => $this->input->post('description'),
+        'stock'           => $this->input->post('stock'),
+        'status' => $this->input->post('status'),
+    ];
+
+    // ✅ ATTRIBUTES
+    $attributes = $this->input->post('attributes');
     if (!empty($attributes)) {
         foreach ($attributes as $key => $attr) {
             $postData["attributes[$key][attribute_id]"] = $attr['attribute_id'];
@@ -669,17 +783,36 @@ public function adding_product()
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_POST, true);
 
-    // ✅ FILE UPLOAD SUPPORT
-    $files = $_FILES['media'];
-    if (!empty($files['name'][0])) {
-        for ($i = 0; $i < count($files['name']); $i++) {
-            $postData['media['.$i.']'] = new CURLFile(
-                $files['tmp_name'][$i],
-                $files['type'][$i],
-                $files['name'][$i]
-            );
-        }
+    // ✅ FILE UPLOAD
+       // ---------- MEDIA FILE ----------
+    
+    /* ================= PHOTOS ================= */
+    // COMBINE ALL FILES INTO media[]
+$mediaIndex = 0;
+
+// PHOTOS
+if (!empty($_FILES['photo']['name'][0])) {
+    foreach ($_FILES['photo']['name'] as $i => $name) {
+        $postData["media[$mediaIndex]"] = new CURLFile(
+            $_FILES['photo']['tmp_name'][$i],
+            $_FILES['photo']['type'][$i],
+            $_FILES['photo']['name'][$i]
+        );
+        $mediaIndex++;
     }
+}
+
+// VIDEOS
+if (!empty($_FILES['video']['name'][0])) {
+    foreach ($_FILES['video']['name'] as $i => $name) {
+        $postData["media[$mediaIndex]"] = new CURLFile(
+            $_FILES['video']['tmp_name'][$i],
+            $_FILES['video']['type'][$i],
+            $_FILES['video']['name'][$i]
+        );
+        $mediaIndex++;
+    }
+}
 
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -721,11 +854,79 @@ public function adding_product()
         return;
     }
 
-    // ✅ SUCCESS
     echo json_encode([
         'status' => true,
-        'message' => 'Product added successfully'
+        'message' => 'Product updated successfully'
     ]);
 }
 
+//deleting
+
+public function deleting_product()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $url = base_url('index.php/api_handler/delete_product');
+
+    // POST DATA
+    $postData = [
+        'id' => $this->input->post('id')
+    ];
+
+    // INIT CURL
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    // TOKEN
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $token
+    ]);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+
+    echo json_encode([
+        'status' => true,
+        'message' => 'Product deleted successfully'
+    ]);
+}
 }

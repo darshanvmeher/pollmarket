@@ -19,6 +19,10 @@ class Products_model extends CI_Model {
 
 }
 
+
+//product media
+
+
   public function add_media($data)
     {
         // ✅ IMPORTANT: force delete_status = 0
@@ -129,30 +133,34 @@ $this->db->select('
 
     public function get_product_list()
     {
-        $this->db->select('
-            p.id,
-            p.product_name,
-            p.price,
-            p.description,
-            p.stock,
-            p.status,
-            sc.id as sub_category_id,
-            sc.sub_category_name
-        ');
         
+        
+                        $this->db->select('
+                p.id,
+                p.product_name,
+                p.price,
+                p.description,
+                p.stock,
+                p.status,
+                sc.id as sub_category_id,
+                sc.sub_category_name,
+                c.id as category_id,
+                c.category_name
+            ');
+                
         $this->db->from('product_tbl p');
         $this->db->join('sub_category_tbl sc', 'sc.id = p.sub_category_id', 'left');
+        $this->db->join('category_tbl c', 'c.id = sc.category_id', 'left');
+
         $this->db->where('p.delete_status', 0);
-        $this->db->where('p.status', 1);
 
         $products = $this->db->get()->result_array();
 
         // Attach media
         foreach ($products as &$product) {
-            $product['media'] = $this->get_product_media($product['id']);
-        }
-
-        $product['attributes'] = $this->get_product_attributes($product['id']);
+    $product['media'] = $this->get_product_media($product['id']);
+    $product['attributes'] = $this->get_product_attributes($product['id']);
+}
         
 
         return $products;
@@ -175,7 +183,7 @@ $this->db->select('
 
     public function get_product_media($product_id)
     {
-        $this->db->select('id, media_types, media_path');
+        $this->db->select('id, media_type, media_path');
         $this->db->from('product_media_tbl');
         $this->db->where('product_id', $product_id);
         $this->db->where('delete_status', 0);

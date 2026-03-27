@@ -12,7 +12,6 @@ public function insert_attribute($data)
 public function get_attributes()
 {
     $this->db->where('delete_status',0);
-    $this->db->where('status',1) ;
     return $this->db->get('attributes_tbl')->result_array();
 }
 

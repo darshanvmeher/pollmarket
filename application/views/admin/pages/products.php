@@ -80,7 +80,7 @@ if ($status == 0) {
     <!-- Status -->
     <td>
         <span class="status-pill <?php echo $status_class; ?>">
-            <?php echo $status ? 'Active' : 'Inactive'; ?>
+        <?php echo html_escape($product['status']); ?>
         </span>
     </td>
 
@@ -95,11 +95,16 @@ if ($status == 0) {
             data-mode="edit"
 
             data-id="<?= $product['id']; ?>"
+            data-category_id="<?= $product['category_id']; ?>"
+            data-sub_category_id="<?= $product['sub_category_id']; ?>"
             data-name="<?= html_escape($product['product_name']); ?>"
             data-price="<?= $product['price']; ?>"
             data-stock="<?= $product['stock']; ?>"
             data-description="<?= html_escape($product['description']); ?>"
             data-status="<?= $product['status']; ?>"
+            data-images='<?= json_encode($product["images"] ?? []); ?>'
+            data-videos='<?= json_encode($product["videos"] ?? []); ?>'
+            data-attributes='<?= json_encode($product["attributes"] ?? []); ?>'
         >
             <i class="bi bi-pencil-square"></i>
             Edit
@@ -183,8 +188,8 @@ if ($status == 0) {
 
    
 </div>-->
-<div class="modal fade" id="productFormModal">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade" id="productFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content product-modal">
 
             <form id="productForm" enctype="multipart/form-data" class="row g-3">
@@ -258,12 +263,22 @@ if ($status == 0) {
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-control"></textarea>
                     </div>
-
-                    <!-- Media -->
-                    <div class="col-12">
-                        <label class="form-label">Product Images / Videos</label>
-                        <input type="file" name="media[]" multiple class="form-control">
+                    
+                        <!-- PHOTOS -->
+                    <div class="form-group">
+                        <label>Upload Photos</label>
+                        <input type="file" id="photoInput" name="photo[]" multiple accept="image/*"  class="form-control">
+                        <ul id="photoPreview" class="mt-2 text-muted"></ul>
                     </div>
+
+                    <!-- VIDEOS -->
+                    <div class="form-group">
+                        <label>Upload Videos</label>
+                        <input type="file" id="videoInput" name="video[]" multiple accept="video/*" class="form-control">
+                         <ul id="videoPreview" class="mt-2 text-muted"></ul>
+                    </div>
+
+                    <div id="existingMedia"></div>
 
                     <!-- Attributes -->
                     <div class="col-12">
@@ -299,7 +314,7 @@ if ($status == 0) {
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Product</button>
                 </div>
 
@@ -337,43 +352,28 @@ function showUpdatePopup(message, error = false) {
 </script>
 
 <script>
-    document.getElementById('productForm').addEventListener('submit', function (e) {
-    e.preventDefault();
+const modal = document.getElementById('productFormModal');
 
-    const formData = new FormData(this);
-    const id = document.getElementById('product_id').value;
-
-    const url = id
-        ? "<?= base_url('index.php/middle/updating_product'); ?>"
-        : "<?= base_url('index.php/middle/adding_product'); ?>";
-
-    fetch(url, {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status) {
-            showUpdatePopup(data.message);
-            setTimeout(() => location.reload(), 1200);
-        } else {
-            showUpdatePopup(data.message, true);
-        }
-    });
-});
-</script>
-<script>
-    const modal = document.getElementById('productFormModal');
 
 modal.addEventListener('show.bs.modal', function (event) {
+    attrIndex = 1; // 🔥 RESET INDEX
 
     const btn = event.relatedTarget;
+     console.log("Clicked button:", btn);
+    console.log("Mode:", btn.getAttribute('data-mode'));
+    console.log("Edit ID:", btn.dataset.id);
     const mode = btn.getAttribute('data-mode');
 
     const form = document.getElementById('productForm');
     form.reset();
 
+    // ✅ CLEAR
+    document.getElementById('existingMedia').innerHTML = '';
+    const container = document.getElementById('attributesContainer');
+    container.innerHTML = '';
+
     if (mode === 'edit') {
+
         document.getElementById('productModalTitle').innerText = "Edit Product";
 
         document.getElementById('product_id').value = btn.dataset.id;
@@ -382,6 +382,48 @@ modal.addEventListener('show.bs.modal', function (event) {
         form.stock.value = btn.dataset.stock;
         form.description.value = btn.dataset.description;
         form.status.value = btn.dataset.status;
+        form.category_id.value = btn.dataset.category_id;
+        form.sub_category_id.value = btn.dataset.sub_category_id;
+
+        // ✅ MEDIA
+        loadExistingMedia(btn.dataset.id);
+
+        // ✅ ATTRIBUTES
+        let attributes = JSON.parse(btn.dataset.attributes || '[]');
+
+        attributes.forEach((attr, index) => {
+
+            let selectHtml = `<select name="attributes[${index}][attribute_id]" class="form-select">`;
+
+            <?php foreach ($attributes as $a): ?>
+                selectHtml += `
+                    <option value="<?= $a['id']; ?>" 
+                    ${parseInt(attr.attribute_id) === <?= $a['id']; ?> ? 'selected' : ''}>
+                        <?= $a['attribute_name']; ?>
+                    </option>`;
+            <?php endforeach; ?>
+
+            selectHtml += `</select>`;
+
+            container.innerHTML += `
+            <div class="row mb-2">
+                <div class="col-md-5">
+                    ${selectHtml}
+                </div>
+
+                <div class="col-md-5">
+                    <input type="text" 
+                        name="attributes[${index}][value]" 
+                        value="${attr.value}" 
+                        class="form-control">
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger removeAttr">X</button>
+                </div>
+            </div>`;
+        });
+
     } else {
         document.getElementById('productModalTitle').innerText = "Add Product";
     }
@@ -414,7 +456,7 @@ document.getElementById('addAttributeBtn').addEventListener('click', function ()
         <div class="col-md-2">
             <button type="button" class="btn btn-danger removeAttr">X</button>
         </div>
-    </div>`;
+    </div>`
 
     container.insertAdjacentHTML('beforeend', html);
     attrIndex++;
@@ -427,102 +469,301 @@ document.addEventListener('click', function (e) {
 });
 </script>
 
+
 <script>
-const modal = document.getElementById('categoryFormModal');
+let selectedPhotos = [];
 
-modal.addEventListener('show.bs.modal', function (event) {
+const photoInput   = document.getElementById('photoInput');
+const photoPreview = document.getElementById('photoPreview');
 
-    const button = event.relatedTarget;
+photoInput.addEventListener('change', function () {
 
-    const mode = button.getAttribute('data-category-mode');
-    const name = button.getAttribute('data-category-name');
-    const status = button.getAttribute('data-category-status');
-    const description = button.getAttribute('data-category-description');
-    const id = button.getAttribute('data-category-id');
-
-    const nameInput = document.querySelector('[name="category_name"]');
-    const statusInput = document.querySelector('[name="status"]');
-    const descInput = document.querySelector('[name="description"]');
-    const idInput = document.getElementById('categories_id');
-
-    if (mode === 'edit') {
-        nameInput.value = name;
-        statusInput.value = status;
-        descInput.value = description;
-        idInput.value = id;
-    } else {
-        nameInput.value = "";
-        statusInput.selectedIndex = 0;
-        descInput.value = "";
-        idInput.value = "";
+    // Add newly selected files
+    for (let file of this.files) {
+        selectedPhotos.push(file);
     }
 
-}); 
+    renderPhotoPreview();
+    updatePhotoInput();
+});
+
+// Render file names + cancel button
+function renderPhotoPreview() {
+    photoPreview.innerHTML = '';
+
+    selectedPhotos.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            ${file.name}
+            <button type="button"
+                    class="btn btn-sm btn-danger ms-2"
+                    onclick="removePhoto(${index})">
+                ✖
+            </button>
+        `;
+        photoPreview.appendChild(li);
+    });
+}
+
+// Remove single image
+function removePhoto(index) {
+    selectedPhotos.splice(index, 1);
+    renderPhotoPreview();
+    updatePhotoInput();
+}
+
+// Rebuild FileList (important)
+function updatePhotoInput() {
+    const dataTransfer = new DataTransfer();
+    selectedPhotos.forEach(file => dataTransfer.items.add(file));
+    photoInput.files = dataTransfer.files;
+}
 </script>
 
-<!--delete script-->
+<script>
+let selectedVideos = [];
+
+const videoInput   = document.getElementById('videoInput');
+const videoPreview = document.getElementById('videoPreview');
+
+videoInput.addEventListener('change', function () {
+
+    for (let file of this.files) {
+        selectedVideos.push(file);
+    }
+
+    renderVideoPreview();
+    updateVideoInput();
+});
+
+function renderVideoPreview() {
+    videoPreview.innerHTML = '';
+
+    selectedVideos.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            ${file.name}
+            <button type="button"
+                    class="btn btn-sm btn-danger ms-2"
+                    onclick="removeVideo(${index})">
+                ✖
+            </button>
+        `;
+        videoPreview.appendChild(li);
+    });
+}
+
+function removeVideo(index) {
+    selectedVideos.splice(index, 1);
+    renderVideoPreview();
+    updateVideoInput();
+}
+
+function updateVideoInput() {
+    const dataTransfer = new DataTransfer();
+    selectedVideos.forEach(file => dataTransfer.items.add(file));
+    videoInput.files = dataTransfer.files;
+}
+</script>
+
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function loadExistingMedia(productId) {
 
-    let deleteCategoryId = null;
+    fetch("<?= base_url('index.php/api_handler/product_media_by_id'); ?>", {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: 'product_id=' + productId
+    })
+    .then(res => res.json())
+    .then(res => {
+        let html = '<h5 class="mt-3">Existing Media</h5>';
 
-    // When delete button clicked → open modal
-    document.querySelectorAll('.delete-btn').forEach(btn => {
+        res.data.forEach(m => {
+            html += `
+            <div class="mb-2">
+                ${
+                    m.media_type === 'photo'
+                    ? `<img src="<?= base_url(); ?>${m.media_path}" width="80">`
+                    : `<video width="120" controls src="<?= base_url(); ?>${m.media_path}"></video>`
+                }
+                <button type="button"
+                        class="btn btn-sm btn-danger ms-2"
+                        onclick="deleteMedia(${m.id})">✖</button>
+            </div>`;
+        });
+
+        document.getElementById('existingMedia').innerHTML = html;
+    });
+}
+</script>
+
+
+
+<!--Delete existing media-->
+
+<script>
+function deleteMedia(mediaId) {
+    if (!confirm('Delete this media?')) return;
+
+    fetch("<?= base_url('index.php/api_handler/delete_product_media'); ?>", {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'media_id='+mediaId
+    })
+    .then(res=>res.json())
+    .then(res=>{
+        if(res.status){
+            loadExistingMedia(document.getElementById('product_id').value);
+        }
+    });
+}
+</script>
+
+
+
+
+<script>
+    document.getElementById('productForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const form = this;
+
+    const photoInput = document.getElementById('photoInput');
+    const videoInput = document.getElementById('videoInput');
+
+    const allowedPhotoTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    const allowedVideoTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/mkv'];
+
+    /* ---------- VALIDATION ---------- */
+    if (photoInput.files.length > 0) {
+        for (let file of photoInput.files) {
+            if (!allowedPhotoTypes.includes(file.type)) {
+                showUpdatePopup('❌ Invalid photo format', true);
+                return;
+            }
+        }
+    }
+
+    if (videoInput.files.length > 0) {
+        for (let file of videoInput.files) {
+            if (!allowedVideoTypes.includes(file.type)) {
+                showUpdatePopup('❌ Invalid video format', true);
+                return;
+            }
+        }
+    }
+
+    /* ---------- URL FIX ---------- */
+    const id = document.getElementById('product_id').value;
+
+    const url = id
+        ? "<?= base_url('index.php/middle/updating_product'); ?>"
+        : "<?= base_url('index.php/middle/adding_product'); ?>";
+
+    const formData = new FormData(form);
+
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.text())   // DEBUG SAFE
+    .then(data => {
+        console.log("RAW RESPONSE:", data);
+
+        try {
+            const json = JSON.parse(data);
+
+            if (json.status) {
+                showUpdatePopup(json.message);
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showUpdatePopup(json.message, true);
+            }
+
+        } catch (e) {
+            console.error("NOT JSON:", data);
+            showUpdatePopup("Server returned HTML ❌", true);
+        }
+    });
+});
+</script>
+
+<script>
+const modalEl = document.getElementById('productFormModal');
+
+let lastFocused = null;
+
+// store button that opened modal
+modalEl.addEventListener('show.bs.modal', function (e) {
+    lastFocused = e.relatedTarget;
+});
+
+// fix focus + reset when modal closes
+modalEl.addEventListener('hide.bs.modal', function () {
+
+    // 🔥 FORCE REMOVE FOCUS FROM MODAL
+    if (document.activeElement && modalEl.contains(document.activeElement)) {
+        document.activeElement.blur();
+    }
+
+    // 🔥 MOVE FOCUS OUTSIDE MODAL (VERY IMPORTANT)
+    document.body.focus();
+
+    // 🔥 RETURN FOCUS TO BUTTON
+    if (lastFocused) {
+        lastFocused.focus();
+    }
+
+    // 🔥 RESET ATTRIBUTES
+    document.getElementById('attributesContainer').innerHTML = '';
+    attrIndex = 1;
+});
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+    let deleteProductId = null;
+
+    // ✅ FIX CLASS NAME
+    document.querySelectorAll('.delete-product-btn').forEach(btn => {
 
         btn.addEventListener('click', function () {
 
-            deleteCategoryId = this.dataset.id;
+            deleteProductId = this.dataset.id;
 
-            // Set category name
-            document.querySelector('[data-category-delete-name]').textContent =
-                this.dataset.name || 'Category';
+            if (!confirm("Delete this product?")) return;
 
-            // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('categoryDeleteModal'));
-            modal.show();
-        });
+            fetch("<?= base_url('index.php/middle/deleting_product'); ?>", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "id=" + deleteProductId
+            })
+            .then(res => res.json())
+            .then(data => {
 
-    });
+                if (data.status) {
 
-    // Confirm delete button (use ID instead of class)
-    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+                    showUpdatePopup('Product deleted successfully ✅');
 
-        if (!deleteCategoryId) return;
+                    // ✅ REMOVE ROW
+                    this.closest('tr').remove();
 
-        fetch("<?= base_url('index.php/middle/deleting_categories'); ?>", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: "id=" + deleteCategoryId
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status) {
+                } else {
+                    showUpdatePopup(data.message || 'Delete failed ❌', true);
+                }
 
-                showUpdatePopup('Category deleted successfully ✅');
+            })
+            .catch(() => {
+                showUpdatePopup('Server error ❌', true);
+            });
 
-                // Remove row
-                document.querySelector(`.delete-btn[data-id="${deleteCategoryId}"]`)
-                    ?.closest('tr').remove();
-
-                // Close modal
-                bootstrap.Modal.getInstance(
-                    document.getElementById('categoryDeleteModal')
-                ).hide();
-                document.body.focus();
-
-            } else {
-                showUpdatePopup(data.message || 'Delete failed ❌', true);
-            }
-        })
-        .catch(() => {
-            showUpdatePopup('Server error ❌', true);
         });
 
     });
 
 });
 </script>
-
