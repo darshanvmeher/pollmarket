@@ -929,4 +929,223 @@ public function deleting_product()
         'message' => 'Product deleted successfully'
     ]);
 }
+
+//add promotions
+
+public function promotions_view()
+{
+     if (!$this->session->userdata('is_logged')) {
+     redirect('middle/login_view');
+    }
+
+    $this->load->model('Promotions_model');
+
+    $data['promotions'] = $this->Promotions_model->get_promotions();
+
+    $this->load->view('admin/pages/promotions', $data); 
+
+
+}
+//add promotion 
+
+public function adding_promotion()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $postData = [
+        'coupon_code' => $this->input->post('coupon_code'),
+        'coupon_type' => $this->input->post('coupon_type'),
+        'discount' => $this->input->post('discount'),
+        'validity' => $this->input->post('validity'),
+        'status' => $this->input->post('status'),
+        'description' => $this->input->post('description')
+    ];
+
+    $url = base_url('index.php/api_handler/add_promotion');
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $token
+]);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+
+    // ✅ SUCCESS RESPONSE (IMPORTANT)
+    echo json_encode([
+        'status' => true,
+        'message' => 'Promotion added successfully'
+    ]);
+
+}
+
+//update promotion
+
+public function updating_promotion()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    // Similar to adding_promotion but with 'id' and different API endpoint
+    // Implement the logic here following the same pattern as adding_promotion
+
+    $postData = [
+        'id' => $this->input->post('id'),
+        'coupon_code' => $this->input->post('coupon_code'),
+        'coupon_type' => $this->input->post('coupon_type'),
+        'discount' => $this->input->post('discount'),
+        'validity' => $this->input->post('validity'),
+        'status' => $this->input->post('status'),
+        'description' => $this->input->post('description')
+    ];
+
+    $url = base_url('index.php/api_handler/update_promotion');
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+    $token = $this->session->userdata('token');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $token
+]);
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+    curl_close($ch);
+    $result = json_decode($response, true);
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+    echo json_encode([
+        'status' => true,
+        'message' => 'Promotion updated successfully'
+    ]);
+
+}
+
+//delete promotion
+
+public function deleting_promotion()
+{
+    if (!$this->session->userdata('is_logged')) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Session expired'
+        ]);
+        return;
+    }
+
+    $postData = [
+        'id' => $this->input->post('id')
+    ];
+
+    $url = base_url('index.php/api_handler/delete_promotion');
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $token = $this->session->userdata('token');
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $token
+]);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => false,
+            'message' => curl_error($ch)
+        ]);
+        return;
+    }
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    if (!$result || !isset($result['status'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid API response'
+        ]);
+        return;
+    }
+
+    if ($result['status'] == false) {
+        echo json_encode([
+            'status' => false,
+            'message' => $result['message']
+        ]);
+        return;
+    }
+
+    echo json_encode([
+        'status' => true,
+        'message' => 'Promotion deleted successfully'
+    ]);
+}   
+
 }

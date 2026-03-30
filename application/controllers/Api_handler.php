@@ -16,6 +16,7 @@ class Api_handler extends CI_Controller {
         $this->load->model('Products_model');
         $this->load->model('Order_model');
         $this->load->model('Attribute_model');
+        $this->load->model('Promotion_model');
         $this->load->library('upload');
 
 
@@ -1490,8 +1491,118 @@ private function upload_file($field, $path, $types)
     return $path . $data['file_name'];
 }
 
+//promotions coupon api
+
+//add promotion
+
+public function add_promotion()
+{
+    $decoded = $this->verify_token();
+    $admin_id = $decoded->admin_id;   
+
+    $data = [
+        "coupon_code" => $this->input->post('Coupon_code'),
+        "coupon_type" => $this->input->post('coupon_type'),
+        "discount" => $this->input->post('discount'),
+        "validity" => $this->input->post('validity'),
+        "status" => $this->input->post('status'),
+        "description" => $this->input->post('description')
+    ];
+    
+    $insert = $this->Promotion_model->insert_promotion($data);
+        if ($insert) {
+        echo json_encode([
+            "status" => true,
+            "message" => "promotions added successfully"
+        ]);
+    } else {
+        echo json_encode([
+            "status" => false,
+            "message" => "Failed to add promotion"
+        ]);
+    }
+    
 }
 
+//update promotion
 
+public function update_promotion()
+{
+    $decoded = $this->verify_token();
+    $admin_id = $decoded->admin_id;   
 
+    $id = $this->input->post('id');
 
+    $promotion = $this->Promotion_model->get_promotion_by_id($id);
+
+    if (!$promotion) {
+        echo json_encode([
+            'status'=>false,
+            'message'=>'Promotion not found or deleted'
+        ]);
+        return;
+    }
+
+    $data = [
+        "coupon_code" => $this->input->post('Coupon_code'),
+        "coupon_type" => $this->input->post('coupon_type'),
+        "discount" => $this->input->post('discount'),
+        "validity" => $this->input->post('validity'),
+        "status" => $this->input->post('status'),
+        "description" => $this->input->post('description')
+    ];
+    
+    $update = $this->Promotion_model->update_promotion($id, $data);
+    
+    echo json_encode([
+        "status" => $update,
+        "message" => $update ? "Promotion updated" : "Update failed"
+    ]);
+
+}
+
+//delete promotion
+
+public function delete_promotion()
+{
+    $decoded = $this->verify_token();
+    $admin_id = $decoded->admin_id;  
+
+    
+    $id = $this->input->post('id');
+
+    $promotion = $this->Promotion_model->get_promotion_by_id($id);
+
+    if (!$promotion) {
+        echo json_encode([
+            'status'=>false,
+            'message'=>'Promotion ID not found or deleted'
+        ]);
+        return;
+    }
+
+ 
+    $delete = $this->Promotion_model->soft_delete_promotion($id);
+
+    echo json_encode([
+        "status" => $delete,
+        "message" => "Promotion deleted"
+    ]); 
+}
+
+//list promotion    
+
+public function list_promotion()
+{
+   $decoded = $this->verify_token();
+   $admin_id = $decoded->admin_id;
+
+    $promotions= $this->Promotion_model->get_promotions();
+
+    echo json_encode([
+        "status" => true,
+        "data" => $promotions
+    ]);
+}
+
+}
