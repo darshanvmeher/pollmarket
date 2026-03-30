@@ -85,6 +85,65 @@
     }
   }
 
+  function initCouponModals() {
+    const couponFormModal = document.getElementById('couponFormModal');
+    const couponDeleteModal = document.getElementById('couponDeleteModal');
+
+    if (couponFormModal) {
+      couponFormModal.addEventListener('show.bs.modal', (event) => {
+        const trigger = event.relatedTarget;
+        if (!trigger) return;
+
+        const mode = trigger.getAttribute('data-coupon-mode') || 'add';
+        const title = couponFormModal.querySelector('[data-coupon-modal-title]');
+        const subtitle = couponFormModal.querySelector('[data-coupon-modal-subtitle]');
+        const submitLabel = couponFormModal.querySelector('[data-coupon-submit-label]');
+        const codeInput = couponFormModal.querySelector('[data-coupon-input="code"]');
+        const typeInput = couponFormModal.querySelector('[data-coupon-input="type"]');
+        const discountInput = couponFormModal.querySelector('[data-coupon-input="discount"]');
+        const validityInput = couponFormModal.querySelector('[data-coupon-input="validity"]');
+        const statusInput = couponFormModal.querySelector('[data-coupon-input="status"]');
+        const descriptionInput = couponFormModal.querySelector('[data-coupon-input="description"]');
+
+        if (mode === 'edit') {
+          title.textContent = 'Edit Coupon';
+          subtitle.textContent = 'Update coupon code settings.';
+          submitLabel.textContent = 'Update Coupon';
+          codeInput.value = trigger.getAttribute('data-coupon-code') || '';
+          typeInput.value = trigger.getAttribute('data-coupon-type') || 'Order Value';
+          discountInput.value = trigger.getAttribute('data-coupon-discount') || '';
+          validityInput.value = trigger.getAttribute('data-coupon-validity') || '';
+          statusInput.value = trigger.getAttribute('data-coupon-status') || 'Active';
+          descriptionInput.value = trigger.getAttribute('data-coupon-description') || '';
+          return;
+        }
+
+        title.textContent = 'Add Coupon';
+        subtitle.textContent = 'Create a new coupon code for promotions.';
+        submitLabel.textContent = 'Save Coupon';
+        codeInput.value = '';
+        typeInput.value = 'Order Value';
+        discountInput.value = '';
+        validityInput.value = '';
+        statusInput.value = 'Active';
+        descriptionInput.value = '';
+      });
+    }
+
+    if (couponDeleteModal) {
+      couponDeleteModal.addEventListener('show.bs.modal', (event) => {
+        const trigger = event.relatedTarget;
+        if (!trigger) return;
+
+        const codeTarget = couponDeleteModal.querySelector('[data-coupon-delete-code]');
+        const usageTarget = couponDeleteModal.querySelector('[data-coupon-delete-usage]');
+
+        codeTarget.textContent = trigger.getAttribute('data-coupon-code') || 'Coupon';
+        usageTarget.textContent = trigger.getAttribute('data-coupon-usage') || '0';
+      });
+    }
+  }
+
   toggleButtons.forEach((btn) => btn.addEventListener('click', toggleSidebar));
   if (overlay) overlay.addEventListener('click', closeSidebar);
 
@@ -96,4 +155,5 @@
 
   setActiveMenu();
   initCategoryModals();
+  initCouponModals();
 })();

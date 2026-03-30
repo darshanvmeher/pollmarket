@@ -254,17 +254,49 @@ class Admin extends CI_Controller
             'active' => 'promotions',
             'title' => 'Promotions',
             'subtitle' => 'Manage discount coupons and bulk offers.',
-            'table_title' => 'Saved Promotions',
-            'headers' => array('Code', 'Type', 'Discount', 'Validity', 'Usage', 'Status'),
-            'rows' => array(
-                array('BULK5', 'Order Value', '5%', 'Mar 01 - Mar 31', '128', 'Active'),
-                array('RFID10', 'Category', '10%', 'Mar 05 - Mar 15', '14', 'Active'),
-                array('WELCOME15', 'First Order', '15%', 'Feb 01 - Apr 01', '230', 'Active'),
-                array('FOILFEST', 'Product', '$3 off', 'Mar 10 - Mar 20', '0', 'Scheduled')
-            )
+            'coupons' => array(
+                array(
+                    'code' => 'BULK5',
+                    'type' => 'Order Value',
+                    'discount' => '5%',
+                    'validity' => 'Mar 01 - Mar 31',
+                    'usage' => '128',
+                    'status' => 'Active',
+                    'description' => 'Applied on bulk orders above the minimum cart value.'
+                ),
+                array(
+                    'code' => 'RFID10',
+                    'type' => 'Category',
+                    'discount' => '10%',
+                    'validity' => 'Mar 05 - Mar 15',
+                    'usage' => '14',
+                    'status' => 'Active',
+                    'description' => 'Discount for all RFID seal products.'
+                ),
+                array(
+                    'code' => 'WELCOME15',
+                    'type' => 'First Order',
+                    'discount' => '15%',
+                    'validity' => 'Feb 01 - Apr 01',
+                    'usage' => '230',
+                    'status' => 'Active',
+                    'description' => 'Introductory coupon for first-time buyers.'
+                ),
+                array(
+                    'code' => 'FOILFEST',
+                    'type' => 'Product',
+                    'discount' => '$3 off',
+                    'validity' => 'Mar 10 - Mar 20',
+                    'usage' => '0',
+                    'status' => 'Scheduled',
+                    'description' => 'Upcoming promotional coupon for foil products.'
+                )
+            ),
+            'coupon_types' => array('Order Value', 'Category', 'Product', 'First Order'),
+            'coupon_status_options' => array('Active', 'Scheduled', 'Expired', 'Draft')
         );
 
-        $this->render('master_table', $data);
+        $this->render('promotions', $data);
     }
 
     public function reports()
