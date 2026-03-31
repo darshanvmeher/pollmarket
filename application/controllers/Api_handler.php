@@ -17,6 +17,7 @@ class Api_handler extends CI_Controller {
         $this->load->model('Order_model');
         $this->load->model('Attribute_model');
         $this->load->model('Promotion_model');
+        $this->load->model('Address_model');
         $this->load->library('upload');
 
 
@@ -1602,6 +1603,144 @@ public function list_promotion()
     echo json_encode([
         "status" => true,
         "data" => $promotions
+    ]);
+}
+
+//multiple address api
+
+public function add_address()
+{
+    $decoded = $this->verify_token();
+    $admin_id = $decoded->admin_id;   
+
+    $user_id = $this->input->post('user_id');
+    $address_type = $this->input->post('address_type');
+    $address = $this->input->post('address');
+    $city = $this->input->post('city');
+    $state = $this->input->post('state');
+    $pincode = $this->input->post('pincode');
+    $country = $this->input->post('country');
+
+    if (empty($user_id) || empty($address_type) || empty($address) || empty($city) || empty($state) || empty($pincode) || empty($country)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "All fields are required"
+        ]);
+        return;
+    }
+
+    $data = [
+        "user_id" => $user_id,
+        "address_type" => $address_type,
+        "address" => $address,
+        "city" => $city,
+        "state" => $state,
+        "pincode" => $pincode,
+        "country" => $country
+    ];
+
+    $insert = $this->Address_model->insert_address($data);
+
+    if ($insert) {
+        echo json_encode([
+            "status" => true,
+            "message" => "Address added successfully"
+        ]);
+    } else {
+        echo json_encode([
+            "status" => false,
+            "message" => "Failed to add address"
+        ]);
+    }
+}
+
+//update address
+
+public function update_address()
+{
+    $decoded = $this->verify_token();
+    $admin_id = $decoded->admin_id;   
+
+    $id = $this->input->post('id');
+
+    $address = $this->Address_model->get_address_by_id($id);
+
+    if (!$address) {
+        echo json_encode([
+            'status'=>false,
+            'message'=>'Address not found or deleted'
+        ]);
+        return;
+    }
+
+    $data = [
+        "user_id" => $this->input->post('user_id'),
+        "address_type" => $this->input->post('address_type'),
+        "address" => $this->input->post('address'),
+        "city" => $this->input->post('city'),
+        "state" => $this->input->post('state'),
+        "pincode" => $this->input->post('pincode'),
+        "country" => $this->input->post('country')
+    ];
+
+    $update = $this->Address_model->update_address($id, $data);
+    
+    echo json_encode([
+        "status" => $update,
+        "message" => $update ? "Address updated" : "Update failed"
+    ]);
+}
+
+//delete address    
+
+public function delete_address()
+{
+    $decoded = $this->verify_token();
+    $admin_id = $decoded->admin_id;  
+
+    
+    $id = $this->input->post('id');
+
+    $address = $this->Address_model->get_address_by_id($id);
+
+    if (!$address) {
+        echo json_encode([
+            'status'=>false,
+            'message'=>'Address ID not found or deleted'
+        ]);
+        return;
+    }
+
+ 
+    $delete = $this->Address_model->soft_delete_address($id);
+
+   if ($delete) {
+        echo json_encode([
+            "status" => true,
+            "message" => "Address deleted"
+        ]);
+    } else {
+        echo json_encode([
+            "status" => false,
+            "message" => "Failed to delete address"
+        ]);
+    }
+
+}
+
+//list address
+
+public function list_address()
+{
+   $decoded = $this->verify_token();
+   $admin_id = $decoded->admin_id;
+$user_id = $this->input->post('user_id');
+
+    $addresses= $this->Address_model->get_addresses($user_id);
+
+    echo json_encode([
+        "status" => true,
+        "data" => $addresses
     ]);
 }
 
