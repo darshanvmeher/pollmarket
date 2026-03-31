@@ -1544,7 +1544,7 @@ public function update_promotion()
     }
 
     $data = [
-        "coupon_code" => $this->input->post('Coupon_code'),
+        "coupon_code" => $this->input->post('coupon_code'),
         "coupon_type" => $this->input->post('coupon_type'),
         "discount" => $this->input->post('discount'),
         "validity" => $this->input->post('validity'),
