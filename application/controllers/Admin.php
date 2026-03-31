@@ -248,7 +248,24 @@ class Admin extends CI_Controller
         $this->render('master_table', $data);
     }
 
+
     public function promotions()
+    {
+        $this->load->model('Promotion_model');
+
+        $data = array(
+            'active' => 'promotions',
+            'title' => 'Promotions',
+            'subtitle' => 'Manage discount coupons and bulk offers.',
+            'promotions' => $this->Promotion_model->get_promotions(), // ✅ DB DATA
+            'coupon_types' => array('OrderValue', 'Category', 'Product', 'FirstOrder'),
+            'coupon_status_options' => array('Active', 'Scheduled', 'Expired', 'Draft')
+        );
+
+        $this->render('promotions', $data);
+    }
+
+   /* public function promotions()
     {
         $data = array(
             'active' => 'promotions',
@@ -297,7 +314,9 @@ class Admin extends CI_Controller
         );
 
         $this->render('promotions', $data);
-    }
+    }*/
+
+    
 
     public function reports()
     {

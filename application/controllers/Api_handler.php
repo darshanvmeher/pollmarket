@@ -1501,7 +1501,7 @@ public function add_promotion()
     $admin_id = $decoded->admin_id;   
 
     $data = [
-        "coupon_code" => $this->input->post('Coupon_code'),
+        "coupon_code" => $this->input->post('coupon_code'),
         "coupon_type" => $this->input->post('coupon_type'),
         "discount" => $this->input->post('discount'),
         "validity" => $this->input->post('validity'),
@@ -1513,12 +1513,12 @@ public function add_promotion()
         if ($insert) {
         echo json_encode([
             "status" => true,
-            "message" => "promotions added successfully"
+            "message" => "coupon added successfully"
         ]);
     } else {
         echo json_encode([
             "status" => false,
-            "message" => "Failed to add promotion"
+            "message" => "Failed to add coupon"
         ]);
     }
     
@@ -1538,7 +1538,7 @@ public function update_promotion()
     if (!$promotion) {
         echo json_encode([
             'status'=>false,
-            'message'=>'Promotion not found or deleted'
+            'message'=>'Coupon not found or deleted'
         ]);
         return;
     }
@@ -1556,7 +1556,7 @@ public function update_promotion()
     
     echo json_encode([
         "status" => $update,
-        "message" => $update ? "Promotion updated" : "Update failed"
+        "message" => $update ? "Coupon updated" : "Update failed"
     ]);
 
 }
@@ -1576,7 +1576,7 @@ public function delete_promotion()
     if (!$promotion) {
         echo json_encode([
             'status'=>false,
-            'message'=>'Promotion ID not found or deleted'
+            'message'=>'Coupon ID not found or deleted'
         ]);
         return;
     }
@@ -1586,7 +1586,7 @@ public function delete_promotion()
 
     echo json_encode([
         "status" => $delete,
-        "message" => "Promotion deleted"
+        "message" => "Coupon deleted"
     ]); 
 }
 

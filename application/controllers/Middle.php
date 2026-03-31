@@ -1013,7 +1013,7 @@ public function adding_promotion()
     // ✅ SUCCESS RESPONSE (IMPORTANT)
     echo json_encode([
         'status' => true,
-        'message' => 'Promotion added successfully'
+        'message' => 'Coupon added successfully'
     ]);
 
 }
@@ -1078,7 +1078,7 @@ public function updating_promotion()
     }
     echo json_encode([
         'status' => true,
-        'message' => 'Promotion updated successfully'
+        'message' => 'Coupon updated successfully'
     ]);
 
 }
@@ -1144,7 +1144,7 @@ public function deleting_promotion()
 
     echo json_encode([
         'status' => true,
-        'message' => 'Promotion deleted successfully'
+        'message' => 'Coupon deleted successfully'
     ]);
 }   
 
