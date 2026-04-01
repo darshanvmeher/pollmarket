@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Silver foil illustration">
+  <defs>
+    <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e5edf4"/>
+      <stop offset="40%" stop-color="#cfdbe6"/>
+      <stop offset="100%" stop-color="#8aa0b6"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1370b8"/>
+      <stop offset="100%" stop-color="#f58220"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" rx="48" fill="#f7fafc"/>
+  <circle cx="630" cy="120" r="140" fill="#1370b8" opacity=".10"/>
+  <path d="M220 190h260c35 0 64 29 64 64v122c0 35-29 64-64 64H220c-35 0-64-29-64-64V254c0-35 29-64 64-64z" fill="url(#foil)" stroke="#a8bbca" stroke-width="8"/>
+  <circle cx="272" cy="316" r="36" fill="#f7fafc" stroke="#9fb3c5" stroke-width="8"/>
+  <path d="M336 246c52 0 94 42 94 94s-42 94-94 94" fill="none" stroke="#ffffff" stroke-width="10" opacity=".9"/>
+  <path d="M214 196l48-64h258l34 64" fill="none" stroke="url(#accent)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M190 470h352" stroke="#1370b8" stroke-width="14" stroke-linecap="round" opacity=".8"/>
+  <path d="M388 142l28 42" stroke="#f58220" stroke-width="14" stroke-linecap="round"/>
+</svg>

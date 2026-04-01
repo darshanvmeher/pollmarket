@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Garbage bags illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1370b8"/>
+      <stop offset="100%" stop-color="#f58220"/>
+    </linearGradient>
+    <linearGradient id="bag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1d3348"/>
+      <stop offset="100%" stop-color="#0b1320"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" rx="48" fill="#f7fafc"/>
+  <circle cx="640" cy="110" r="120" fill="url(#bg)" opacity=".12"/>
+  <circle cx="140" cy="500" r="140" fill="url(#bg)" opacity=".10"/>
+  <path d="M323 158c15-27 57-27 72 0l24 43H299l24-43z" fill="#f58220"/>
+  <path d="M286 204h128l54 282c4 21-12 40-33 40H265c-21 0-37-19-33-40l54-282z" fill="url(#bag)"/>
+  <path d="M348 204h4" stroke="#8ec5ff" stroke-width="10" stroke-linecap="round"/>
+  <path d="M383 204h4" stroke="#8ec5ff" stroke-width="10" stroke-linecap="round"/>
+  <path d="M318 250c26-18 64-18 90 0" fill="none" stroke="#f58220" stroke-width="10" stroke-linecap="round"/>
+  <path d="M327 318c26-18 64-18 90 0M327 384c26-18 64-18 90 0M327 450c26-18 64-18 90 0" fill="none" stroke="#1f4363" stroke-width="8" stroke-linecap="round" opacity=".85"/>
+  <circle cx="223" cy="470" r="32" fill="#1370b8"/>
+  <circle cx="415" cy="470" r="32" fill="#f58220"/>
+</svg>

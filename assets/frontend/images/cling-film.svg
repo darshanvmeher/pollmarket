@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Cling film illustration">
+  <defs>
+    <linearGradient id="roll" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dfe8ef"/>
+      <stop offset="100%" stop-color="#9caebf"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" rx="48" fill="#f7fafc"/>
+  <circle cx="625" cy="120" r="120" fill="#f58220" opacity=".10"/>
+  <ellipse cx="305" cy="330" rx="110" ry="98" fill="url(#roll)"/>
+  <ellipse cx="305" cy="330" rx="52" ry="46" fill="#f7fafc" stroke="#7f93a6" stroke-width="8"/>
+  <path d="M402 286c110-30 192 18 228 72 20 30 0 66-34 66H390" fill="none" stroke="#1370b8" stroke-width="18" stroke-linecap="round"/>
+  <path d="M393 346c110 4 170 34 210 76" fill="none" stroke="#f58220" stroke-width="14" stroke-linecap="round" opacity=".9"/>
+  <path d="M244 248c-26 18-42 44-48 74" fill="none" stroke="#0d4f86" stroke-width="12" stroke-linecap="round"/>
+  <path d="M196 322c6 68 40 118 98 150" fill="none" stroke="#8ec5ff" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="598" cy="428" r="28" fill="#f58220"/>
+</svg>
