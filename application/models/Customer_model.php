@@ -33,4 +33,11 @@ public function insert_customer($data)
     $this->db->insert('users_tbl', $data);
     return $this->db->insert_id(); // Return the ID of the inserted customer
 }
+
+//insert requests
+public function insert_request($data)
+{
+    $this->db->insert('req_form_tbl', $data);
+    return $this->db->insert_id(); // Return the ID of the inserted request
+}
 }

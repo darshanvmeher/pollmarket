@@ -74,20 +74,25 @@
             </div>
         </div>
     </div>
+   
+    
     <div class="col-lg-7">
+         <form id="reqForm" autocomplete="off">
         <div class="surface-card p-4 h-100">
             <div class="section-kicker">Send message</div>
             <h2 class="section-title">Tell us what you need</h2>
             <div class="row g-3 mt-1">
-                <div class="col-md-6"><input class="form-control" placeholder="Name"></div>
-                <div class="col-md-6"><input class="form-control" placeholder="Email"></div>
-                <div class="col-12"><input class="form-control" placeholder="Subject"></div>
-                <div class="col-12"><textarea class="form-control" rows="6" placeholder="Message"></textarea></div>
+                <div class="col-md-6"><input class="form-control" name="name" placeholder="Name"></div>
+                <div class="col-md-6"><input class="form-control" name="email" placeholder="Email"></div>
+                <div class="col-12"><input class="form-control" name="subject" placeholder="Subject"></div>
+                <div class="col-12"><textarea class="form-control" name="message" rows="6" placeholder="Message"></textarea></div>
             </div>
             <button class="btn btn-primary mt-3"><i class="bi bi-send me-2"></i>Send Message</button>
         </div>
+         </form>
     </div>
 </div>
+
 
 <section class="py-4">
     <div class="surface-card overflow-hidden">
@@ -134,6 +139,51 @@
 
 
 
+<!-- ✅ jQuery (if not already included in header) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!--Ajax-->
+<script>
+ $(document).ready(function() {
+    $('#reqForm').submit(function(e){
+        e.preventDefault(); // Prevent default form submission
+$.ajax({
+    url : "<?=base_url('index.php/Api_handler/customer_request')?>",
+    type: "POST",
+    data: $(this).serialize(),
+    dataType: "json", // ✅ important
+
+   
+    success: function(res){
+
+        console.log(res); // 🔍 debug
+
+        if(res.status){   // ✅ BEST CONDITION
+            Swal.fire({
+                icon: 'success',
+                title: 'Request Submitted',
+                text: res.message
+            }).then(() => {
+                window.location.href = "<?=base_url('index.php/frontend/contact')?>";
+            });
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Request Failed',
+                text: res.message
+            });
+        }
+    }
+});
+});
+
+ });
+
+
+</script>
 
 
 

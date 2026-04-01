@@ -1907,6 +1907,48 @@ $user_id = $this->input->post('user_id');
     ]);
 }
 
+//customer req form
+
+public function customer_request()
+{
+     
+
+   // $user_id = $this->input->post('user_id');
+    $name= $this->input->post('name');
+    $email= $this->input->post('email');
+    $subject= $this->input->post('subject');
+    $message= $this->input->post('message');
+
+    if (empty($name) || empty($email) || empty($subject) || empty($message)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "All fields are required"
+        ]);
+        return;
+    }
+
+    $data = [
+       // "user_id" => $user_id,
+        "name" => $name,
+        "email" => $email,  
+        "subject" => $subject,
+        "message" => $message
+    ];
+
+    $insert = $this->Customer_model->insert_request($data);
+
+    if ($insert) {
+        echo json_encode([
+            "status" => true,
+            "message" => "Request submitted successfully"
+        ]);
+    } else {
+        echo json_encode([
+            "status" => false,
+            "message" => "Failed to submit request"
+        ]);
+    }
+
 }
 
-
+}

@@ -41,6 +41,9 @@ $.ajax({
         console.log(res); // 🔍 debug
 
         if(res.status){   // ✅ BEST CONDITION
+                    
+        localStorage.setItem("token", res.token);
+
             Swal.fire({
                 icon: 'success',
                 title: 'Login Successful',
