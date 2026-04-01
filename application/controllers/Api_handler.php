@@ -11,6 +11,7 @@ class Api_handler extends CI_Controller {
         parent::__construct();
 
         $this->load->model('Admin_model');
+        $this->load->model('Customer_model');
         $this->load->model('Category_model');
         $this->load->model('Sub_category_model');
         $this->load->model('Products_model');
@@ -115,6 +116,18 @@ class Api_handler extends CI_Controller {
         return;
     }
 
+
+// ✅ INSERT LOGIN LOG HERE
+    $log_data = [
+    'user_id' => $admin['id'],
+    'user_type' => $admin['user_type'],
+    'delete_status' => 0,
+    'created_at' => date('Y-m-d H:i:s'),
+    'updated_at' => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->insert('user_login_logs', $log_data);
+
     // Generate JWT token
     $key = "this_is_my_super_secret_key_for_jwt_token_12345";
 
@@ -217,6 +230,156 @@ private function verify_token()
         exit;
     }
 }
+
+//customer login
+
+public function customer_login()
+{
+    $email = $this->input->post('email');
+    $password = $this->input->post('password');
+
+    if (empty($email) || empty($password)) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'All fields are required'
+        ]);
+        return;
+    }
+
+    // Check email
+    $customer = $this->Customer_model->get_customer_by_email($email);
+
+    if (!$customer) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Incorrect email'
+        ]);
+        return;
+    }
+
+    // Check password
+    if (!password_verify($password, $customer['password'])) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Incorrect password'
+        ]);
+        return;
+    }
+
+
+                // ✅ INSERT LOGIN LOG HERE
+                $log_data = [
+                    'user_id' => $customer['id'],
+                    'user_type' => $customer['user_type'],
+                    'delete_status' => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+
+                $this->db->insert('user_login_logs', $log_data);
+
+    // Generate JWT token
+    $key = "this_is_my_super_secret_key_for_jwt_token_12345";
+
+    $payload = [
+        'customer_id' => $customer['id'],
+        'email' => $customer['email'],
+        'iat' => time(),
+        'exp' => time() + 3600
+    ];
+
+    $jwt = JWT::encode($payload, $key, 'HS256');
+
+    echo json_encode([
+        "status" => true,
+        "message" => "Login successful",
+        "data" => [
+            "id" => $customer['id'],
+            "firstname" => $customer['firstname'] ?? '',
+            "lastname" => $customer['lastname'] ?? '',
+            "email" => $customer['email'],
+            "role" => "customer"
+        ],
+        "token" => $jwt
+    ]);
+
+
+}
+
+
+//register customer
+
+public function register()
+{
+    $firstname = $this->input->post('firstname');
+    $lastname = $this->input->post('lastname');
+    $dob = $this->input->post('dob');
+    $gender= $this->input->post('gender');
+    $email = $this->input->post('email');
+    $phone_no = $this->input->post('phone_no');
+    $password = $this->input->post('password');
+    $address = $this->input->post('address');
+    $city = $this->input->post('city');
+    $state = $this->input->post('state');
+    $country = $this->input->post('country');
+    $pincode = $this->input->post('pincode');
+
+
+    if (empty($firstname) || empty($lastname) || empty($dob) || empty($gender) || empty($phone_no) || empty($email) || empty($password) || empty($address) || empty($city) || empty($state) || empty($country) || empty($pincode)) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'All fields are required'
+        ]);
+        return;
+    }
+
+    // Check if email already exists
+    $existing_customer = $this->Customer_model->get_customer_by_email($email);
+
+    if ($existing_customer) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Email already registered'
+        ]);
+        return;
+    }
+
+    // Hash the password
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // Insert new customer
+    $customer_data = [
+        'firstname' => $firstname,
+        'lastname' => $lastname,
+        'email' => $email,
+        'password' => $hashed_password,
+        'dob' => $dob,
+        'gender' => $gender,
+        'phone_no' => $phone_no,
+        'address' => $address,
+        'city' => $city,
+        'state' => $state,
+        'country' => $country,
+        'pincode' => $pincode,
+        'user_type' => 'customer',
+        
+    ];
+
+    $customer_id = $this->Customer_model->insert_customer($customer_data);
+
+    if ($customer_id) {
+        echo json_encode([
+            'status' => true,
+            'message' => 'Customer registered successfully'
+        ]);
+    } else {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Failed to register customer'
+        ]);
+    }
+}
+
 
 //catgory api
 
@@ -1745,3 +1908,5 @@ $user_id = $this->input->post('user_id');
 }
 
 }
+
+

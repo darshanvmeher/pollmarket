@@ -131,3 +131,10 @@
 </section>
 
 <?php $this->load->view('frontend/partials/footer'); ?>
+
+
+
+
+
+
+
