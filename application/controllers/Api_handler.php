@@ -19,6 +19,7 @@ class Api_handler extends CI_Controller {
         $this->load->model('Attribute_model');
         $this->load->model('Promotion_model');
         $this->load->model('Address_model');
+        $this->load->model('Wishlist_model');
         $this->load->library('upload');
 
 
@@ -1773,8 +1774,8 @@ public function list_promotion()
 
 public function add_address()
 {
-    $decoded = $this->verify_token();
-    $admin_id = $decoded->admin_id;   
+    $decoded = $this->verify_token(); 
+    $user_id = $decoded->customer_id;   
 
     $user_id = $this->input->post('user_id');
     $address_type = $this->input->post('address_type');
@@ -1821,8 +1822,8 @@ public function add_address()
 
 public function update_address()
 {
-    $decoded = $this->verify_token();
-    $admin_id = $decoded->admin_id;   
+    $decoded = $this->verify_token(); 
+    $user_id = $decoded->customer_id;   
 
     $id = $this->input->post('id');
 
@@ -1858,8 +1859,8 @@ public function update_address()
 
 public function delete_address()
 {
-    $decoded = $this->verify_token();
-    $admin_id = $decoded->admin_id;  
+    $decoded = $this->verify_token(); 
+    $user_id = $decoded->customer_id;    
 
     
     $id = $this->input->post('id');
@@ -1895,9 +1896,10 @@ public function delete_address()
 
 public function list_address()
 {
-   $decoded = $this->verify_token();
-   $admin_id = $decoded->admin_id;
-$user_id = $this->input->post('user_id');
+    $decoded = $this->verify_token(); 
+    $user_id = $decoded->customer_id;
+    
+    $user_id = $this->input->post('user_id');
 
     $addresses= $this->Address_model->get_addresses($user_id);
 
@@ -1949,6 +1951,99 @@ public function customer_request()
         ]);
     }
 
+}
+
+//wishlist api
+
+//add to wishlist
+
+public function add_to_wishlist()
+{
+    $decoded = $this->verify_token(); 
+    $user_id = $decoded->customer_id;  
+
+    $user_id = $this->input->post('user_id');
+    $product_id = $this->input->post('product_id');
+
+    if (empty($user_id) || empty($product_id)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "User ID and Product ID are required"
+        ]);
+        return;
+    }
+
+    $result = $this->Wishlist_model->add_to_wishlist($user_id, $product_id);
+
+    if ($result == 'added') {
+        echo json_encode([
+            "status" => true,
+            "message" => "Added to wishlist successfully"
+        ]);
+    } elseif ($result == 'updated') {
+        echo json_encode([
+            "status" => true,
+            "message" => "Added to wishlist again"
+        ]);
+    } else {
+        echo json_encode([
+            "status" => false,
+            "message" => "Already in wishlist"
+        ]);
+    }
+}
+
+
+//remove from wishlist
+
+public function remove_from_wishlist()
+{
+    $decoded = $this->verify_token(); 
+    $user_id = $decoded->customer_id;  
+
+    $user_id = $this->input->post('user_id');
+    $product_id = $this->input->post('product_id');
+
+    if (empty($user_id) || empty($product_id)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "User ID and Product ID are required"
+        ]);
+        return;
+    }
+
+    $delete = $this->Wishlist_model->remove_from_wishlist($user_id, $product_id);
+
+    echo json_encode([
+        "status" => $delete ? true : false,
+        "message" => $delete ? "Removed successfully" : "Failed"
+    ]);
+}
+
+
+
+//wishlist list
+public function wishlist()
+{
+    $decoded = $this->verify_token(); 
+    $user_id = $decoded->customer_id;  
+    
+    $user_id = $this->input->post('user_id');
+
+    if (empty($user_id)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "User ID is required"
+        ]);
+        return;
+    }
+
+    $wishlist = $this->Wishlist_model->get_wishlist_by_user_id($user_id);
+
+    echo json_encode([
+        "status" => true,
+        "data" => $wishlist
+    ]);
 }
 
 }
