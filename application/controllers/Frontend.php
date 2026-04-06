@@ -34,6 +34,17 @@ class Frontend extends CI_Controller
         );
     }
 
+    private function find_product($slug)
+    {
+        foreach ($this->product_catalog() as $product) {
+            if ($product['image'] === $slug) {
+                return $product;
+            }
+        }
+
+        return $this->product_catalog()[0];
+    }
+
     public function index()
     {
         $data = array(
@@ -119,21 +130,59 @@ class Frontend extends CI_Controller
 
     public function product($slug = 'heavy-duty-garbage-bags')
     {
+        $catalog = $this->product_catalog();
+        $selected = $this->find_product($slug);
+        $gallery_map = array(
+            'garbage-bag' => array(
+                base_url('assets/frontend/images/products/garbage-bag.png'),
+                base_url('assets/frontend/images/products/garbage-bag.jpg'),
+                base_url('assets/frontend/images/products/indian-warehouse.jpg'),
+                base_url('assets/frontend/images/products/paper-bag.jpg')
+            ),
+            'paper-bag' => array(
+                base_url('assets/frontend/images/products/paper-bag.jpg'),
+                base_url('assets/frontend/images/products/indian-office-team.jpg'),
+                base_url('assets/frontend/images/products/garbage-bag.png'),
+                base_url('assets/frontend/images/products/cling-film.jpg')
+            ),
+            'cling-film' => array(
+                base_url('assets/frontend/images/products/cling-film.jpg'),
+                base_url('assets/frontend/images/products/indian-warehouse.jpg'),
+                base_url('assets/frontend/images/products/paper-bag.jpg'),
+                base_url('assets/frontend/images/products/silver-foil.jpg')
+            ),
+            'silver-foil' => array(
+                base_url('assets/frontend/images/products/silver-foil.jpg'),
+                base_url('assets/frontend/images/products/indian-warehouse.jpg'),
+                base_url('assets/frontend/images/products/cling-film.jpg'),
+                base_url('assets/frontend/images/products/rfid-seal.jpg')
+            ),
+            'rfid-seal' => array(
+                base_url('assets/frontend/images/products/rfid-seal.jpg'),
+                base_url('assets/frontend/images/products/indian-office-team.jpg'),
+                base_url('assets/frontend/images/products/indian-warehouse.jpg'),
+                base_url('assets/frontend/images/products/garbage-bag.png')
+            ),
+            'stationery' => array(
+                base_url('assets/frontend/images/products/stationery.jpg'),
+                base_url('assets/frontend/images/products/indian-office-team.jpg'),
+                base_url('assets/frontend/images/products/paper-bag.jpg'),
+                base_url('assets/frontend/images/products/garbage-bag.png')
+            )
+        );
+        $gallery = isset($gallery_map[$selected['image']]) ? $gallery_map[$selected['image']] : array($selected['image_url']);
         $data = array(
             'title' => 'Product Details',
             'nav_items' => $this->nav_items(),
             'slug' => $slug,
-            'product' => array(
-                'name' => 'Heavy Duty Garbage Bags',
-                'category' => 'Plastic Bags',
-                'price' => '₹349',
-                'old_price' => '₹399',
-                'rating' => '4.8',
+            'product' => array_merge($selected, array(
                 'stock' => 'In stock',
-                'description' => 'Durable, leak-resistant bags built for commercial and household waste management in Indian operations.',
-                'image_url' => base_url('assets/frontend/images/products/garbage-bag.png')
-            ),
-            'related_products' => array_slice($this->product_catalog(), 1, 4)
+                'description' => 'Durable, commercial-grade packaging built for Indian business operations.',
+                'gallery' => $gallery
+            )),
+            'related_products' => array_values(array_filter($catalog, function ($item) use ($selected) {
+                return $item['image'] !== $selected['image'];
+            }))
         );
 
         $this->load->view('frontend/pages/product', $data);
@@ -141,12 +190,13 @@ class Frontend extends CI_Controller
 
     public function cart()
     {
+        $catalog = $this->product_catalog();
         $data = array(
             'title' => 'Cart',
             'nav_items' => $this->nav_items(),
             'items' => array(
-                array('name' => 'Heavy Duty Garbage Bags', 'qty' => 2, 'price' => '₹349', 'subtotal' => '₹698'),
-                array('name' => 'RFID Tamper Seal Pack', 'qty' => 1, 'price' => '₹1,999', 'subtotal' => '₹1,999')
+                array('name' => 'Heavy Duty Garbage Bags', 'category' => 'Plastic Bags', 'qty' => 2, 'price' => '₹349', 'subtotal' => '₹698', 'image_url' => $catalog[0]['image_url']),
+                array('name' => 'RFID Tamper Seal Pack', 'category' => 'RFID Seals', 'qty' => 1, 'price' => '₹1,999', 'subtotal' => '₹1,999', 'image_url' => $catalog[3]['image_url'])
             )
         );
 

@@ -12,7 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="<?php echo base_url('assets/frontend/css/frontend.css'); ?>" rel="stylesheet">
 </head>
-<body>
+<body data-product-base="<?php echo site_url('frontend/product/'); ?>">
 <div class="site-shell">
     <nav class="navbar navbar-expand-lg site-nav sticky-top">
         <div class="container py-2">
@@ -40,8 +40,13 @@
                     <?php endforeach; ?>
                 </ul>
                 <div class="d-flex gap-2">
-                    <a class="btn btn-outline-dark btn-sm" href="<?php echo site_url('frontend/wishlist'); ?>"><i class="bi bi-suit-heart"></i></a>
-                    <a class="btn btn-outline-dark btn-sm" href="<?php echo site_url('frontend/cart'); ?>"><i class="bi bi-bag"></i></a>
+                    <a class="btn btn-outline-dark btn-sm icon-badge-wrap" href="<?php echo site_url('frontend/wishlist'); ?>">
+                        <i class="bi bi-suit-heart"></i>
+                        <span class="icon-badge d-none" data-wishlist-badge>0</span>
+                    </a>
+                    <a class="btn btn-outline-dark btn-sm icon-badge-wrap" href="<?php echo site_url('frontend/cart'); ?>">
+                        <i class="bi bi-bag"></i>
+                    </a>
                     <a class="btn btn-primary btn-sm" href="<?php echo site_url('frontend/login'); ?>">Sign in</a>
                 </div>
             </div>

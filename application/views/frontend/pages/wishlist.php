@@ -5,30 +5,37 @@
     <h1 class="section-title">Save products for later comparison</h1>
 </div>
 
-<div class="row g-3">
-    <?php foreach ($items as $item): ?>
-        <div class="col-md-6 col-xl-4">
-            <div class="product-card">
-                <div class="product-thumb d-flex flex-column justify-content-between">
-                    <div class="product-photo">
-                        <img src="<?php echo html_escape($item['image_url']); ?>" alt="<?php echo html_escape($item['name']); ?>">
-                    </div>
-                    <span class="product-pill"><?php echo html_escape($item['badge']); ?></span>
-                    <div>
-                        <div class="text-white-50 small"><?php echo html_escape($item['category']); ?></div>
-                        <h3 class="h5 mt-1 mb-0"><?php echo html_escape($item['name']); ?></h3>
-                    </div>
+<div class="row g-3" data-wishlist-grid>
+    <div class="col-12" data-wishlist-empty>
+        <div class="surface-card p-4 text-center">
+            <h2 class="h5 fw-bold mb-2">Your wishlist is empty</h2>
+            <p class="text-muted mb-0">Add products from the product page to see them here.</p>
+        </div>
+    </div>
+</div>
+
+<template id="wishlist-card-template">
+    <div class="col-md-6 col-xl-4">
+        <div class="product-card">
+            <div class="product-thumb d-flex flex-column justify-content-between">
+                <div class="product-photo">
+                    <img src="" alt="">
                 </div>
-                <div class="p-3 d-flex justify-content-between align-items-center">
-                    <span class="price"><?php echo html_escape($item['price']); ?></span>
-                    <div class="d-flex gap-2">
-                        <a class="btn btn-sm btn-outline-dark" href="#">Remove</a>
-                        <a class="btn btn-sm btn-primary" href="<?php echo site_url('frontend/product/' . $item['image']); ?>">View</a>
-                    </div>
+                <span class="product-pill"></span>
+                <div>
+                    <div class="text-white-50 small"></div>
+                    <h3 class="h5 mt-1 mb-0"></h3>
+                </div>
+            </div>
+            <div class="p-3 d-flex justify-content-between align-items-center">
+                <span class="price"></span>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-dark" type="button" data-wishlist-remove>Remove</button>
+                    <a class="btn btn-sm btn-primary" href="#">View</a>
                 </div>
             </div>
         </div>
-    <?php endforeach; ?>
-</div>
+    </div>
+</template>
 
 <?php $this->load->view('frontend/partials/footer'); ?>
