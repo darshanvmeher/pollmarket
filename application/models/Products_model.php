@@ -11,13 +11,13 @@ class Products_model extends CI_Model {
 
 //product by id
 
-    public function get_product_by_id($id)
+   /* public function get_product_by_id($id)
 {
     $this->db->where('id',$id)
              ->where('delete_status',0);       
     return $this->db->get('product_tbl')->row_array();
 
-}
+}*/
 
 
 //product media
@@ -139,8 +139,11 @@ $this->db->select('
                 p.id,
                 p.product_name,
                 p.price,
+                p.strike_price,
                 p.description,
                 p.stock,
+                p.badge,
+                p.rating,
                 p.status,
                 sc.id as sub_category_id,
                 sc.sub_category_name,
@@ -214,5 +217,23 @@ public function upsert_product_attribute($data)
         // INSERT
         $this->db->insert('product_attribute_tbl', $data);
     }
+}
+
+public function get_product_by_id($id)
+{
+    $this->db->select('
+        p.*,
+        sc.sub_category_name,
+        c.category_name
+    ');
+    
+    $this->db->from('product_tbl p');
+    $this->db->join('sub_category_tbl sc', 'sc.id = p.sub_category_id', 'left');
+    $this->db->join('category_tbl c', 'c.id = sc.category_id', 'left');
+
+    $this->db->where('p.id', $id);
+    $this->db->where('p.delete_status', 0);
+
+    return $this->db->get()->row_array();
 }
 }

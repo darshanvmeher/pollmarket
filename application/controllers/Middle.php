@@ -648,8 +648,11 @@ public function adding_product()
         'sub_category_id' => $this->input->post('sub_category_id'),
         'product_name'    => $this->input->post('product_name'),
         'price'           => $this->input->post('price'),
+        'strike_price'    => $this->input->post('strike_price'),
         'description'     => $this->input->post('description'),
         'stock'           => $this->input->post('stock'),
+        'badge'           => $this->input->post('badge'),
+        'rating'          => $this->input->post('rating'),
         'status'          => $this->input->post('status')
     ];
 
@@ -763,8 +766,11 @@ public function updating_product()
         'sub_category_id' => $this->input->post('sub_category_id'),
         'product_name'    => $this->input->post('product_name'),
         'price'           => $this->input->post('price'),
+        'strike_price'    => $this->input->post('strike_price'),
         'description'     => $this->input->post('description'),
         'stock'           => $this->input->post('stock'),
+        'badge'           => $this->input->post('badge'),
+        'rating'          => $this->input->post('rating'),
         'status' => $this->input->post('status'),
     ];
 

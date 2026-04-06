@@ -725,11 +725,15 @@ public function add_product()
     $sub_category_id = $this->input->post('sub_category_id');
     $product_name = $this->input->post('product_name');
     $price = $this->input->post('price');
+    $strike_price = $this->input->post('strike_price') ?? null;
+
     $description = $this->input->post('description');
     $stock = $this->input->post('stock');
+    $badge = $this->input->post('badge');
+    $rating = $this->input->post('rating');
     $status = $this->input->post('status') ?? '1';
 
-    if (empty($sub_category_id) || empty($product_name) || empty($price) || empty($stock) ) {
+    if (empty($sub_category_id) || empty($product_name) || empty($price) || empty($strike_price) || empty($stock)|| empty($badge) || empty($rating)){
         echo json_encode([
             "status" => false,
             "message" => "Required fields are missing"
@@ -741,8 +745,11 @@ public function add_product()
         "sub_category_id" => $sub_category_id,
         "product_name" => $product_name,
         "price" => $price,
+        "strike_price" => $strike_price,
         "description" => $description,
         "stock" => $stock,
+        "badge" => $badge,
+        "rating" => $rating,
         "status" => $status
     ];
 
@@ -902,6 +909,7 @@ public function update_product()
         "product_name" => $this->input->post('product_name'),
         "attribute_id" => $this->input->post('attribute_id'),
         "price" => $this->input->post('price'),
+        "strike_price" => $strike_price,
         "description" => $this->input->post('description'),
         "stock" => $this->input->post('stock')
     ];
@@ -957,8 +965,11 @@ public function update_product()
         "sub_category_id" => $sub_category_id,
         "product_name" => $this->input->post('product_name'),
         "price" => $this->input->post('price'),
+        "strike_price" => $this->input->post('strike_price'),
         "description" => $this->input->post('description'),
         "stock" => $this->input->post('stock'),
+        "badge" => $this->input->post('badge'),
+        "rating" => $this->input->post('rating'),
         "status" => $this->input->post('status'),
     ];
 

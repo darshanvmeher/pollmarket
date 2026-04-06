@@ -28,8 +28,9 @@
                         <img src="<?php echo html_escape($hero_scene['office']); ?>" alt="Indian business procurement team">
                     </div>
                     <div class="hero-gallery-tile">
-                        <img src="<?php echo html_escape($hero_products[0]['image_url']); ?>" alt="<?php echo html_escape($hero_products[0]['name']); ?>">
-                    </div>
+                        <img src="<?= base_url($hero_products[0]['media'][0]['media_path'] ?? 'assets/no-image.png') ?>"
+                            alt="<?= html_escape($hero_products[0]['product_name'] ?? 'Product') ?>">
+                        </div>
                 </div>
             </div>
         </div>
@@ -84,28 +85,28 @@
     </div>
     <div class="row g-3">
         <?php foreach ($featured_products as $index => $product): ?>
-            <div class="col-md-6 col-xl-3">
-                <div class="product-card fade-up delay-<?php echo min($index + 1, 3); ?>">
+                    <div class="col-md-6 col-xl-3 d-flex">
+                    <div class="product-card fade-up delay-<?php echo min($index + 1, 3); ?>">
                     <div class="product-thumb d-flex flex-column justify-content-between">
                         <div class="product-photo">
-                            <img src="<?php echo html_escape($product['image_url']); ?>" alt="<?php echo html_escape($product['name']); ?>">
+                            <img src="<?= base_url($product['media'][0]['media_path'] ?? 'assets/no-image.png') ?>">
                         </div>
                         <div class="d-flex justify-content-between align-items-start">
                             <span class="product-pill"><?php echo html_escape($product['badge']); ?></span>
                             <span class="product-pill"><i class="bi bi-star-fill"></i> <?php echo html_escape($product['rating']); ?></span>
                         </div>
                         <div>
-                            <div class="text-white-50 small"><?php echo html_escape($product['category']); ?></div>
-                            <h3 class="h5 mt-1 mb-0"><?php echo html_escape($product['name']); ?></h3>
+                            <div class="text-white-50 small"><?php echo html_escape($product['category_name']); ?></div>
+                            <h3 class="h5 mt-1 mb-0"><?php echo html_escape($product['product_name']); ?></h3>
                         </div>
                     </div>
                     <div class="p-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <span class="price"><?php echo html_escape($product['price']); ?></span>
-                                <span class="price-old ms-2"><?php echo html_escape($product['old_price']); ?></span>
+                                <span class="price-old ms-2"><?php echo html_escape($product['strike_price']); ?></span>
                             </div>
-                            <a class="btn btn-sm btn-primary" href="<?php echo site_url('frontend/product/' . $product['image']); ?>">View</a>
+                            <a class="btn btn-sm btn-primary" href="<?php echo site_url('frontend/product/' . $product['id']); ?>">View</a>
                         </div>
                     </div>
                 </div>

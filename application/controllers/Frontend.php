@@ -7,6 +7,7 @@ class Frontend extends CI_Controller
     {
         parent::__construct();
         $this->load->helper('url');
+        $this->load->model('Products_model');
     }
 
     private function nav_items()
@@ -21,7 +22,7 @@ class Frontend extends CI_Controller
         );
     }
 
-    private function product_catalog()
+   /* private function product_catalog()
     {
         return array(
             array('name' => 'Heavy Duty Garbage Bags', 'category' => 'Plastic Bags', 'price' => '₹349', 'old_price' => '₹399', 'badge' => 'Best Seller', 'rating' => '4.8', 'image' => 'garbage-bag', 'image_url' => base_url('assets/frontend/images/products/garbage-bag.png')),
@@ -32,9 +33,9 @@ class Frontend extends CI_Controller
             array('name' => 'Cling Film Roll', 'category' => 'Cling Films', 'price' => '₹579', 'old_price' => '₹699', 'badge' => 'New', 'rating' => '4.7', 'image' => 'cling-film', 'image_url' => base_url('assets/frontend/images/products/cling-film.jpg')),
             array('name' => 'Office Stationery Kit', 'category' => 'Stationery', 'price' => '₹1,499', 'old_price' => '₹1,799', 'badge' => 'Combo', 'rating' => '4.9', 'image' => 'kit', 'image_url' => base_url('assets/frontend/images/products/stationery.jpg'))
         );
-    }
+    }*/
 
-    private function find_product($slug)
+   /*private function find_product($slug)
     {
         foreach ($this->product_catalog() as $product) {
             if ($product['image'] === $slug) {
@@ -43,10 +44,61 @@ class Frontend extends CI_Controller
         }
 
         return $this->product_catalog()[0];
+    }*/
+    public function product($id)
+{
+    $this->load->model('Products_model');
+
+    // ✅ GET PRODUCT FROM DB
+    $product = $this->Products_model->get_product_by_id($id);
+
+    if (!$product) {
+        show_404();
     }
+
+    // ✅ ADD MEDIA TO MAIN PRODUCT
+    $product['media'] = $this->Products_model->get_product_media($id);
+
+    // ✅ SAFE DEFAULT VALUES
+   // $product['category_name'] = $product['category_name'] ?? 'Category';
+    //$product['badge'] = $product['badge'] ?? 'New';
+    //$product['rating'] = $product['rating'] ?? '4.5';
+
+    // ✅ GET ALL PRODUCTS
+    $all_products = $this->Products_model->get_product_list();
+
+    // ✅ ADD MEDIA TO EACH PRODUCT
+    foreach ($all_products as &$p) {
+        $p['media'] = $this->Products_model->get_product_media($p['id']);
+    }
+
+    // ✅ FILTER RELATED PRODUCTS
+    $related_products = array_values(array_filter($all_products, function($p) use ($id) {
+        return $p['id'] != $id;
+    }));
+
+    // ✅ RANDOM + LIMIT
+    shuffle($related_products);
+    $related_products = array_slice($related_products, 0, 4);
+
+    // ✅ PASS DATA TO VIEW
+    $data = [
+        'title' => 'Product Details',
+        'nav_items' => $this->nav_items(),
+        'product' => $product,
+        'related_products' => $related_products
+    ];
+
+    $this->load->view('frontend/pages/product', $data);
+}
 
     public function index()
     {
+        $products = $this->Products_model->get_product_list();
+
+        shuffle($products); // ✅ RANDOM EACH TIME
+
+
         $data = array(
             'title' => 'Home',
             'nav_items' => $this->nav_items(),
@@ -64,12 +116,16 @@ class Frontend extends CI_Controller
                 array('label' => 'Silver Foil Papers', 'count' => '40+ SKUs'),
                 array('label' => 'RFID Seals', 'count' => '25+ SKUs')
             ),
-            'hero_products' => array(
+            /*'hero_products' => array(
                 $this->product_catalog()[0],
                 $this->product_catalog()[4],
                 $this->product_catalog()[5]
-            ),
-            'featured_products' => array_slice($this->product_catalog(), 0, 4),
+            ),*/
+            'hero_products' => array_slice($products, 0, 3),
+            //  'featured_products' => array_slice($this->product_catalog(), 0, 4),
+            'featured_products' => array_slice($products, 0, 4),
+
+
             'clients' => array(
                 array('name' => 'Retail Mart Pvt. Ltd.', 'segment' => 'Wholesale retail chain', 'monthly' => '₹12.4L', 'status' => 'Active'),
                 array('name' => 'Shakti Traders', 'segment' => 'Reseller network', 'monthly' => '₹8.9L', 'status' => 'Active'),
@@ -128,9 +184,12 @@ class Frontend extends CI_Controller
         $this->load->view('frontend/pages/shop', $data);
     }
 
-    public function product($slug = 'heavy-duty-garbage-bags')
-    {
-        $catalog = $this->product_catalog();
+    /*public function product($id')
+    {   
+         $this->load->model('Products_model');
+
+         $catalog = $this->Products_model->get_product_list();
+
         $selected = $this->find_product($slug);
         $gallery_map = array(
             'garbage-bag' => array(
@@ -186,7 +245,7 @@ class Frontend extends CI_Controller
         );
 
         $this->load->view('frontend/pages/product', $data);
-    }
+    }*/
 
     public function cart()
     {

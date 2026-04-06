@@ -23,6 +23,7 @@
                 <th>Subcategory</th>
                 <th>Product Name</th>
                 <th>Price</th>
+                <th>Strike Price</th>
                 <th>Description</th>
                 <th>Stock</th>
                 <th>Status</th>
@@ -66,6 +67,19 @@ if ($status == 0) {
     <td>
         ₹<?php echo html_escape($product['price']); ?>
     </td>
+  
+     <!-- Strike Price 
+    <td>
+        ₹<?php echo html_escape($product['strike_price']); ?>
+    </td>-->
+
+    <td>
+    <?php if (!empty($product['strike_price'])): ?>
+        <span style="text-decoration: line-through; color: gray;">
+            ₹<?= html_escape($product['strike_price']); ?>
+        </span>
+    <?php endif; ?>
+    </td>
 
     <!-- Description -->
     <td>
@@ -99,8 +113,11 @@ if ($status == 0) {
             data-sub_category_id="<?= $product['sub_category_id']; ?>"
             data-name="<?= html_escape($product['product_name']); ?>"
             data-price="<?= $product['price']; ?>"
+            data-strike_price="<?= $product['strike_price']; ?>"
             data-stock="<?= $product['stock']; ?>"
             data-description="<?= html_escape($product['description']); ?>"
+            data-badge="<?= html_escape($product['badge']); ?>"
+            data-rating="<?= html_escape($product['rating']); ?>"
             data-status="<?= $product['status']; ?>"
             data-images='<?= json_encode($product["images"] ?? []); ?>'
             data-videos='<?= json_encode($product["videos"] ?? []); ?>'
@@ -241,12 +258,32 @@ if ($status == 0) {
                         <input type="text" name="price" class="form-control" required>
                     </div>
 
+                    <!-- Strike Price -->
+                    <div class="col-md-6">
+                        <label class="form-label">Strike Price</label>
+                        <input type="text" name="strike_price" class="form-control">
+                    </div>
+                    
+
                     <!-- Stock -->
                     <div class="col-md-6">
                         <label class="form-label">Stock</label>
                         <input type="text" name="stock" class="form-control" required>                   
 
                     </div>
+
+                    <!-- Badge -->
+                    <div class="col-md-6">
+                        <label class="form-label">Badge</label>
+                        <input type="text" name="badge" class="form-control">
+                    </div>
+
+                    <!-- Rating -->
+                    <div class="col-md-6">
+                        <label class="form-label">Rating</label>
+                        <input type="text" name="rating" class="form-control">
+                    </div>
+
 
                     <!-- Status (ENUM FIX) -->
                     <div class="col-md-6">
@@ -379,8 +416,11 @@ modal.addEventListener('show.bs.modal', function (event) {
         document.getElementById('product_id').value = btn.dataset.id;
         form.product_name.value = btn.dataset.name;
         form.price.value = btn.dataset.price;
+        form.strike_price.value = btn.dataset.strike_price;
         form.stock.value = btn.dataset.stock;
         form.description.value = btn.dataset.description;
+        form.badge.value = btn.dataset.badge;
+        form.rating.value = btn.dataset.rating;
         form.status.value = btn.dataset.status;
         form.category_id.value = btn.dataset.category_id;
         form.sub_category_id.value = btn.dataset.sub_category_id;

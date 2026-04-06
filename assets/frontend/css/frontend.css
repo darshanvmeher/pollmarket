@@ -400,7 +400,9 @@ h1, h2, h3, h4, h5, .display-font {
 }
 
 .hero-gallery-tile {
-  min-height: 205px;
+  height: 180px;        /* fixed clean height */
+  overflow: hidden;
+  border-radius: 20px;
 }
 
 .hero-product-showcase::before,
@@ -532,6 +534,12 @@ h1, h2, h3, h4, h5, .display-font {
   background: #fff;
   border: 1px solid var(--site-border);
   box-shadow: 0 18px 40px rgba(16, 32, 48, 0.08);
+}
+
+.product-gallery .mini-stat strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-gallery-main img {
@@ -956,6 +964,10 @@ h1, h2, h3, h4, h5, .display-font {
 .product-card {
   overflow: hidden;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  height: 100%;              /* ✅ equal height */
+  display: flex;             /* ✅ flex layout */
+  flex-direction: column;    /* ✅ vertical alignment */
 }
 
 .product-card:hover {
@@ -964,28 +976,56 @@ h1, h2, h3, h4, h5, .display-font {
 }
 
 .product-thumb {
-  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  height: 300px;   /* 🔥 FIXED HEIGHT */
   padding: 1rem;
+
   background:
     radial-gradient(circle at 20% 20%, rgba(255,255,255,0.35), transparent 18%),
     linear-gradient(135deg, rgba(19,112,184,0.94), rgba(8,17,31,0.95));
   color: #fff;
 }
 
+.product-card .p-3 {
+  margin-top: auto;
+}
+
+.product-card h3 {
+  min-height: 50px;
+}
+
+.product-card h3 {
+  min-height: 48px;
+  line-height: 1.2;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* max 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .product-photo {
   border-radius: 18px;
   overflow: hidden;
   margin-bottom: 0.9rem;
-  height: 170px;
-  background: rgba(255,255,255,0.96);
-  padding: 0.35rem;
+  height: 150px;              /* slightly bigger */
+  background: #fff;
+  padding: 0;                 /* 🔥 REMOVE padding */
 }
+
 
 .product-photo img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  display: block;
+  object-fit: cover; 
+  object-position: center;     /* 🔥 CHANGE THIS */
+}
+
+.product-thumb > div:last-child {
+  margin-top: 6px;
 }
 
 .product-pill {
