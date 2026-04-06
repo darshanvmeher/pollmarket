@@ -2,20 +2,39 @@
 
 <section class="row g-4 align-items-start">
     <div class="col-lg-6">
-        <div class="hero-media" style="min-height: 520px;">
-            <div class="card-stack">
-                <div class="hero-aside-card" style="padding:0; overflow:hidden;">
-                    <img src="<?php echo html_escape($product['image_url'] ?? ''); ?>" alt="<?php echo html_escape($product['name']); ?>" style="width:100%; height:240px; object-fit:cover; display:block;">
+        <div class="product-gallery surface-card p-3 p-lg-4">
+            <div class="product-gallery-main">
+                <img
+                    src="<?php echo html_escape($product['gallery'][0] ?? $product['image_url']); ?>"
+                    alt="<?php echo html_escape($product['name']); ?>"
+                    data-product-gallery-main>
+            </div>
+            <div class="product-gallery-thumbs mt-3">
+                <?php foreach (($product['gallery'] ?? array()) as $index => $image_url): ?>
+                    <button
+                        class="product-gallery-thumb <?php echo $index === 0 ? 'active' : ''; ?>"
+                        type="button"
+                        data-product-gallery-thumb
+                        data-gallery-src="<?php echo html_escape($image_url); ?>"
+                        aria-label="View image <?php echo html_escape($index + 1); ?>">
+                        <img src="<?php echo html_escape($image_url); ?>" alt="<?php echo html_escape($product['name']); ?> image <?php echo html_escape($index + 1); ?>">
+                    </button>
+                <?php endforeach; ?>
+            </div>
+            <div class="row g-3 mt-3">
+                <div class="col-md-6">
+                    <div class="mini-stat">
+                        <span class="text-white-50">Product</span>
+                        <strong><?php echo html_escape($product['name']); ?></strong>
+                        <small class="text-white-50"><?php echo html_escape($product['category']); ?></small>
+                    </div>
                 </div>
-                <div class="mini-stat">
-                    <span class="text-white-50">Product</span>
-                    <strong><?php echo html_escape($product['name']); ?></strong>
-                    <small class="text-white-50"><?php echo html_escape($product['category']); ?></small>
-                </div>
-                <div class="mini-stat">
-                    <span class="text-white-50">Quick View</span>
-                    <strong><?php echo html_escape($product['rating']); ?> rating</strong>
-                    <small class="text-white-50"><?php echo html_escape($product['stock']); ?></small>
+                <div class="col-md-6">
+                    <div class="mini-stat">
+                        <span class="text-white-50">Quick View</span>
+                        <strong><?php echo html_escape($product['rating']); ?> rating</strong>
+                        <small class="text-white-50"><?php echo html_escape($product['stock']); ?></small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -39,9 +58,20 @@
                 <input id="qty" class="form-control text-center" value="1">
                 <button class="btn btn-outline-dark" type="button" data-qty-action="increase" data-qty-target="#qty">+</button>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-primary btn-lg">Add to Cart</button>
-                <button class="btn btn-outline-dark btn-lg"><i class="bi bi-suit-heart"></i></button>
+                <button
+                    class="btn btn-outline-dark btn-lg"
+                    type="button"
+                    data-wishlist-add
+                    data-product-id="<?php echo html_escape($slug); ?>"
+                    data-product-name="<?php echo html_escape($product['name']); ?>"
+                    data-product-category="<?php echo html_escape($product['category']); ?>"
+                    data-product-price="<?php echo html_escape($product['price']); ?>"
+                    data-product-image="<?php echo html_escape($product['image_url']); ?>"
+                    title="Add to wishlist">
+                    <i class="bi bi-suit-heart"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -53,7 +83,7 @@
         <h2 class="section-title">Products customers usually buy together</h2>
     </div>
     <div class="row g-3">
-        <?php foreach ($related_products as $product_item): ?>
+        <?php foreach (array_slice($related_products, 0, 4) as $product_item): ?>
             <div class="col-md-6 col-xl-3">
                 <div class="product-card">
                     <div class="product-thumb d-flex flex-column justify-content-between">
@@ -63,9 +93,23 @@
                             <h3 class="h5 mt-1 mb-0"><?php echo html_escape($product_item['name']); ?></h3>
                         </div>
                     </div>
-                    <div class="p-3 d-flex justify-content-between align-items-center">
+                    <div class="p-3 d-flex justify-content-between align-items-center gap-2">
                         <span class="price"><?php echo html_escape($product_item['price']); ?></span>
-                        <a class="btn btn-sm btn-primary" href="<?php echo site_url('frontend/product/' . $product_item['image']); ?>">View</a>
+                        <div class="d-flex gap-2">
+                            <button
+                                class="btn btn-sm btn-outline-dark"
+                                type="button"
+                                data-wishlist-add
+                                data-product-id="<?php echo html_escape($product_item['image']); ?>"
+                                data-product-name="<?php echo html_escape($product_item['name']); ?>"
+                                data-product-category="<?php echo html_escape($product_item['category']); ?>"
+                                data-product-price="<?php echo html_escape($product_item['price']); ?>"
+                                data-product-image="<?php echo html_escape($product_item['image_url']); ?>"
+                                title="Add to wishlist">
+                                <i class="bi bi-suit-heart"></i>
+                            </button>
+                            <a class="btn btn-sm btn-primary" href="<?php echo site_url('frontend/product/' . $product_item['image']); ?>">View</a>
+                        </div>
                     </div>
                 </div>
             </div>
