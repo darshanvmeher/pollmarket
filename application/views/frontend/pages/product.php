@@ -131,3 +131,34 @@
 </section>
 
 <?php $this->load->view('frontend/partials/footer'); ?>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script>
+$(document).on("click", "[data-wishlist-add]", function () {
+
+    let product_id = $(this).data("product-id");
+    let token = localStorage.getItem("token"); // ✅ get token
+
+    $.ajax({
+        url: "<?=base_url('index.php/Api_handler/add_to_wishlist')?>",
+        type: "POST",
+        headers: {
+            "Authorization": "Bearer " + token   // ✅ VERY IMPORTANT
+        },
+        data: {
+            product_id: product_id
+        },
+        dataType: "json",
+        success: function (res) {
+            alert(res.message);
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+
+});
+
+</script>

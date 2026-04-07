@@ -131,11 +131,12 @@ $this->db->select('
     
 */
 
+
     public function get_product_list()
     {
         
         
-                        $this->db->select('
+                $this->db->select('
                 p.id,
                 p.product_name,
                 p.price,

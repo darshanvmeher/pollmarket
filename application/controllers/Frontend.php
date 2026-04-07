@@ -271,13 +271,15 @@ class Frontend extends CI_Controller
 
         $this->load->view('frontend/pages/checkout', $data);
     }
-
     public function wishlist()
     {
+    // Load model first
+        $this->load->model('Products_model');
+
         $data = array(
             'title' => 'Wishlist',
             'nav_items' => $this->nav_items(),
-            'items' => array_slice($this->product_catalog(), 0, 3)
+            'items' => array_slice($this->Products_model->get_product_list(), 0, 3),
         );
 
         $this->load->view('frontend/pages/wishlist', $data);

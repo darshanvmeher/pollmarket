@@ -1973,13 +1973,12 @@ public function add_to_wishlist()
     $decoded = $this->verify_token(); 
     $user_id = $decoded->customer_id;  
 
-    $user_id = $this->input->post('user_id');
     $product_id = $this->input->post('product_id');
 
-    if (empty($user_id) || empty($product_id)) {
+    if (empty($product_id)) {
         echo json_encode([
             "status" => false,
-            "message" => "User ID and Product ID are required"
+            "message" => "Product ID required"
         ]);
         return;
     }
@@ -1989,14 +1988,14 @@ public function add_to_wishlist()
     if ($result == 'added') {
         echo json_encode([
             "status" => true,
-            "message" => "Added to wishlist successfully"
+            "message" => "Added to wishlist"
         ]);
     } elseif ($result == 'updated') {
         echo json_encode([
             "status" => true,
-            "message" => "Added to wishlist again"
+            "message" => "Added again"
         ]);
-    } else {
+    } elseif ($result === false) {
         echo json_encode([
             "status" => false,
             "message" => "Already in wishlist"
@@ -2012,49 +2011,69 @@ public function remove_from_wishlist()
     $decoded = $this->verify_token(); 
     $user_id = $decoded->customer_id;  
 
-    $user_id = $this->input->post('user_id');
+    // $user_id = $this->input->post('user_id');
     $product_id = $this->input->post('product_id');
 
-    if (empty($user_id) || empty($product_id)) {
+   /* if (empty($user_id) || empty($product_id)) {
         echo json_encode([
             "status" => false,
             "message" => "User ID and Product ID are required"
         ]);
         return;
-    }
+    }*/
 
     $delete = $this->Wishlist_model->remove_from_wishlist($user_id, $product_id);
 
     echo json_encode([
-        "status" => $delete ? true : false,
-        "message" => $delete ? "Removed successfully" : "Failed"
-    ]);
+    "status" => $delete > 0,
+    "message" => $delete > 0 ? "Removed successfully" : "Already removed"
+    ]);;
 }
 
 
 
 //wishlist list
-public function wishlist()
+/*public function wishlist()
 {
     $decoded = $this->verify_token(); 
     $user_id = $decoded->customer_id;  
     
-    $user_id = $this->input->post('user_id');
+ //   $user_id = $this->input->post('user_id');
 
-    if (empty($user_id)) {
+/*    if (empty($user_id)) {
         echo json_encode([
             "status" => false,
             "message" => "User ID is required"
         ]);
         return;
-    }
-
+    }*/
+/*
     $wishlist = $this->Wishlist_model->get_wishlist_by_user_id($user_id);
 
     echo json_encode([
         "status" => true,
         "data" => $wishlist
     ]);
-}
+}*/
 
+
+public function wishlist()
+{
+    $decoded = $this->verify_token(); 
+    $user_id = $decoded->customer_id;  
+
+    // ✅ get data from model
+    $wishlist = $this->Wishlist_model->get_wishlist_by_user_id($user_id);
+
+    // ✅ ADD IMAGE FULL URL HERE
+    foreach ($wishlist as &$item) {
+        $item['product_image'] = base_url($item['product_image']);
+    }
+
+    // ✅ response
+    echo json_encode([
+        "status" => true,
+        "data" => $wishlist
+    ]);
+}
 }

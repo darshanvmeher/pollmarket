@@ -16,7 +16,7 @@ class Wishlist_model extends CI_Model {
         $this->db->where('w.status', 1); 
         return $this->db->get()->result_array();
     }*/
-    
+    /*
     public function get_wishlist_by_user_id($user_id) {
     $this->db->select('
         w.*, 
@@ -25,60 +25,92 @@ class Wishlist_model extends CI_Model {
         p.stock, 
         p.description, 
         p.status,
-        pm.media_path as product_image
-    ');
+        pm.media_path as product_image    
+        ');
     
     $this->db->from('wishlist_tbl w');
     $this->db->join('product_tbl p', 'w.product_id = p.id', 'left');
-    $this->db->join('product_media_tbl pm', 'pm.product_id = p.id AND pm.media_type AND pm.delete_status = 0', 'left');
+    $this->db->join('product_media_tbl pm', 'pm.product_id = p.id AND pm.media_type = "image" AND pm.delete_status = 0', 'left');
 
     $this->db->where('w.user_id', $user_id);
     $this->db->where('w.status', 1);
-    $this->db->where('w.delete_status', 0);
-    $this->db->where('p.delete_status', 0);
-    $this->db->where('pm.delete_status', 0);
+    //$this->db->where('w.delete_status', 0);
+   // $this->db->where('p.delete_status', 0);
 
     $this->db->group_by('w.id'); 
 
     return $this->db->get()->result_array();
+}*/
+
+public function get_wishlist_by_user_id($user_id) {
+
+    $this->db->select('
+        w.id,
+        w.product_id,
+        p.product_name,
+        p.price,
+        p.stock,
+        p.description,
+        p.status,
+        MIN(pm.media_path) as product_image
+    ');
+
+    $this->db->from('wishlist_tbl w');
+
+    $this->db->join('product_tbl p', 'w.product_id = p.id', 'left');
+
+    $this->db->join(
+        'product_media_tbl pm',
+        'pm.product_id = p.id AND pm.media_type = "photo" AND pm.delete_status = 0',
+        'left'
+    );
+
+    $this->db->where('w.user_id', $user_id);
+    $this->db->where('w.status', 1);
+
+    $this->db->group_by('w.product_id'); // ✅ important
+
+    return $this->db->get()->result_array();
 }
-    public function add_to_wishlist($user_id, $product_id)
-    {
-        $exists = $this->db->get_where('wishlist_tbl', [
+//insert
+
+public function add_to_wishlist($user_id, $product_id)
+{
+    $exists = $this->db->get_where('wishlist_tbl', [
         'user_id' => $user_id,
         'product_id' => $product_id
-        ])->row();
+    ])->row();
 
     if ($exists) {
 
-        // If already exists but removed earlier → make active again
+        // reactivate
         if ($exists->status == 0) {
             $this->db->where('id', $exists->id);
-            $this->db->update('wishlist_tbl', [
-                'status' => 1
-            ]);
-            return 'updated'; // 🔥 important
+            $this->db->update('wishlist_tbl', ['status' => 1]);
+            return 'updated';
         }
 
-        // Already active
+        // already active
         return false;
     }
 
-    // Insert new
+    // new insert
     $this->db->insert('wishlist_tbl', [
         'user_id' => $user_id,
-        'product_id' => $product_id
-        // status default = 1
+        'product_id' => $product_id,
+        'status' => 1
     ]);
 
     return 'added';
 }
 
+//remove
 public function remove_from_wishlist($user_id, $product_id)
 {
     $this->db->where([
         'user_id' => $user_id,
-        'product_id' => $product_id
+        'product_id' => $product_id,
+        'status' => 1
     ]);
 
     $this->db->update('wishlist_tbl', [
