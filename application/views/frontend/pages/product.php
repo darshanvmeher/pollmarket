@@ -150,6 +150,7 @@ $(document).on("click", "[data-wishlist-add]", function (e) {
     $.ajax({
         url: "<?=base_url('index.php/Api_handler/add_to_wishlist')?>",
         type: "POST",
+         dataType: "json",
         headers: {
             "Authorization": "Bearer " + token
         },

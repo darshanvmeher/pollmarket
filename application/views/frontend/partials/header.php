@@ -72,6 +72,7 @@ window.loadWishlistCount = function () {
     $.ajax({
         url: "<?=base_url('index.php/Api_handler/wishlist_count')?>",
         type: "POST",
+        dataType: "json",
         cache: false,
         headers: {
             "Authorization": "Bearer " + token
