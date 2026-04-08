@@ -49,7 +49,7 @@
 <?php $this->load->view('frontend/partials/footer'); ?>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+<!--
 <script>
 $(document).ready(function () {
 
@@ -116,14 +116,13 @@ $(document).ready(function () {
     // ✅ REMOVE IMMEDIATELY
     cardElement.fadeOut(200, function () {
     $(this).remove();
-    });
+    
     if ($("[data-wishlist-grid] [class*='col-']").length === 0) {
         $("[data-wishlist-empty]").show();
     }
-
+        });
     // API call
     removeWishlist(item.product_id, btn);
-    updateWishlistCount();
     
 });
                     
@@ -186,7 +185,181 @@ function removeWishlist(product_id, btn) {
             "Authorization": "Bearer " + token
         },
         success: function (res) {
-            $("#wishlist-count").text(res.data.length);
+        $("[data-wishlist-badge]").text(res.data.length);
+        $("[data-wishlist-badge]").removeClass("d-none");
+    }
+    });
+}
+</script>-->
+
+<script>
+$(document).ready(function () {
+
+    let token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Please login first");
+        return;
+    }
+
+    const grid = $("[data-wishlist-grid]");
+    const emptyState = $("[data-wishlist-empty]");
+    const template = $("#wishlist-card-template").html();
+
+    emptyState.hide();
+    grid.html("<p>Loading...</p>");
+
+    // ✅ LOAD WISHLIST
+    $.ajax({
+        url: "<?=base_url('index.php/Api_handler/wishlist')?>",
+        type: "POST",
+        cache: false,
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        dataType: "json",
+
+        success: function (response) {
+
+            grid.html("");
+
+            if (response.status && response.data && response.data.length > 0) {
+
+                emptyState.hide();
+
+                // ✅ SET INITIAL COUNT
+                updateBadge(response.data.length);
+
+                $.each(response.data, function (i, item) {
+
+                    let card = $(template);
+
+                    card.find("img").attr("src", item.product_image);
+                    card.find("h3").text(item.product_name);
+                    card.find(".price").text("₹" + item.price);
+                    card.find(".product-pill").text("Saved");
+                    card.find("a").attr("href", "product/" + item.product_id);
+
+                    // ✅ REMOVE BUTTON
+                    card.find("[data-wishlist-remove]").off("click").on("click", function (e) {
+
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+
+                        let btn = $(this);
+
+                        if (btn.data("processing")) return;
+
+                        btn.data("processing", true);
+                        btn.prop("disabled", true);
+                        btn.text("Removing...");
+                        btn.css("opacity", "0.6");
+
+                        let cardElement = btn.closest(".col-md-6, .col-xl-4");
+
+                        // 🔥 1. UPDATE COUNT INSTANTLY
+                        decreaseBadge();
+
+                        // 🔥 2. REMOVE UI
+                        cardElement.fadeOut(200, function () {
+                            $(this).remove();
+
+                            if ($("[data-wishlist-grid] .col-md-6, .col-xl-4").length === 0) {
+                                emptyState.show();
+                            }
+                        });
+
+                        // 🔥 3. API CALL (background)
+                        removeWishlist(item.product_id, btn);
+                    });
+
+                    grid.append(card);
+                });
+
+            } else {
+                emptyState.show();
+                updateBadge(0);
+            }
+        },
+
+        error: function (err) {
+            console.log("List Error:", err);
+        }
+    });
+
+});
+</script>
+
+<script>
+// ✅ REMOVE FROM WISHLIST
+function removeWishlist(product_id, btn) {
+
+    let token = localStorage.getItem("token");
+
+    $.ajax({
+        url: "<?=base_url('index.php/Api_handler/remove_from_wishlist')?>",
+        type: "POST",
+        cache: false,
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        data: { product_id: product_id },
+        dataType: "json",
+
+        success: function (res) {
+            console.log(res.message);
+
+            // OPTIONAL: sync with server
+            updateWishlistCount();
+        },
+
+        error: function () {
+            alert("Failed to remove item");
+            location.reload();
+        }
+    });
+}
+</script>
+
+<script>
+// ✅ UPDATE BADGE (SET VALUE)
+function updateBadge(count) {
+    let badge = $("[data-wishlist-badge]");
+    badge.text(count);
+
+    if (count > 0) {
+        badge.removeClass("d-none");
+    } else {
+        badge.addClass("d-none");
+    }
+}
+
+// ✅ DECREASE BADGE
+function decreaseBadge() {
+    let badge = $("[data-wishlist-badge]");
+    let count = parseInt(badge.text()) || 0;
+
+    if (count > 0) {
+        count--;
+        updateBadge(count);
+    }
+}
+
+// ✅ SYNC WITH API
+function updateWishlistCount() {
+
+    let token = localStorage.getItem("token");
+
+    $.ajax({
+        url: "<?=base_url('index.php/Api_handler/wishlist')?>",
+        type: "POST",
+        cache: false,
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        success: function (res) {
+            let count = res.data ? res.data.length : 0;
+            updateBadge(count);
         }
     });
 }
