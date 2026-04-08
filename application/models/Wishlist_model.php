@@ -73,7 +73,7 @@ public function get_wishlist_by_user_id($user_id) {
     return $this->db->get()->result_array();
 }
 //insert
-
+/*
 public function add_to_wishlist($user_id, $product_id)
 {
     $exists = $this->db->get_where('wishlist_tbl', [
@@ -102,6 +102,43 @@ public function add_to_wishlist($user_id, $product_id)
     ]);
 
     return 'added';
+}*/
+
+
+public function add_to_wishlist($user_id, $product_id)
+{
+    // check active
+    $exists = $this->db->get_where('wishlist_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id,
+        'status' => 1
+    ])->row();
+
+    if ($exists) {
+        return false;
+    }
+
+    // check inactive
+    $inactive = $this->db->get_where('wishlist_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id,
+        'status' => 0
+    ])->row();
+
+    if ($inactive) {
+        $this->db->where('id', $inactive->id);
+        $this->db->update('wishlist_tbl', ['status' => 1]);
+        return 'updated';
+    }
+
+    // insert new
+    $this->db->insert('wishlist_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id,
+        'status' => 1
+    ]);
+
+    return 'added';
 }
 
 //remove
@@ -118,5 +155,17 @@ public function remove_from_wishlist($user_id, $product_id)
     ]);
 
     return true;
+}
+
+//wishlist count
+public function get_wishlist_count($user_id)
+{
+    $this->db->where([
+        'user_id' => $user_id,
+       // 'product_id' => $product_id,
+        'status' => 1
+    ]);
+
+    return $this->db->count_all_results('wishlist_tbl');
 }
 }

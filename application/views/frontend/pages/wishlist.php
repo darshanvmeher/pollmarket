@@ -191,8 +191,7 @@ function removeWishlist(product_id, btn) {
     });
 }
 </script>-->
-
-<script>
+        <script>
 $(document).ready(function () {
 
     let token = localStorage.getItem("token");
@@ -227,8 +226,10 @@ $(document).ready(function () {
 
                 emptyState.hide();
 
-                // ✅ SET INITIAL COUNT
-                updateBadge(response.data.length);
+                // ✅ USE GLOBAL HEADER FUNCTION
+                if (typeof loadWishlistCount === "function") {
+                    loadWishlistCount();
+                }
 
                 $.each(response.data, function (i, item) {
 
@@ -241,10 +242,9 @@ $(document).ready(function () {
                     card.find("a").attr("href", "product/" + item.product_id);
 
                     // ✅ REMOVE BUTTON
-                    card.find("[data-wishlist-remove]").off("click").on("click", function (e) {
+                    card.find("[data-wishlist-remove]").on("click", function (e) {
 
                         e.preventDefault();
-                        e.stopImmediatePropagation();
 
                         let btn = $(this);
 
@@ -253,14 +253,10 @@ $(document).ready(function () {
                         btn.data("processing", true);
                         btn.prop("disabled", true);
                         btn.text("Removing...");
-                        btn.css("opacity", "0.6");
 
                         let cardElement = btn.closest(".col-md-6, .col-xl-4");
 
-                        // 🔥 1. UPDATE COUNT INSTANTLY
-                        decreaseBadge();
-
-                        // 🔥 2. REMOVE UI
+                        // 🔥 REMOVE UI FIRST
                         cardElement.fadeOut(200, function () {
                             $(this).remove();
 
@@ -269,8 +265,32 @@ $(document).ready(function () {
                             }
                         });
 
-                        // 🔥 3. API CALL (background)
-                        removeWishlist(item.product_id, btn);
+                        // 🔥 API CALL
+                        $.ajax({
+                            url: "<?=base_url('index.php/Api_handler/remove_from_wishlist')?>",
+                            type: "POST",
+                            headers: {
+                                "Authorization": "Bearer " + token
+                            },
+                            data: { product_id: item.product_id },
+
+                            success: function () {
+
+                                // ✅ UPDATE GLOBAL BADGE
+                                if (typeof loadWishlistCount === "function") {
+                                    loadWishlistCount();
+                                }
+
+                                // 🔥 SYNC ALL PAGES
+                                localStorage.setItem("wishlist_updated", Date.now());
+                            },
+
+                            error: function () {
+                                alert("Failed to remove item");
+                                location.reload();
+                            }
+                        });
+
                     });
 
                     grid.append(card);
@@ -278,7 +298,11 @@ $(document).ready(function () {
 
             } else {
                 emptyState.show();
-                updateBadge(0);
+
+                // ✅ RESET BADGE
+                if (typeof loadWishlistCount === "function") {
+                    loadWishlistCount();
+                }
             }
         },
 
@@ -289,78 +313,83 @@ $(document).ready(function () {
 
 });
 </script>
+<!--
+        <script>
+        // ✅ REMOVE FROM WISHLIST
+        function removeWishlist(product_id, btn) {
 
-<script>
-// ✅ REMOVE FROM WISHLIST
-function removeWishlist(product_id, btn) {
+            let token = localStorage.getItem("token");
 
-    let token = localStorage.getItem("token");
+            $.ajax({
+                url: "<?=base_url('index.php/Api_handler/remove_from_wishlist')?>",
+                type: "POST",
+                cache: false,
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                data: { product_id: product_id },
+                dataType: "json",
 
-    $.ajax({
-        url: "<?=base_url('index.php/Api_handler/remove_from_wishlist')?>",
-        type: "POST",
-        cache: false,
-        headers: {
-            "Authorization": "Bearer " + token
-        },
-        data: { product_id: product_id },
-        dataType: "json",
+                success: function (res) {
+                    console.log(res.message);
 
-        success: function (res) {
-            console.log(res.message);
+                    // OPTIONAL: sync with server
+                    updateWishlistCount();
+                    
+                    localStorage.setItem("wishlist_updated", Date.now());
 
-            // OPTIONAL: sync with server
-            updateWishlistCount();
-        },
+                },
 
-        error: function () {
-            alert("Failed to remove item");
-            location.reload();
+                error: function () {
+                    alert("Failed to remove item");
+                    location.reload();
+                }
+            });
         }
-    });
-}
-</script>
+        </script>
 
-<script>
-// ✅ UPDATE BADGE (SET VALUE)
-function updateBadge(count) {
-    let badge = $("[data-wishlist-badge]");
-    badge.text(count);
+        <script>
+        // ✅ UPDATE BADGE (SET VALUE)
+        function updateBadge(count) {
+            let badge = $("[data-wishlist-badge]");
 
-    if (count > 0) {
-        badge.removeClass("d-none");
-    } else {
-        badge.addClass("d-none");
-    }
-}
+            if (count > 0) {
+                badge.text(count);
+                badge.removeClass("d-none");
+            } else {
+                badge.text(0); // ✅ VERY IMPORTANT
+                badge.addClass("d-none");
+            }
+        }
+        // ✅ DECREASE BADGE
+       function decreaseBadge() {
+            let badge = $("[data-wishlist-badge]");
+            let count = parseInt(badge.text()) || 0;
 
-// ✅ DECREASE BADGE
-function decreaseBadge() {
-    let badge = $("[data-wishlist-badge]");
-    let count = parseInt(badge.text()) || 0;
+            count = Math.max(0, count - 1); // ✅ prevent negative
 
-    if (count > 0) {
-        count--;
-        updateBadge(count);
-    }
-}
+            updateBadge(count);
+        }
 
-// ✅ SYNC WITH API
-function updateWishlistCount() {
+        // ✅ SYNC WITH API
+        function updateWishlistCount() {
 
     let token = localStorage.getItem("token");
 
     $.ajax({
-        url: "<?=base_url('index.php/Api_handler/wishlist')?>",
+        url: "<?=base_url('index.php/Api_handler/wishlist_count')?>", // ✅ correct API
         type: "POST",
         cache: false,
         headers: {
             "Authorization": "Bearer " + token
         },
         success: function (res) {
-            let count = res.data ? res.data.length : 0;
+
+            let count = res.count ? res.count : 0;
             updateBadge(count);
         }
     });
 }
-</script>
+        </script>
+
+-->

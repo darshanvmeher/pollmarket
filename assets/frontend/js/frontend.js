@@ -1,5 +1,5 @@
 (function () {
-  const WISHLIST_KEY = 'pollmarket_wishlist';
+  //const WISHLIST_KEY = 'pollmarket_wishlist';
   const navToggler = document.querySelector('[data-nav-toggle]');
   const navCollapse = document.getElementById('siteNav');
   const quantityButtons = document.querySelectorAll('[data-qty-action]');
@@ -11,7 +11,7 @@
   const galleryMain = document.querySelector('[data-product-gallery-main]');
   const galleryThumbs = document.querySelectorAll('[data-product-gallery-thumb]');
 
-  const readWishlist = () => {
+  /*const readWishlist = () => {
     try {
       return JSON.parse(localStorage.getItem(WISHLIST_KEY) || '[]');
     } catch (error) {
@@ -99,7 +99,7 @@
     });
 
     wishlistGrid.appendChild(fragment);
-  };
+  };*/
 
   if (navToggler && navCollapse) {
     navToggler.addEventListener('click', () => {
@@ -118,11 +118,11 @@
     });
   });
 
-  document.addEventListener('click', (event) => {
-    const addButton = event.target.closest('[data-wishlist-add]');
-    const removeButton = event.target.closest('[data-wishlist-remove]');
+  //document.addEventListener('click', (event) => {
+    //const addButton = event.target.closest('[data-wishlist-add]');
+    //const removeButton = event.target.closest('[data-wishlist-remove]');
 
-    if (addButton) {
+    /*if (addButton) {
       event.preventDefault();
       upsertWishlistItem(addButton);
     }
@@ -139,7 +139,7 @@
         const wrapper = removeButton.closest('.col-md-6, .col-xl-4');
         if (wrapper) wrapper.remove();
       }
-    }
+    }*/
   });
 
   galleryThumbs.forEach((thumb) => {
@@ -154,6 +154,7 @@
     });
   });
 
-  syncWishlistBadge();
-  renderWishlistGrid();
-})();
+ // syncWishlistBadge();
+  //renderWishlistGrid();
+
+

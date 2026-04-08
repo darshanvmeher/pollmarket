@@ -56,36 +56,55 @@
         <div class="container py-4 py-lg-5">
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
- <script>
-        $(document).ready(function () {
-            loadWishlistCount();
-        });
+ 
 
-        function loadWishlistCount() {
+    <script>
+$(document).ready(function () {
+    loadWishlistCount();
+});
 
-            let token = localStorage.getItem("token");
-            if (!token) return;
+// ✅ GLOBAL FUNCTION
+window.loadWishlistCount = function () {
 
-            $.ajax({
-                url: "<?=base_url('index.php/Api_handler/wishlist')?>",
-                type: "POST",
-                cache: false,
-                headers: {
-                    "Authorization": "Bearer " + token
-                },
-                success: function (res) {
+    let token = localStorage.getItem("token");
+    if (!token) return;
 
-                    let count = res.data ? res.data.length : 0;
-                    let badge = $("[data-wishlist-badge]");
+    $.ajax({
+        url: "<?=base_url('index.php/Api_handler/wishlist_count')?>",
+        type: "POST",
+        cache: false,
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        success: function (res) {
 
-                    badge.text(count);
+            let count = res.count ? res.count : 0;
+            let badge = $("[data-wishlist-badge]");
 
-                    if (count > 0) {
-                        badge.removeClass("d-none");
-                    } else {
-                        badge.addClass("d-none");
-                    }
-                }
-            });
+            // ✅ ALWAYS RESET VALUE
+            badge.text(count);
+
+            if (count > 0) {
+                badge.removeClass("d-none");
+            } else {
+                badge.addClass("d-none");
+            }
+        },
+        error: function () {
+            console.log("Wishlist count error");
         }
+    });
+};
+
+// 🔁 CROSS-TAB SYNC
+window.addEventListener("storage", function () {
+    loadWishlistCount();
+});
+
+// 🔥 SAME TAB NAVIGATION FIX
+document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) {
+        loadWishlistCount();
+    }
+});
 </script>

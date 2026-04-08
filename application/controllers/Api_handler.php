@@ -2004,6 +2004,7 @@ public function add_to_wishlist()
 }
 
 
+
 //remove from wishlist
 
 public function remove_from_wishlist()
@@ -2076,4 +2077,19 @@ public function wishlist()
         "data" => $wishlist
     ]);
 }
+
+public function wishlist_count()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+    
+    // $product_id = $this->input->post('product_id');
+    $count = $this->Wishlist_model->get_wishlist_count($user_id);
+
+    echo json_encode([
+        "status" => true,
+        "count" => $count
+    ]);
+}
+
 }

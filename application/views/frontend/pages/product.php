@@ -119,7 +119,7 @@
                                 data-product-price="<?php echo html_escape($product_item['price']); ?>"
                                 data-product-image="<?= base_url($product_item['media'][0]['media_path'] ?? 'assets/no-image.png') ?>"
                                 title="Add to wishlist">
-                                <i class="bi bi-suit-heart"></i>
+                                <i class="bi bi-heart"></i>
                             </button>
                             <a class="btn btn-sm btn-primary" href="<?php echo site_url('frontend/product/' . $product_item['id']); ?>">View</a>
                         </div>
@@ -134,31 +134,53 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
 <script>
-$(document).on("click", "[data-wishlist-add]", function () {
+$(document).on("click", "[data-wishlist-add]", function (e) {
+    e.preventDefault();
 
-    let product_id = $(this).data("product-id");
-    let token = localStorage.getItem("token"); // ✅ get token
+    let btn = $(this);
+    let product_id = btn.data("product-id");
+    let token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Please login first");
+        return;
+    }
 
     $.ajax({
         url: "<?=base_url('index.php/Api_handler/add_to_wishlist')?>",
         type: "POST",
         headers: {
-            "Authorization": "Bearer " + token   // ✅ VERY IMPORTANT
+            "Authorization": "Bearer " + token
         },
-        data: {
-            product_id: product_id
-        },
-        dataType: "json",
+        data: { product_id: product_id },
+
         success: function (res) {
-            alert(res.message);
+
+            // ✅ UPDATE HEADER BADGE
+            if (typeof loadWishlistCount === "function") {
+                loadWishlistCount();
+            }
+
+            // 🔥 GLOBAL SYNC (VERY IMPORTANT)
+            localStorage.setItem("wishlist_updated", Date.now());
+
+            // 🔥 TOGGLE HEART ICON
+            btn.toggleClass("active");
+
+            if (btn.hasClass("active")) {
+                btn.html('<i class="bi bi-heart-fill text-danger"></i>');
+            } else {
+                btn.html('<i class="bi bi-heart"></i>');
+            }
+
+            // ✅ OPTIONAL MESSAGE
+            alert("Wishlist updated");
         },
-        error: function (err) {
-            console.log(err);
+
+        error: function () {
+            alert("Something went wrong");
         }
     });
-
 });
-
 </script>
