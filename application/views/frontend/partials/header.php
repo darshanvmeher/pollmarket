@@ -44,8 +44,9 @@
                         <i class="bi bi-suit-heart"></i>
                         <span class="icon-badge d-none" data-wishlist-badge>0</span>
                     </a>
-                    <a class="btn btn-outline-dark btn-sm icon-badge-wrap" href="<?php echo site_url('frontend/cart'); ?>">
+                   <a class="btn btn-outline-dark btn-sm icon-badge-wrap" href="<?php echo site_url('frontend/cart'); ?>">
                         <i class="bi bi-bag"></i>
+                        <span class="icon-badge d-none" data-cart-badge>0</span>
                     </a>
                     <a class="btn btn-primary btn-sm" href="<?php echo site_url('frontend/login'); ?>">Sign in</a>
                 </div>
@@ -108,4 +109,39 @@ document.addEventListener("visibilitychange", function () {
         loadWishlistCount();
     }
 });
+</script>
+
+
+<script>
+    $(document).ready(function () {
+    loadCartCount();
+});
+
+function loadCartCount() {
+    let token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://localhost/pollmarket/index.php/Api_handler/cart_count", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        const count = data.count || 0;
+
+        const badge = document.querySelector('[data-cart-badge]');
+        if (!badge) return;
+
+        badge.textContent = count;
+
+        if (count > 0) {
+            badge.classList.remove('d-none');
+        } else {
+            badge.classList.add('d-none');
+        }
+    })
+    .catch(err => console.log(err));
+}
 </script>

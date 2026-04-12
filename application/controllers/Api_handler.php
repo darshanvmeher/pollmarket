@@ -20,6 +20,7 @@ class Api_handler extends CI_Controller {
         $this->load->model('Promotion_model');
         $this->load->model('Address_model');
         $this->load->model('Wishlist_model');
+        $this->load->model('Cart_model');
         $this->load->library('upload');
 
 
@@ -278,6 +279,13 @@ public function customer_login()
                 ];
 
                 $this->db->insert('user_login_logs', $log_data);
+
+
+                // ✅ 🔥 ADD THIS (IMPORTANT)
+                $this->session->set_userdata([
+                'user_id' => $customer['id'],
+                'logged_in' => true
+    ]);
 
     // Generate JWT token
     $key = "this_is_my_super_secret_key_for_jwt_token_12345";
@@ -2092,4 +2100,100 @@ public function wishlist_count()
     ]);
 }
 
+//cart api
+
+//add
+
+public function add_to_cart()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $product_id = $this->input->post('product_id');
+    $quantity = $this->input->post('quantity');
+    $cart_status = $this->input->post('cart_status');
+
+    /*if (empty($product_id) || empty($quantity)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Product ID and quantity are required"
+        ]);
+        return;
+    }*/
+
+    $result = $this->Cart_model->added_to_cart($user_id, $product_id, $quantity);
+
+    if ($result == 'added') {
+        echo json_encode([
+            "status" => true,
+            "message" => "Added to cart"
+        ]);
+    } elseif ($result == 'updated') {
+        echo json_encode([
+            "status" => true,
+            "message" => "Quantity updated"
+        ]);
+    } elseif ($result === false) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Already in cart"
+        ]);
+    }
+}
+
+//remove from cart
+
+public function remove_from_cart()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $product_id = $this->input->post('product_id');
+
+    if (empty($product_id)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Product ID required"
+        ]);
+        return;
+    }
+
+    $delete = $this->Cart_model->remove_from_cart($user_id, $product_id);
+
+    echo json_encode([
+        "status" => $delete > 0,
+        "message" => $delete > 0 ? "Removed successfully" : "Already removed"
+    ]);
+}
+
+//cart list
+
+public function cart()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $cart = $this->Cart_model->get_cart_by_user_id($user_id);
+
+    echo json_encode([
+        "status" => true,
+        "data" => $cart
+    ]);
+}
+
+//cart count
+
+public function cart_count()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $count = $this->Cart_model->get_cart_count($user_id);
+
+    echo json_encode([
+        "status" => true,
+        "count" => $count
+    ]);
+
+}
 }

@@ -57,12 +57,16 @@
                 <span class="soft-badge"><i class="bi bi-shield-check"></i> Quality checked</span>
             </div>
             <div class="input-group mb-3" style="max-width: 220px;">
-                <button class="btn btn-outline-dark" type="button" data-qty-action="decrease" data-qty-target="#qty">-</button>
+                <button class="btn btn-outline-dark" type="button" name="quantity" data-qty-action="decrease" data-qty-target="#qty">-</button>
                 <input id="qty" class="form-control text-center" value="1">
-                <button class="btn btn-outline-dark" type="button" data-qty-action="increase" data-qty-target="#qty">+</button>
+                <button class="btn btn-outline-dark" type="button" name="quantity" data-qty-action="increase" data-qty-target="#qty">+</button>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <button class="btn btn-primary btn-lg">Add to Cart</button>
+                <button 
+                    class="btn btn-primary btn-lg"
+                    data-add-cart="<?= $product['id']; ?>">
+                    Add to Cart
+                </button>
                 <button
                     class="btn btn-outline-dark btn-lg"
                     type="button"
@@ -182,6 +186,75 @@ $(document).on("click", "[data-wishlist-add]", function (e) {
         error: function () {
             alert("Something went wrong");
         }
+    });
+});
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('[data-qty-action]').on('click', function () {
+            const action = $(this).data('qty-action');
+            const targetInput = $($(this).data('qty-target'));
+            let currentValue = parseInt(targetInput.val()) || 1;
+
+            if (action === 'increase') {
+                currentValue++;
+            } else if (action === 'decrease' && currentValue > 1) {
+                currentValue--;
+            }
+
+            targetInput.val(currentValue);
+        });
+    });
+    </script>
+
+
+//add to cart ajax
+
+<script>
+$(document).ready(function () {
+    $('[data-add-cart]').on('click', function () {
+        const productId = $(this).data('add-cart');
+        const qty = parseInt($('#qty').val()) || 1;
+        let token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Please login first");
+            return;
+        }
+
+        $.ajax({
+            url: "<?=base_url('index.php/Api_handler/add_to_cart')?>",
+            type: "POST",
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            data: { product_id: productId, quantity: qty },
+
+            success: function (res) {
+                alert("Product added to cart");
+
+                // 🔥 INSTANT CART COUNT UPDATE
+                let badge = document.querySelector('[data-cart-badge]');
+                if (badge) {
+                    let count = parseInt(badge.textContent) || 0;
+                    badge.textContent = count + qty; // ✔ add qty
+                    badge.classList.remove('d-none');
+                }
+
+                // 🔁 Sync with backend (optional but recommended)
+                setTimeout(function () {
+                    if (typeof loadCartCount === "function") {
+                        loadCartCount();
+                    }
+                }, 500);
+            },
+
+            error: function () {
+                alert("Something went wrong");
+            }
+        });
     });
 });
 </script>

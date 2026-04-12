@@ -247,21 +247,78 @@ class Frontend extends CI_Controller
         $this->load->view('frontend/pages/product', $data);
     }*/
 
-    public function cart()
+   /* public function cart()
     {
-        $catalog = $this->product_catalog();
+      // Load model first
+        $this->load->model('Products_model');
+
         $data = array(
             'title' => 'Cart',
             'nav_items' => $this->nav_items(),
-            'items' => array(
-                array('name' => 'Heavy Duty Garbage Bags', 'category' => 'Plastic Bags', 'qty' => 2, 'price' => '₹349', 'subtotal' => '₹698', 'image_url' => $catalog[0]['image_url']),
-                array('name' => 'RFID Tamper Seal Pack', 'category' => 'RFID Seals', 'qty' => 1, 'price' => '₹1,999', 'subtotal' => '₹1,999', 'image_url' => $catalog[3]['image_url'])
-            )
+            'items' => array_slice($this->Products_model->get_produc(), 0, 10),
         );
 
         $this->load->view('frontend/pages/cart', $data);
-    }
+    }*/
 
+/*
+    public function cart()
+{
+    // echo $this->session->userdata('user_id');
+    //exit;
+    $this->load->model('Cart_model');
+    $this->load->model('Customer_model');
+
+    // ✅ get user id from session
+    $user_id = $this->session->userdata('user_id');
+
+    // ✅ check login
+    //if (!$user_id) {
+      //  redirect('frontend/login');
+    //}
+
+    // ✅ get cart items
+    $items = $this->Cart_model->get_cart_by_user_id($user_id);
+
+    $data = array(
+        'title' => 'Cart',
+        'nav_items' => $this->nav_items(),
+        'items' => $items // ❌ no array_slice needed
+    );
+
+    $this->load->view('frontend/pages/cart', $data);
+}*/
+
+
+public function cart()
+{
+    $this->load->model('Cart_model');
+    $this->load->model('Customer_model');
+
+    // ✅ get user id
+    $user_id = $this->session->userdata('user_id');
+
+    // OPTIONAL: enable later
+    // if (!$user_id) {
+    //     redirect('frontend/login');
+    // }
+
+    // ✅ get cart items
+    $items = $this->Cart_model->get_cart_by_user_id($user_id);
+
+    // ✅ 🔥 GET USER STATE
+    $customer = $this->Customer_model->get_customer_by_id($user_id);
+    $user_state = $customer['state'] ?? 'Other';
+
+    $data = array(
+        'title' => 'Cart',
+        'nav_items' => $this->nav_items(),
+        'items' => $items,
+        'user_state' => $user_state // 🔥 IMPORTANT
+    );
+
+    $this->load->view('frontend/pages/cart', $data);
+}
     public function checkout()
     {
         $data = array(

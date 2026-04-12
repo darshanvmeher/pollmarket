@@ -40,4 +40,15 @@ public function insert_request($data)
     $this->db->insert('req_form_tbl', $data);
     return $this->db->insert_id(); // Return the ID of the inserted request
 }
+
+//list
+
+public function get_customer_by_id($customer_id)
+{
+    $this->db->where('id', $customer_id);
+    $this->db->where('user_type', 'customer');
+    $this->db->where('is_active', 1);
+    return $this->db->get('users_tbl')->row_array();    
+
+}
 }

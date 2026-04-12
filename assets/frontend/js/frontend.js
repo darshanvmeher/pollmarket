@@ -9,7 +9,23 @@
   const wishlistTemplate = document.getElementById('wishlist-card-template');
   const productBase = document.body ? document.body.getAttribute('data-product-base') || '' : '';
   const galleryMain = document.querySelector('[data-product-gallery-main]');
+  //const galleryThumbs = document.querySelectorAll('[data-product-gallery-thumb]');
+
+
   const galleryThumbs = document.querySelectorAll('[data-product-gallery-thumb]');
+
+  if (galleryMain && galleryThumbs && galleryThumbs.length > 0) {
+    galleryThumbs.forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        const src = thumb.getAttribute('data-gallery-src');
+        if (!src) return;
+
+        galleryMain.src = src;
+        galleryThumbs.forEach((item) => item.classList.remove('active'));
+        thumb.classList.add('active');
+      });
+    });
+  }
 
   /*const readWishlist = () => {
     try {
@@ -142,7 +158,7 @@
     }*/
   });
 
-  galleryThumbs.forEach((thumb) => {
+  /*galleryThumbs.forEach((thumb) => {
     thumb.addEventListener('click', () => {
       if (!galleryMain) return;
       const src = thumb.getAttribute('data-gallery-src');
@@ -152,9 +168,10 @@
       galleryThumbs.forEach((item) => item.classList.remove('active'));
       thumb.classList.add('active');
     });
-  });
+  });*/
 
  // syncWishlistBadge();
   //renderWishlistGrid();
+
 
 
