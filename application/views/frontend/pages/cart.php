@@ -244,6 +244,7 @@ $(document).ready(function () {
 <script>
 $(document).ready(function () {
 
+    // 🔥 UPDATE TOTAL + GST
     function updateCartTotal() {
         let subtotal = 0;
 
@@ -260,6 +261,7 @@ $(document).ready(function () {
         let cgst = 0, sgst = 0, igst = 0, gst = 0;
 
         if (state === "Maharashtra") {
+
             cgst = subtotal * 0.025;
             sgst = subtotal * 0.025;
             gst = cgst + sgst;
@@ -271,6 +273,7 @@ $(document).ready(function () {
             $('#sgst-amount').text('₹' + sgst.toLocaleString());
 
         } else {
+
             igst = subtotal * 0.05;
             gst = igst;
 
@@ -287,11 +290,11 @@ $(document).ready(function () {
         $('#cart-total').text('₹' + total.toLocaleString());
     }
 
-    // ✅ CALL ON LOAD
+    // ✅ INITIAL LOAD
     updateCartTotal();
 
 
-    // 🔥 ADD THIS HERE (IMPORTANT)
+    // 🔥 QTY INCREASE / DECREASE
     $(document).on('click', '[data-qty-action]', function () {
 
         const action = $(this).data('qty-action');
@@ -315,6 +318,51 @@ $(document).ready(function () {
 
         // 🔥 UPDATE SUMMARY
         updateCartTotal();
+    });
+
+
+    // 🔥 REMOVE FROM CART
+    $(document).on('click', '.cart-remove-btn', function () {
+
+        let btn = $(this);
+        let productId = btn.data('product-id');
+        let row = btn.closest('.cart-line');
+        let token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Please login");
+            return;
+        }
+
+        $.ajax({
+            url: "<?= base_url('index.php/Api_handler/remove_from_cart') ?>",
+            type: "POST",
+            data: { product_id: productId },
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+
+            success: function () {
+
+                // ✅ REMOVE ITEM FROM UI
+                row.remove();
+
+                // ✅ UPDATE TOTAL
+                updateCartTotal();
+
+                // ✅ UPDATE CART BADGE
+                if (typeof loadCartCount === "function") {
+                    loadCartCount();
+                }
+
+                alert("Item removed");
+            },
+
+            error: function () {
+                alert("Error removing item");
+            }
+        });
+
     });
 
 });
