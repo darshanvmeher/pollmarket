@@ -71,6 +71,21 @@ class Frontend extends CI_Controller
         );
     }
 
+    private function build_dummy_checkout_address($customer)
+    {
+        return array(
+            'id' => 'demo-address-1',
+            'address_type' => 'Head Office',
+            'address' => 'Poll Market Solutions, 3rd Floor, Lotus Trade Centre, Andheri Kurla Road',
+            'city' => 'Mumbai',
+            'state' => 'Maharashtra',
+            'pincode' => '400059',
+            'country' => 'India',
+            'is_dummy' => true,
+            'display_name' => trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastname'] ?? ''))
+        );
+    }
+
    /* private function product_catalog()
     {
         return array(
@@ -369,6 +384,10 @@ public function cart()
         $items = $this->Cart_model->get_cart_by_user_id($user_id);
         $addresses = $this->Address_model->get_addresses($user_id);
 
+        if (empty($addresses)) {
+            $addresses[] = $this->build_dummy_checkout_address($customer ?: array());
+        }
+
         $selected_address = !empty($addresses) ? $addresses[0] : null;
         $selected_state = $selected_address['state'] ?? ($customer['state'] ?? 'Other');
         $summary = $this->calculate_checkout_totals($items, $selected_state);
@@ -448,6 +467,112 @@ public function cart()
                 'status' => true,
                 'message' => 'Address saved successfully.',
                 'address' => $saved_address
+            )));
+    }
+
+    public function update_address()
+    {
+        $user_id = $this->require_customer_login();
+
+        if (strtoupper($this->input->method()) !== 'POST') {
+            show_404();
+        }
+
+        $address_id = (int) $this->input->post('id');
+        $existing_address = $this->Address_model->get_user_address_by_id($address_id, $user_id);
+
+        if (!$existing_address) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array(
+                    'status' => false,
+                    'message' => 'Address not found.'
+                )));
+        }
+
+        $address_type = trim((string) $this->input->post('address_type', true));
+        $address = trim((string) $this->input->post('address', true));
+        $city = trim((string) $this->input->post('city', true));
+        $state = trim((string) $this->input->post('state', true));
+        $pincode = trim((string) $this->input->post('pincode', true));
+        $country = trim((string) $this->input->post('country', true));
+
+        $required = array(
+            'Address type' => $address_type,
+            'Address' => $address,
+            'City' => $city,
+            'State' => $state,
+            'PIN code' => $pincode,
+            'Country' => $country
+        );
+
+        foreach ($required as $label => $value) {
+            if ($value === '') {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode(array(
+                        'status' => false,
+                        'message' => $label . ' is required.'
+                    )));
+            }
+        }
+
+        $updated = $this->Address_model->update_address($address_id, array(
+            'address_type' => $address_type,
+            'address' => $address,
+            'city' => $city,
+            'state' => $state,
+            'pincode' => $pincode,
+            'country' => $country
+        ));
+
+        if (!$updated) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array(
+                    'status' => false,
+                    'message' => 'Unable to update address right now.'
+                )));
+        }
+
+        $saved_address = $this->Address_model->get_user_address_by_id($address_id, $user_id);
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array(
+                'status' => true,
+                'message' => 'Address updated successfully.',
+                'address' => $saved_address
+            )));
+    }
+
+    public function delete_address()
+    {
+        $user_id = $this->require_customer_login();
+
+        if (strtoupper($this->input->method()) !== 'POST') {
+            show_404();
+        }
+
+        $address_id = (int) $this->input->post('id');
+        $existing_address = $this->Address_model->get_user_address_by_id($address_id, $user_id);
+
+        if (!$existing_address) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array(
+                    'status' => false,
+                    'message' => 'Address not found.'
+                )));
+        }
+
+        $deleted = $this->Address_model->soft_delete_address($address_id);
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array(
+                'status' => (bool) $deleted,
+                'message' => $deleted ? 'Address deleted successfully.' : 'Unable to delete address right now.'
             )));
     }
     public function wishlist()

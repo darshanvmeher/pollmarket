@@ -49,11 +49,12 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                 <form class="surface-card p-3 p-lg-4 mb-4 d-none checkout-address-form" id="saveAddressForm" action="<?php echo site_url('frontend/save_address'); ?>" method="post">
                     <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
                         <div>
-                            <h3 class="h5 fw-bold mb-1">Save a new address</h3>
-                            <p class="text-muted mb-0">Use simple labels like Office, Warehouse, Branch, or Home.</p>
+                            <h3 class="h5 fw-bold mb-1" data-address-form-title>Save a new address</h3>
+                            <p class="text-muted mb-0" data-address-form-copy>Use simple labels like Office, Warehouse, Branch, or Home.</p>
                         </div>
                         <button class="btn btn-sm btn-link text-decoration-none" type="button" data-address-cancel>Cancel</button>
                     </div>
+                    <input type="hidden" name="id" value="" data-address-id-input>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Address type</label>
@@ -93,6 +94,7 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                                 <?php
                                 $is_selected = (string) ($address['id'] ?? '') === (string) $selected_address_id;
                                 $address_label = trim(($address['address'] ?? '') . ', ' . ($address['city'] ?? '') . ', ' . ($address['state'] ?? '') . ' - ' . ($address['pincode'] ?? ''));
+                                $is_dummy_address = !empty($address['is_dummy']);
                                 ?>
                                 <div class="col-12">
                                     <label
@@ -120,9 +122,39 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                                                     <div class="text-muted"><?php echo html_escape(($address['city'] ?? '') . ', ' . ($address['state'] ?? '') . ' - ' . ($address['pincode'] ?? '')); ?></div>
                                                     <div class="text-muted"><?php echo html_escape($address['country'] ?? ''); ?></div>
                                                 </div>
-                                                <div class="checkout-address-chip">
-                                                    <i class="bi bi-geo-alt"></i>
-                                                    <span><?php echo html_escape($address['address_type'] ?? 'Address'); ?></span>
+                                                <div class="d-flex flex-column align-items-md-end gap-2">
+                                                    <div class="checkout-address-chip">
+                                                        <i class="bi bi-geo-alt"></i>
+                                                        <span><?php echo html_escape($address['address_type'] ?? 'Address'); ?></span>
+                                                    </div>
+                                                    <?php if (!$is_dummy_address): ?>
+                                                        <div class="d-flex gap-2">
+                                                            <button
+                                                                class="btn btn-sm btn-outline-dark"
+                                                                type="button"
+                                                                data-address-edit
+                                                                data-id="<?php echo html_escape($address['id']); ?>"
+                                                                data-address-type="<?php echo html_escape($address['address_type'] ?? ''); ?>"
+                                                                data-address="<?php echo html_escape($address['address'] ?? ''); ?>"
+                                                                data-city="<?php echo html_escape($address['city'] ?? ''); ?>"
+                                                                data-state="<?php echo html_escape($address['state'] ?? ''); ?>"
+                                                                data-pincode="<?php echo html_escape($address['pincode'] ?? ''); ?>"
+                                                                data-country="<?php echo html_escape($address['country'] ?? ''); ?>"
+                                                            >
+                                                                <i class="bi bi-pencil-square me-1"></i>Edit
+                                                            </button>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-danger"
+                                                                type="button"
+                                                                data-address-delete
+                                                                data-id="<?php echo html_escape($address['id']); ?>"
+                                                            >
+                                                                <i class="bi bi-trash3 me-1"></i>Delete
+                                                            </button>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <div class="small text-muted">Demo preview address</div>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -238,9 +270,16 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
     const feedback = $('[data-address-feedback]');
     const addressForm = $('#saveAddressForm');
     const addressToggle = $('[data-address-toggle]');
+    const addressFormTitle = $('[data-address-form-title]');
+    const addressFormCopy = $('[data-address-form-copy]');
+    const addressIdInput = $('[data-address-id-input]');
     const selectedAddressIdInput = $('#selected_address_id');
     const subtotal = Number(page.data('subtotal') || 0);
     const shipping = Number(page.data('shipping') || 0);
+    const createAddressUrl = <?php echo json_encode(site_url('frontend/save_address')); ?>;
+    const updateAddressUrl = <?php echo json_encode(site_url('frontend/update_address')); ?>;
+    const deleteAddressUrl = <?php echo json_encode(site_url('frontend/delete_address')); ?>;
+    const customerDisplayName = <?php echo json_encode($customer_name !== '' ? $customer_name : ($customer['email'] ?? 'Customer')); ?>;
 
     function formatCurrency(amount) {
         return new Intl.NumberFormat('en-IN', {
@@ -257,6 +296,38 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
 
     function clearFeedback() {
         feedback.addClass('d-none').removeClass('alert-success alert-danger').text('');
+    }
+
+    function resetAddressForm() {
+        addressForm[0].reset();
+        addressIdInput.val('');
+        addressForm.attr('action', createAddressUrl);
+        addressFormTitle.text('Save a new address');
+        addressFormCopy.text('Use simple labels like Office, Warehouse, Branch, or Home.');
+        $('[data-address-submit]').text('Save address');
+    }
+
+    function openAddressForm(mode, addressData) {
+        clearFeedback();
+
+        if (mode === 'edit' && addressData) {
+            addressFormTitle.text('Edit saved address');
+            addressFormCopy.text('Update this address and keep it ready for future checkouts.');
+            addressForm.attr('action', updateAddressUrl);
+            addressIdInput.val(addressData.id || '');
+            addressForm.find('[name="address_type"]').val(addressData.address_type || '');
+            addressForm.find('[name="address"]').val(addressData.address || '');
+            addressForm.find('[name="city"]').val(addressData.city || '');
+            addressForm.find('[name="state"]').val(addressData.state || '');
+            addressForm.find('[name="pincode"]').val(addressData.pincode || '');
+            addressForm.find('[name="country"]').val(addressData.country || '');
+            $('[data-address-submit]').text('Update address');
+        } else {
+            resetAddressForm();
+        }
+
+        addressForm.removeClass('d-none');
+        addressForm.find('[name="address_type"]').trigger('focus');
     }
 
     function renderAddressCard(address, customerName) {
@@ -283,9 +354,35 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                                 <div class="text-muted">${$('<div>').text((address.city || '') + ', ' + (address.state || '') + ' - ' + (address.pincode || '')).html()}</div>
                                 <div class="text-muted">${$('<div>').text(address.country || '').html()}</div>
                             </div>
-                            <div class="checkout-address-chip">
-                                <i class="bi bi-geo-alt"></i>
-                                <span>${$('<div>').text(address.address_type || 'Address').html()}</span>
+                            <div class="d-flex flex-column align-items-md-end gap-2">
+                                <div class="checkout-address-chip">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>${$('<div>').text(address.address_type || 'Address').html()}</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button
+                                        class="btn btn-sm btn-outline-dark"
+                                        type="button"
+                                        data-address-edit
+                                        data-id="${address.id}"
+                                        data-address-type="${$('<div>').text(address.address_type || '').html()}"
+                                        data-address="${$('<div>').text(address.address || '').html()}"
+                                        data-city="${$('<div>').text(address.city || '').html()}"
+                                        data-state="${$('<div>').text(address.state || '').html()}"
+                                        data-pincode="${$('<div>').text(address.pincode || '').html()}"
+                                        data-country="${$('<div>').text(address.country || '').html()}"
+                                    >
+                                        <i class="bi bi-pencil-square me-1"></i>Edit
+                                    </button>
+                                    <button
+                                        class="btn btn-sm btn-outline-danger"
+                                        type="button"
+                                        data-address-delete
+                                        data-id="${address.id}"
+                                    >
+                                        <i class="bi bi-trash3 me-1"></i>Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -342,12 +439,18 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
     }
 
     addressToggle.on('click', function () {
-        clearFeedback();
-        addressForm.toggleClass('d-none');
+        if (addressForm.hasClass('d-none')) {
+            openAddressForm('create');
+        } else {
+            addressForm.addClass('d-none');
+            resetAddressForm();
+            clearFeedback();
+        }
     });
 
     $('[data-address-cancel]').on('click', function () {
-        addressForm.addClass('d-none')[0].reset();
+        addressForm.addClass('d-none');
+        resetAddressForm();
         clearFeedback();
     });
 
@@ -355,12 +458,87 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
         syncSelectedAddress($(this).closest('[data-address-card]'));
     });
 
+    $(document).on('click', '[data-address-edit]', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        openAddressForm('edit', {
+            id: $(this).data('id'),
+            address_type: $(this).data('address-type'),
+            address: $(this).data('address'),
+            city: $(this).data('city'),
+            state: $(this).data('state'),
+            pincode: $(this).data('pincode'),
+            country: $(this).data('country')
+        });
+    });
+
+    $(document).on('click', '[data-address-delete]', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const button = $(this);
+        const addressId = button.data('id');
+
+        if (!window.confirm('Delete this saved address?')) {
+            return;
+        }
+
+        clearFeedback();
+        button.prop('disabled', true);
+
+        $.ajax({
+            url: deleteAddressUrl,
+            type: 'POST',
+            data: { id: addressId },
+            dataType: 'json'
+        }).done(function (response) {
+            if (!response || !response.status) {
+                showFeedback('error', response && response.message ? response.message : 'Unable to delete address.');
+                return;
+            }
+
+            const card = button.closest('.col-12');
+            const wasSelected = String(selectedAddressIdInput.val()) === String(addressId);
+            card.remove();
+
+            if (!addressList.find('[data-address-card]').length) {
+                addressList.html(`
+                    <div class="col-12">
+                        <div class="checkout-empty-state" id="addressEmptyState">
+                            <div class="checkout-empty-state__icon"><i class="bi bi-house-add"></i></div>
+                            <h3 class="h5 fw-bold mb-2">No saved addresses yet</h3>
+                            <p class="text-muted mb-0">Add the first delivery address and it will appear here for future checkouts.</p>
+                        </div>
+                    </div>
+                `);
+                selectedAddressIdInput.val('');
+                $('#selectedAddressType').text('Select an address');
+                $('#selectedAddressSummary').text('Choose a saved address to continue.');
+            } else if (wasSelected) {
+                syncSelectedAddress(addressList.find('[data-address-card]').first());
+            }
+
+            if (String(addressIdInput.val()) === String(addressId)) {
+                addressForm.addClass('d-none');
+                resetAddressForm();
+            }
+
+            showFeedback('success', response.message || 'Address deleted successfully.');
+        }).fail(function () {
+            showFeedback('error', 'Something went wrong while deleting the address.');
+        }).always(function () {
+            button.prop('disabled', false);
+        });
+    });
+
     addressForm.on('submit', function (event) {
         event.preventDefault();
         clearFeedback();
 
         const submitButton = $('[data-address-submit]');
-        submitButton.prop('disabled', true).text('Saving...');
+        const isEditMode = addressIdInput.val() !== '';
+        submitButton.prop('disabled', true).text(isEditMode ? 'Updating...' : 'Saving...');
 
         $.ajax({
             url: addressForm.attr('action'),
@@ -373,22 +551,33 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                 return;
             }
 
-            if (emptyState.length) {
-                emptyState.remove();
+            $('#addressEmptyState').closest('.col-12').remove();
+
+            if (isEditMode) {
+                const existingCard = addressList.find('[data-address-card][data-address-id="' + response.address.id + '"]').closest('.col-12');
+                const isCurrentlySelected = String(selectedAddressIdInput.val()) === String(response.address.id);
+
+                existingCard.replaceWith(renderAddressCard(response.address, customerDisplayName));
+
+                if (isCurrentlySelected) {
+                    syncSelectedAddress(addressList.find('[data-address-card][data-address-id="' + response.address.id + '"]'));
+                }
+            } else {
+                addressList.prepend(renderAddressCard(response.address, customerDisplayName));
+                syncSelectedAddress(addressList.find('[data-address-card]').first());
             }
 
-            addressList.prepend(renderAddressCard(response.address, <?php echo json_encode($customer_name !== '' ? $customer_name : ($customer['email'] ?? 'Customer')); ?>));
-            syncSelectedAddress(addressList.find('[data-address-card]').first());
-            addressForm[0].reset();
             addressForm.addClass('d-none');
+            resetAddressForm();
             showFeedback('success', response.message || 'Address saved successfully.');
         }).fail(function () {
             showFeedback('error', 'Something went wrong while saving the address.');
         }).always(function () {
-            submitButton.prop('disabled', false).text('Save address');
+            submitButton.prop('disabled', false).text(addressIdInput.val() !== '' ? 'Update address' : 'Save address');
         });
     });
 
+    resetAddressForm();
     syncSelectedAddress($('[data-address-card].is-selected').first().length ? $('[data-address-card].is-selected').first() : $('[data-address-card]').first());
 })(jQuery);
 </script>
