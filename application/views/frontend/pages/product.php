@@ -48,8 +48,8 @@
             <h1 class="section-title"><?php echo html_escape($product['product_name']); ?></h1>
             <p class="text-muted"><?php echo html_escape($product['description']); ?></p>
             <div class="d-flex align-items-center gap-3 mb-3">
-                <span class="price"><?php echo html_escape($product['price']); ?></span>
-                <span class="price-old"><?php echo html_escape($product['strike_price']); ?></span>
+                <span class="price">₹<?php echo html_escape($product['price']); ?></span>
+                <span class="price-old">₹<?php echo html_escape($product['strike_price']); ?></span>
                 <span class="rating"><i class="bi bi-star-fill"></i> <?php echo html_escape($product['rating']); ?></span>
             </div>
             <div class="d-flex flex-wrap gap-2 mb-3">
@@ -111,7 +111,7 @@
                         </div>
                     </div>
                     <div class="p-3 d-flex justify-content-between align-items-center gap-2">
-                        <span class="price"><?php echo html_escape($product_item['price']); ?></span>
+                        <span class="price">₹<?php echo html_escape($product_item['price']); ?></span>
                         <div class="d-flex gap-2">
                             <button
                                 class="btn btn-sm btn-outline-dark"

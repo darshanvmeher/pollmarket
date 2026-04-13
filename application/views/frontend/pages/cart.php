@@ -23,7 +23,7 @@
                         <div>
                             <div class="fw-bold"><?php echo html_escape($item['product_name']); ?></div>
                             <div class="text-muted small"><?php echo html_escape($item['category_name']); ?></div>
-                            <div class="text-muted small">Unit price: <?php echo html_escape($item['price']); ?></div>
+                            <div class="text-muted small">Unit price:  ₹<?php echo html_escape($item['price']); ?></div>
                             
                         </div>
                     </div>
