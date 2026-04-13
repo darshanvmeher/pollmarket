@@ -8,6 +8,9 @@ class Frontend extends CI_Controller
         parent::__construct();
         $this->load->helper('url');
         $this->load->model('Products_model');
+        $this->load->model('Customer_model');
+        $this->load->model('Cart_model');
+        $this->load->model('Address_model');
     }
 
     private function nav_items()
@@ -19,6 +22,52 @@ class Frontend extends CI_Controller
             array('label' => 'Offers', 'url' => 'frontend/offers'),
             array('label' => 'About', 'url' => 'frontend/about'),
             array('label' => 'Contact', 'url' => 'frontend/contact')
+        );
+    }
+
+    private function get_logged_in_customer_id()
+    {
+        return (int) $this->session->userdata('user_id');
+    }
+
+    private function require_customer_login()
+    {
+        $user_id = $this->get_logged_in_customer_id();
+
+        if (!$user_id) {
+            redirect('frontend/login');
+            exit;
+        }
+
+        return $user_id;
+    }
+
+    private function calculate_checkout_totals($items, $state)
+    {
+        $subtotal = 0;
+        $item_count = 0;
+
+        foreach ($items as $item) {
+            $price = (float) ($item['price'] ?? 0);
+            $qty = (int) ($item['qty'] ?? 1);
+
+            $subtotal += ($price * $qty);
+            $item_count += $qty;
+        }
+
+        $shipping = $subtotal > 0 ? 99 : 0;
+        $is_intra_state = strtolower(trim((string) $state)) === 'maharashtra';
+        $gst = $subtotal * 0.05;
+
+        return array(
+            'item_count' => $item_count,
+            'subtotal' => $subtotal,
+            'shipping' => $shipping,
+            'gst' => $gst,
+            'cgst' => $is_intra_state ? ($subtotal * 0.025) : 0,
+            'sgst' => $is_intra_state ? ($subtotal * 0.025) : 0,
+            'igst' => $is_intra_state ? 0 : $gst,
+            'total' => $subtotal + $shipping + $gst
         );
     }
 
@@ -292,10 +341,6 @@ class Frontend extends CI_Controller
 
 public function cart()
 {
-    $this->load->model('Cart_model');
-    $this->load->model('Customer_model');
-
-    // ✅ get user id
     $user_id = $this->session->userdata('user_id');
 
     // OPTIONAL: enable later
@@ -303,10 +348,8 @@ public function cart()
     //     redirect('frontend/login');
     // }
 
-    // ✅ get cart items
     $items = $this->Cart_model->get_cart_by_user_id($user_id);
 
-    // ✅ 🔥 GET USER STATE
     $customer = $this->Customer_model->get_customer_by_id($user_id);
     $user_state = $customer['state'] ?? 'Other';
 
@@ -321,12 +364,91 @@ public function cart()
 }
     public function checkout()
     {
+        $user_id = $this->require_customer_login();
+        $customer = $this->Customer_model->get_customer_by_id($user_id);
+        $items = $this->Cart_model->get_cart_by_user_id($user_id);
+        $addresses = $this->Address_model->get_addresses($user_id);
+
+        $selected_address = !empty($addresses) ? $addresses[0] : null;
+        $selected_state = $selected_address['state'] ?? ($customer['state'] ?? 'Other');
+        $summary = $this->calculate_checkout_totals($items, $selected_state);
+
         $data = array(
             'title' => 'Checkout',
-            'nav_items' => $this->nav_items()
+            'nav_items' => $this->nav_items(),
+            'customer' => $customer,
+            'items' => $items,
+            'addresses' => $addresses,
+            'selected_address' => $selected_address,
+            'summary' => $summary
         );
 
         $this->load->view('frontend/pages/checkout', $data);
+    }
+
+    public function save_address()
+    {
+        $user_id = $this->require_customer_login();
+
+        if (strtoupper($this->input->method()) !== 'POST') {
+            show_404();
+        }
+
+        $address_type = trim((string) $this->input->post('address_type', true));
+        $address = trim((string) $this->input->post('address', true));
+        $city = trim((string) $this->input->post('city', true));
+        $state = trim((string) $this->input->post('state', true));
+        $pincode = trim((string) $this->input->post('pincode', true));
+        $country = trim((string) $this->input->post('country', true));
+
+        $required = array(
+            'Address type' => $address_type,
+            'Address' => $address,
+            'City' => $city,
+            'State' => $state,
+            'PIN code' => $pincode,
+            'Country' => $country
+        );
+
+        foreach ($required as $label => $value) {
+            if ($value === '') {
+                return $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode(array(
+                        'status' => false,
+                        'message' => $label . ' is required.'
+                    )));
+            }
+        }
+
+        $address_id = $this->Address_model->insert_address(array(
+            'user_id' => $user_id,
+            'address_type' => $address_type,
+            'address' => $address,
+            'city' => $city,
+            'state' => $state,
+            'pincode' => $pincode,
+            'country' => $country
+        ));
+
+        if (!$address_id) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array(
+                    'status' => false,
+                    'message' => 'Unable to save address right now.'
+                )));
+        }
+
+        $saved_address = $this->Address_model->get_user_address_by_id($address_id, $user_id);
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array(
+                'status' => true,
+                'message' => 'Address saved successfully.',
+                'address' => $saved_address
+            )));
     }
     public function wishlist()
     {

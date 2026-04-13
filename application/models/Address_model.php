@@ -5,8 +5,12 @@ class Address_model extends CI_Model {
 
 public function insert_address($data)
 {
-    return $this->db->insert('address_book_tbl', $data);
-    
+    $inserted = $this->db->insert('address_book_tbl', $data);
+    if (!$inserted) {
+        return false;
+    }
+
+    return $this->db->insert_id();
 }
 public function get_addresses($user_id = null)
 {
@@ -33,6 +37,14 @@ public function soft_delete_address($id)
 public function get_address_by_id($id)
 {
     $this->db->where('id', $id)
+             ->where('delete_status', 0);
+    return $this->db->get('address_book_tbl')->row_array();
+}
+
+public function get_user_address_by_id($id, $user_id)
+{
+    $this->db->where('id', $id)
+             ->where('user_id', $user_id)
              ->where('delete_status', 0);
     return $this->db->get('address_book_tbl')->row_array();
 }
