@@ -581,5 +581,42 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
     syncSelectedAddress($('[data-address-card].is-selected').first().length ? $('[data-address-card].is-selected').first() : $('[data-address-card]').first());
 })(jQuery);
 </script>
+<!--
+<script>
+$('#saveAddressForm').on('submit', function (e) {
+    e.preventDefault();
+
+    let token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Please login");
+        return;
+    }
+
+    $.ajax({
+        url: "<?= base_url('index.php/Api_handler/add_address') ?>",
+        type: "POST",
+        data: $(this).serialize(),
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        dataType: "json",
+
+        success: function (res) {
+            if (res.status) {
+                alert("Address saved successfully");
+                $('#saveAddressForm')[0].reset();
+            } else {
+                alert(res.message || "Failed to save address");
+            }
+        },
+
+        error: function () {
+            alert("Error saving address");
+        }
+    });
+});
+
+</script>-->
 
 <?php $this->load->view('frontend/partials/footer'); ?>

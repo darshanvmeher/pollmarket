@@ -1796,7 +1796,7 @@ public function add_address()
     $decoded = $this->verify_token(); 
     $user_id = $decoded->customer_id;   
 
-    $user_id = $this->input->post('user_id');
+   $user_id = $this->input->post('user_id');
     $address_type = $this->input->post('address_type');
     $address = $this->input->post('address');
     $city = $this->input->post('city');
@@ -1804,7 +1804,7 @@ public function add_address()
     $pincode = $this->input->post('pincode');
     $country = $this->input->post('country');
 
-    if (empty($user_id) || empty($address_type) || empty($address) || empty($city) || empty($state) || empty($pincode) || empty($country)) {
+  if (empty($user_id) || empty($address_type) || empty($address) || empty($city) || empty($state) || empty($pincode) || empty($country)) {
         echo json_encode([
             "status" => false,
             "message" => "All fields are required"
@@ -1813,7 +1813,7 @@ public function add_address()
     }
 
     $data = [
-        "user_id" => $user_id,
+       "user_id" => $user_id,
         "address_type" => $address_type,
         "address" => $address,
         "city" => $city,
@@ -2196,5 +2196,6 @@ public function cart_count()
     ]);
 
 }
+
 
 }
