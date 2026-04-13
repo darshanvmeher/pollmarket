@@ -32,7 +32,6 @@
                             <button class="btn btn-outline-dark btn-sm" data-qty-action="decrease" data-qty-target="#qty-cart-<?php echo html_escape($index); ?>">-</button>
                             <input id="qty-cart-<?php echo html_escape($index); ?>" class="form-control text-center cart-qty-input"  value="<?php echo html_escape($item['qty'] ?? 1); ?>">
                             <button class="btn btn-outline-dark btn-sm" data-qty-action="increase" data-qty-target="#qty-cart-<?php echo html_escape($index); ?>">+</button>
-                            <div class="cart-line border-bottom py-3" data-price="<?= $item['price']; ?>"></div>
                         </div>
                         <button 
                         class="btn btn-link text-danger cart-remove-btn"

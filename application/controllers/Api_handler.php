@@ -2196,4 +2196,5 @@ public function cart_count()
     ]);
 
 }
+
 }
