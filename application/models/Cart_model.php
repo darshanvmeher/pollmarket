@@ -30,7 +30,7 @@ class Cart_model extends CI_Model {
         ]);
         return 'added';
     }*/
-
+/*
 
         public function added_to_cart($user_id, $product_id, $quantity) {
 
@@ -62,7 +62,41 @@ class Cart_model extends CI_Model {
     ]);
 
     return 'added';
+}*/
+
+public function added_to_cart($user_id, $product_id, $quantity)
+{
+    $quantity = (int)$quantity;
+    $quantity = max(1, $quantity);
+
+    $exists = $this->db->get_where('cart_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id,
+        'cart_status' => 1
+    ])->row_array();
+
+    if ($exists) {
+
+        // ✅ FIX: overwrite instead of add
+        $this->db->update(
+            'cart_tbl',
+            ['quantity' => $quantity],
+            ['id' => $exists['id']]
+        );
+
+        return 'updated';
+    }
+
+    $this->db->insert('cart_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id,
+        'quantity' => $quantity,
+        'cart_status' => 1
+    ]);
+
+    return 'added';
 }
+
 
     public function remove_from_cart($user_id, $product_id) {
         $this->db->delete('cart_tbl', [
@@ -152,5 +186,23 @@ public function get_cart_count($user_id) {
     $this->db->where('user_id', $user_id);
     $this->db->where('cart_status', 1);
     return $this->db->count_all_results('cart_tbl');    
+}
+
+//clear cart
+
+/*public function clear_cart($user_id)
+{
+    $this->db->where('user_id', $user_id);
+    return $this->db->update('cart_tbl');
+}*/
+
+public function clear_cart($user_id)
+{
+    $this->db->where('user_id', $user_id);
+    $this->db->where('cart_status', 1); // optional filter
+    return $this->db->update('cart_tbl', [
+        'cart_status' => 0,
+        'delete_status' => 1
+    ]);
 }
 }

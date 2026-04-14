@@ -254,9 +254,12 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                     </div>
                 <?php endif; ?>
 
-                <button class="btn btn-primary w-100 mt-4" type="button" <?php echo empty($items) ? 'disabled' : ''; ?>>
+                <!--<button class="btn btn-primary w-100 mt-4" type="button" <?php echo empty($items) ? 'disabled' : ''; ?>>
                     Place Order
-                </button>
+                </button>-->
+                <button id="placeOrderBtn" class="btn btn-primary w-100 mt-4" type="button">
+                Place Order
+            </button>
             </div>
         </div>
     </div>
@@ -288,11 +291,29 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
         }).format(amount || 0);
     }
 
-    function showFeedback(type, message) {
-        feedback.removeClass('d-none alert-success alert-danger')
-            .addClass(type === 'success' ? 'alert-success' : 'alert-danger')
-            .text(message);
-    }
+    //function showFeedback(type, message) {
+      //  feedback.removeClass('d-none alert-success alert-danger')
+        //    .addClass(type === 'success' ? 'alert-success' : 'alert-danger')
+          //  .text(message);
+    //}
+
+
+  function showFeedback(type, message) {
+    clearTimeout(window.feedbackTimer);
+
+    feedback.stop(true, true)
+        .removeClass('d-none alert-success alert-danger')
+        .addClass(type === 'success' ? 'alert-success' : 'alert-danger')
+        .hide()
+        .text(message)
+        .fadeIn(200);
+
+    window.feedbackTimer = setTimeout(function () {
+        feedback.fadeOut(300, function () {
+            feedback.addClass('d-none').show();
+        });
+    }, 1000); 
+}
 
     function clearFeedback() {
         feedback.addClass('d-none').removeClass('alert-success alert-danger').text('');
@@ -581,42 +602,56 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
     syncSelectedAddress($('[data-address-card].is-selected').first().length ? $('[data-address-card].is-selected').first() : $('[data-address-card]').first());
 })(jQuery);
 </script>
-<!--
+
+
 <script>
-$('#saveAddressForm').on('submit', function (e) {
-    e.preventDefault();
+$('#placeOrderBtn').on('click', function () {
 
     let token = localStorage.getItem("token");
 
     if (!token) {
-        alert("Please login");
+        alert("Please login first");
         return;
     }
 
+    let address_id = $('#selected_address_id').val();
+
+    if (!address_id) {
+        alert("Please select address");
+        return;
+    }
+
+    let btn = $(this);
+    btn.prop('disabled', true).text('Placing Order...');
+
     $.ajax({
-        url: "<?= base_url('index.php/Api_handler/add_address') ?>",
+        url: "<?= site_url('Api_handler/place_order') ?>",
         type: "POST",
-        data: $(this).serialize(),
-        headers: {
+        data: {
+            address_id: address_id
+        },
+        headers: {   // ✅ ADD THIS
             "Authorization": "Bearer " + token
         },
         dataType: "json",
 
         success: function (res) {
             if (res.status) {
-                alert("Address saved successfully");
-                $('#saveAddressForm')[0].reset();
+                alert("Order placed successfully!");
+                window.location.href = "<?= site_url('frontend') ?>";
             } else {
-                alert(res.message || "Failed to save address");
+                alert(res.message || "Order failed");
             }
         },
 
         error: function () {
-            alert("Error saving address");
+            alert("Something went wrong");
+        },
+
+        complete: function () {
+            btn.prop('disabled', false).text('Place Order');
         }
     });
 });
-
-</script>-->
-
+</script>
 <?php $this->load->view('frontend/partials/footer'); ?>

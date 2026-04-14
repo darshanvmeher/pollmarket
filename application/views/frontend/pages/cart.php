@@ -10,7 +10,11 @@
     <div class="col-lg-8">
         <div class="surface-card p-3">
             <?php foreach ($items as $index => $item): ?>
-                <div class="cart-line border-bottom py-3" data-price="<?= $item['price']; ?>">
+                <!--<div class="cart-line border-bottom py-3" data-price="<?= $item['price']; ?>"-->
+                <div class="cart-line border-bottom py-3"
+                        data-price="<?= $item['price']; ?>"
+                        data-product-id="<?= $item['product_id']; ?>">
+
                     <div class="cart-line-info">
                         <div class="cart-thumb">
                            <!-- <img src="<?php echo html_escape($item['image_url']); ?>" alt="<?php echo html_escape($item['product_name']); ?>">
@@ -239,7 +243,7 @@ $(document).ready(function () {
 
 });
 </script>-->
-
+<!--
 <script>
 $(document).ready(function () {
 
@@ -296,30 +300,49 @@ $(document).ready(function () {
     // 🔥 QTY INCREASE / DECREASE
     $(document).on('click', '[data-qty-action]', function () {
 
-        const action = $(this).data('qty-action');
-        const input = $($(this).data('qty-target'));
-        const row = input.closest('.cart-line');
+    const action = $(this).data('qty-action');
+    const input = $($(this).data('qty-target'));
+    const row = input.closest('.cart-line');
 
-        let qty = parseInt(input.val()) || 1;
-        let price = parseFloat(row.data('price')) || 0;
+    let productId = row.find('.cart-remove-btn').data('product-id'); // ✅ get product_id
+    let token = localStorage.getItem("token");
 
-        if (action === 'increase') {
-            qty++;
-        } else if (action === 'decrease' && qty > 1) {
-            qty--;
+    let qty = parseInt(input.val()) || 1;
+    let price = parseFloat(row.data('price')) || 0;
+
+    if (action === 'increase') {
+        qty++;
+    } else if (action === 'decrease' && qty > 1) {
+        qty--;
+    }
+
+    // 🔥 CALL API TO UPDATE DB
+    $.ajax({
+        url: "<?= base_url('index.php/Api_handler/update_cart_quantity') ?>",
+        type: "POST",
+        data: {
+            product_id: productId,
+            quantity: qty
+        },
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        success: function () {
+
+            // ✅ UPDATE UI AFTER SUCCESS
+            input.val(qty);
+
+            let total = price * qty;
+            row.find('.cart-item-total').text('₹' + total.toLocaleString());
+
+            updateCartTotal();
+        },
+        error: function () {
+            alert("Error updating quantity");
         }
-
-        input.val(qty);
-
-        // 🔥 UPDATE ITEM TOTAL
-        let total = price * qty;
-        row.find('.cart-item-total').text('₹' + total.toLocaleString());
-
-        // 🔥 UPDATE SUMMARY
-        updateCartTotal();
     });
 
-
+});
     // 🔥 REMOVE FROM CART
     $(document).on('click', '.cart-remove-btn', function () {
 
@@ -359,6 +382,167 @@ $(document).ready(function () {
 
             error: function () {
                 alert("Error removing item");
+            }
+        });
+
+    });
+
+});
+</script>-->
+
+
+<script>
+$(document).ready(function () {
+
+    // 🔥 UPDATE TOTAL + GST
+    function updateCartTotal() {
+        let subtotal = 0;
+
+        $('.cart-line').each(function () {
+            let price = parseFloat($(this).data('price')) || 0;
+            let qty = parseInt($(this).find('.cart-qty-input').val()) || 1;
+
+            subtotal += price * qty;
+        });
+
+        let shipping = 99;
+        let state = "<?= $user_state ?? 'Other' ?>";
+
+        let cgst = 0, sgst = 0, igst = 0, gst = 0;
+
+        if (state === "Maharashtra") {
+            cgst = subtotal * 0.025;
+            sgst = subtotal * 0.025;
+            gst = cgst + sgst;
+
+            $('#cgst-sgst-row').show();
+            $('#igst-row').hide();
+
+            $('#cgst-amount').text('₹' + cgst.toLocaleString());
+            $('#sgst-amount').text('₹' + sgst.toLocaleString());
+        } else {
+            igst = subtotal * 0.05;
+            gst = igst;
+
+            $('#igst-row').show();
+            $('#cgst-sgst-row').hide();
+
+            $('#igst-amount').text('₹' + igst.toLocaleString());
+        }
+
+        let total = subtotal + gst + shipping;
+
+        $('#cart-subtotal').text('₹' + subtotal.toLocaleString());
+        $('#gst-total').text('₹' + gst.toLocaleString());
+        $('#cart-total').text('₹' + total.toLocaleString());
+    }
+
+    // ✅ INITIAL LOAD
+    updateCartTotal();
+
+
+    // 🔥 QTY INCREASE / DECREASE (FINAL FIXED)
+    $(document).on('click', '[data-qty-action]', function () {
+
+        const btn = $(this);
+        const action = btn.data('qty-action');
+        const input = $(btn.data('qty-target'));
+        const row = input.closest('.cart-line');
+
+        let productId = row.data('product-id'); // ✅ FIXED
+        let token = localStorage.getItem("token");
+
+        if (!productId || !token) {
+            alert("Something went wrong");
+            return;
+        }
+
+        let qty = parseInt(input.val()) || 1;
+        let price = parseFloat(row.data('price')) || 0;
+
+        if (action === 'increase') {
+            qty++;
+        } else if (action === 'decrease' && qty > 1) {
+            qty--;
+        }
+
+        // 🔒 prevent multiple clicks
+        btn.prop('disabled', true);
+
+        $.ajax({
+            url: "<?= base_url('index.php/Api_handler/update_cart_quantity') ?>",
+            type: "POST",
+            data: {
+                product_id: productId,
+                quantity: qty
+            },
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+
+            success: function () {
+                // ✅ UPDATE UI AFTER DB SUCCESS
+                input.val(qty);
+
+                let total = price * qty;
+                row.find('.cart-item-total').text('₹' + total.toLocaleString());
+
+                updateCartTotal();
+            },
+
+            error: function () {
+                alert("Error updating quantity");
+            },
+
+            complete: function () {
+                btn.prop('disabled', false);
+            }
+        });
+
+    });
+
+
+    // 🔥 REMOVE FROM CART
+    $(document).on('click', '.cart-remove-btn', function () {
+
+        let btn = $(this);
+        let row = btn.closest('.cart-line');
+        let productId = row.data('product-id'); // ✅ FIXED
+        let token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Please login");
+            return;
+        }
+
+        btn.prop('disabled', true);
+
+        $.ajax({
+            url: "<?= base_url('index.php/Api_handler/remove_from_cart') ?>",
+            type: "POST",
+            data: { product_id: productId },
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+
+            success: function () {
+
+                row.remove();
+                updateCartTotal();
+
+                if (typeof loadCartCount === "function") {
+                    loadCartCount();
+                }
+
+                alert("Item removed");
+            },
+
+            error: function () {
+                alert("Error removing item");
+            },
+
+            complete: function () {
+                btn.prop('disabled', false);
             }
         });
 

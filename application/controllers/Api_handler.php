@@ -2181,6 +2181,25 @@ public function cart()
     ]);
 }
 
+//update cart qty
+
+public function update_cart_quantity()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $product_id = $this->input->post('product_id');
+    $quantity = $this->input->post('quantity');
+
+    $this->db->where('user_id', $user_id);
+    $this->db->where('product_id', $product_id);
+
+    $this->db->update('cart_tbl', [
+        'quantity' => $quantity
+    ]);
+
+    echo json_encode(["status" => true]);
+}
 //cart count
 
 public function cart_count()
@@ -2196,6 +2215,189 @@ public function cart_count()
     ]);
 
 }
+//order api add with cart items with payment methods
 
+/*
+public function place_order()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
 
+    $payment_method = $this->input->post('payment_method') ?? 'COD';
+    $address_id = $this->input->post('address_id');
+
+    // ✅ Get cart
+    $cart_items = $this->Cart_model->get_cart_by_user_id($user_id);
+
+    if (empty($cart_items)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Cart is empty"
+        ]);
+        return;
+    }
+
+    // ✅ Calculate total (IMPORTANT 🔥)
+    $total_amount = 0;
+    foreach ($cart_items as $item) {
+        $total_amount += $item['price'] * $item['qty'];
+    }
+
+    // ✅ Start transaction
+    $this->db->trans_start();
+
+    // ✅ Create order
+    $order_data = [
+        "user_id" => $user_id,
+        "total_amount" => $total_amount,
+        "order_status" => "pending",
+        "address_id" => $address_id
+    ];
+
+    $order_id = $this->Order_model->insert_order($order_data);
+
+    if (!$order_id) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Failed to create order"
+        ]);
+        return;
+    }
+
+    // ✅ Insert order items
+    foreach ($cart_items as $item) {
+        $order_item_data = [
+            "order_id" => $order_id,
+            "product_id" => $item['product_id'],
+            "quantity" => $item['qty'],
+            "price" => $item['price']
+        ];
+        $this->Order_model->insert_order_items($order_item_data);
+    }
+
+    // ✅ Insert payment
+    $payment_data = [
+        "order_id" => $order_id,
+        "payment_method" => $payment_method,
+        "amount" => $total_amount,
+        "payment_status" => "pending",
+        "transaction_id" => uniqid('txn_'),
+    ];
+    $this->Order_model->insert_payment_details($payment_data);
+
+    // ✅ Clear cart
+    $this->Cart_model->clear_cart($user_id);
+
+    // ✅ Complete transaction
+    $this->db->trans_complete();
+
+    echo json_encode([
+        "status" => true,
+        "message" => "Order placed successfully",
+        "order_id" => $order_id
+    ]);
+}*/
+public function place_order()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $payment_method = $this->input->post('payment_method') ?? 'COD';
+    $address_id = $this->input->post('address_id');
+
+    // ✅ Get cart items
+    $cart_items = $this->Cart_model->get_cart_by_user_id($user_id);
+
+    if (empty($cart_items)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Cart is empty"
+        ]);
+        return;
+    }
+
+    // ✅ Calculate subtotal
+    $subtotal = 0;
+    foreach ($cart_items as $item) {
+        $subtotal += $item['price'] * $item['qty'];
+    }
+
+    // ✅ GST (5%)
+    $gst = $subtotal * 0.05;
+
+    // ✅ Shipping
+    $shipping = 99;
+
+    // ✅ Final total
+    $total_amount = $subtotal + $gst + $shipping;
+
+    // ✅ Start transaction
+    $this->db->trans_start();
+
+    // ✅ Insert order
+    $order_data = [
+        "user_id" => $user_id,
+        "subtotal" => $subtotal,
+        "gst" => $gst,
+        "shipping" => $shipping,
+        "total_amount" => $total_amount,
+        "order_status" => "pending",
+        "address_id" => $address_id
+    ];
+
+    $order_id = $this->Order_model->insert_order($order_data);
+
+    if (!$order_id) {
+        $this->db->trans_rollback();
+        echo json_encode([
+            "status" => false,
+            "message" => "Failed to create order"
+        ]);
+        return;
+    }
+
+    // ✅ Insert order items
+    foreach ($cart_items as $item) {
+       // $order_item_data = [
+         //   "order_id" => $order_id,
+           // "product_id" => $item['product_id'],
+            //"quantity" => $item['qty'],
+            //"price" => $item['price']
+        //];
+
+        $unit_price = $item['price'];
+        $qty = $item['qty'];
+
+    $order_item_data = [
+    "order_id" => $order_id,
+    "product_id" => $item['product_id'],
+    "quantity" => $qty,
+    "price" => $unit_price * $qty // ✅ total price
+];
+        $this->Order_model->insert_order_items($order_item_data);
+    }
+
+    // ✅ Insert payment
+    $payment_data = [
+        "order_id" => $order_id,
+        "payment_method" => $payment_method,
+        "amount" => $total_amount,
+        "payment_status" => "pending",
+        "transaction_id" => uniqid('txn_'),
+    ];
+
+    $this->Order_model->insert_payment_details($payment_data);
+
+    // ✅ Clear cart
+    $this->Cart_model->clear_cart($user_id);
+
+    // ✅ Complete transaction
+    $this->db->trans_complete();
+
+    echo json_encode([
+        "status" => true,
+        "message" => "Order placed successfully",
+        "order_id" => $order_id
+    ]);
+}
 }

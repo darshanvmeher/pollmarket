@@ -71,7 +71,7 @@ class Frontend extends CI_Controller
         );
     }
 
-    private function build_dummy_checkout_address($customer)
+   /* private function build_dummy_checkout_address($customer)
     {
         return array(
             'id' => 'demo-address-1',
@@ -84,7 +84,7 @@ class Frontend extends CI_Controller
             'is_dummy' => true,
             'display_name' => trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastname'] ?? ''))
         );
-    }
+    }*/
 
    /* private function product_catalog()
     {
@@ -385,7 +385,8 @@ public function cart()
         $addresses = $this->Address_model->get_addresses($user_id);
 
         if (empty($addresses)) {
-            $addresses[] = $this->build_dummy_checkout_address($customer ?: array());
+           // $addresses[] = $this->build_dummy_checkout_address($customer ?: array());
+           $addresses=[];
         }
 
         $selected_address = !empty($addresses) ? $addresses[0] : null;
