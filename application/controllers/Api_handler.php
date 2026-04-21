@@ -1681,13 +1681,14 @@ private function upload_file($field, $path, $types)
 
 public function add_promotion()
 {
-    $decoded = $this->verify_token();
-    $admin_id = $decoded->admin_id;   
+   // $decoded = $this->verify_token();
+    //$admin_id = $decoded->admin_id;   
 
     $data = [
         "coupon_code" => $this->input->post('coupon_code'),
         "coupon_type" => $this->input->post('coupon_type'),
-        "discount" => $this->input->post('discount'),
+        "discount_type" => $this->input->post('discount_type'),
+        "discount_value" => $this->input->post('discount_value'),
         "validity" => $this->input->post('validity'),
         "status" => $this->input->post('status'),
         "description" => $this->input->post('description')
@@ -1706,8 +1707,46 @@ public function add_promotion()
         ]);
     }
     
+    
 }
+/*
+public function add_promotion()
+{
+    // ✅ CHECK ADMIN SESSION (instead of token)
+    if (!$this->session->userdata('admin_id')) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Unauthorized access"
+        ]);
+        return;
+    }
 
+    $data = [
+        "coupon_code" => $this->input->post('coupon_code'),
+        "coupon_type" => $this->input->post('coupon_type'),
+        "discount_type" => $this->input->post('discount_type'),
+        "discount_value" => $this->input->post('discount_value'),
+        "validity" => $this->input->post('validity'),
+        "status" => $this->input->post('status'),
+        "description" => $this->input->post('description')
+    ];
+
+    $insert = $this->Promotion_model->insert_promotion($data);
+
+    if ($insert) {
+        echo json_encode([
+            "status" => true,
+            "message" => "Coupon added successfully"
+        ]);
+    } else {
+        echo json_encode([
+            "status" => false,
+            "message" => "Failed to add coupon"
+        ]);
+    }
+
+    exit;
+}*/
 //update promotion
 
 public function update_promotion()
@@ -1730,7 +1769,8 @@ public function update_promotion()
     $data = [
         "coupon_code" => $this->input->post('coupon_code'),
         "coupon_type" => $this->input->post('coupon_type'),
-        "discount" => $this->input->post('discount'),
+        "discount_type" => $this->input->post('discount_type'),
+        "discount_value" => $this->input->post('discount_value'),
         "validity" => $this->input->post('validity'),
         "status" => $this->input->post('status'),
         "description" => $this->input->post('description')
@@ -1742,6 +1782,7 @@ public function update_promotion()
         "status" => $update,
         "message" => $update ? "Coupon updated" : "Update failed"
     ]);
+    exit;
 
 }
 
@@ -1788,6 +1829,10 @@ public function list_promotion()
         "data" => $promotions
     ]);
 }
+
+
+
+
 
 //multiple address api
 
@@ -2305,6 +2350,8 @@ public function place_order()
     $payment_method = $this->input->post('payment_method') ?? 'COD';
     $address_id = $this->input->post('address_id');
 
+    $coupon_id=$this->input->post('coupon_id');
+
     // ✅ Get cart items
     $cart_items = $this->Cart_model->get_cart_by_user_id($user_id);
 
@@ -2342,7 +2389,8 @@ public function place_order()
         "shipping" => $shipping,
         "total_amount" => $total_amount,
         "order_status" => "pending",
-        "address_id" => $address_id
+        "address_id" => $address_id,
+        "coupon_id" =>$coupon_id
     ];
 
     $order_id = $this->Order_model->insert_order($order_data);
@@ -2398,6 +2446,288 @@ public function place_order()
         "status" => true,
         "message" => "Order placed successfully",
         "order_id" => $order_id
+    ]);
+}
+/*
+public function apply_coupon()
+{
+    // ✅ get user from token (dynamic)
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    // ✅ get coupon code
+    $code = $this->input->post('coupon_code');
+
+    if (empty($code)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Coupon code is required"
+        ]);
+        return;
+    }
+
+    // ✅ get coupon from DB
+    $coupon = $this->Promotion_model->get_coupon_by_code($code);
+
+    if (!$coupon) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Invalid coupon"
+        ]);
+        return;
+    }
+
+    // ✅ check status
+    if ($coupon['status'] != 'Active') {
+        echo json_encode([
+            "status" => false,
+            "message" => "Coupon not active"
+        ]);
+        return;
+    }
+
+    // ✅ get cart total
+    $cart_total = $this->Cart_model->get_cart_total($user_id);
+
+    if ($cart_total <= 0) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Cart is empty"
+        ]);
+        return;
+    }
+
+    // ✅ discount calculation
+    if ($coupon['discount_type'] == 'percent') {
+        $discount = ($cart_total * $coupon['discount_value']) / 100;
+    } else {
+        $discount = $coupon['discount_value'];
+    }
+
+    // ✅ prevent negative total
+    if ($discount > $cart_total) {
+        $discount = $cart_total;
+    }
+
+    $final_total = $cart_total - $discount;
+
+    // ✅ response
+    echo json_encode([
+        "status" => true,
+        "message" => "Coupon applied successfully",
+        "coupon_code" => $code,
+        "cart_total" => $cart_total,
+        "discount" => round($discount),
+        "final_total" => round($final_total)
+    ]);
+}*/
+/*
+public function apply_coupon()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $code = $this->input->post('coupon_code');
+
+    $coupon = $this->Promotion_model->get_coupon_by_code($code);
+
+    if (!$coupon) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Invalid coupon"
+        ]);
+        return;
+    }
+
+    if ($coupon['status'] != 'Active') {
+        echo json_encode([
+            "status" => false,
+            "message" => "Coupon not active"
+        ]);
+        return;
+    }
+
+    $cart_total = $this->Cart_model->get_cart_count($user_id);
+
+    if ($cart_total <= 0) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Cart is empty"
+        ]);
+        return;
+    }
+
+    // ✅ dynamic discount logic (your DB format)
+    $raw = $coupon['discount'];
+    $value = (int) filter_var($raw, FILTER_SANITIZE_NUMBER_INT);
+
+    if (strpos($raw, '%') !== false) {
+        $discount = ($cart_total * $value) / 100;
+    } else {
+        $discount = $value;
+    }
+
+    if ($discount > $cart_total) {
+        $discount = $cart_total;
+    }
+
+    $final_total = $cart_total - $discount;
+
+    echo json_encode([
+        "status" => true,
+        "message" => "Coupon applied successfully",
+        "discount" => round($discount),
+        "final_total" => round($final_total)
+    ]);
+}
+*/
+/*
+public function apply_coupon()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $code = $this->input->post('coupon_code');
+
+    $coupon = $this->Promotion_model->get_coupon_by_code($code);
+
+    if (!$coupon) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Invalid coupon"
+        ]);
+        return;
+    }
+
+    if ($coupon['status'] != 'Active') {
+        echo json_encode([
+            "status" => false,
+            "message" => "Coupon not active"
+        ]);
+        return;
+    }
+
+    // ✅ Subtotal
+    $subtotal = $this->Cart_model->get_cart_total($user_id);
+
+    if ($subtotal <= 0) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Cart is empty"
+        ]);
+        return;
+    }
+
+    // ✅ Discount
+    if ($coupon['discount_type'] == 'percent') {
+        $discount = ($subtotal * $coupon['discount_value']) / 100;
+    } else {
+        $discount = $coupon['discount_value'];
+    }
+
+    if ($discount > $subtotal) {
+        $discount = $subtotal;
+    }
+
+    $after_discount = $subtotal - $discount;
+
+    // ✅ GST (example 5%)
+    $gst = ($after_discount * 5) / 100;
+
+    // ✅ Shipping
+    $shipping = 99;
+
+    // ✅ Final Total
+    $final_total = $after_discount + $gst + $shipping;
+
+    echo json_encode([
+        "status" => true,
+        "message" => "Coupon applied successfully",
+        "subtotal" => round($subtotal),
+        "discount" => round($discount),
+        "gst" => round($gst),
+        "shipping" => $shipping,
+        "final_total" => round($final_total)
+    ]);
+}*/
+
+public function apply_coupon()
+{
+    error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $code = $this->input->post('coupon_code');
+    $state = $this->input->post('state');
+
+    $coupon = $this->Promotion_model->get_coupon_by_code($code);
+
+    if (!$coupon) {
+        echo json_encode(["status" => false, "message" => "Invalid coupon"]);
+        return;
+    }
+
+    if ($coupon['status'] != 'Active') {
+        echo json_encode(["status" => false, "message" => "Coupon not active"]);
+        return;
+    }
+
+    $subtotal = $this->Cart_model->get_cart_total($user_id);
+
+    if ($subtotal <= 0) {
+        echo json_encode(["status" => false, "message" => "Cart is empty"]);
+        return;
+    }
+
+    // discount
+    if ($coupon['discount_type'] == 'percent') {
+        $discount = ($subtotal * $coupon['discount_value']) / 100;
+    } else {
+        $discount = $coupon['discount_value'];
+    }
+
+    if ($discount > $subtotal) $discount = $subtotal;
+
+    $after_discount = $subtotal - $discount;
+
+    // GST by state
+    $cgst = $sgst = $igst = 0;
+
+    if ($state == "Maharashtra") {
+        $cgst = ($after_discount * 2.5) / 100;
+        $sgst = ($after_discount * 2.5) / 100;
+        $gst = $cgst + $sgst;
+    } else {
+        $igst = ($after_discount * 5) / 100;
+        $gst = $igst;
+    }
+
+    $shipping = 99;
+
+    $final_total = $after_discount + $gst + $shipping;
+
+    // ✅ STORE IN SESSION
+
+$this->session->set_userdata('coupon_data', [
+    'coupon_id'   => $coupon['id'],
+    'coupon_code' => $coupon['coupon_code'],
+    'discount'    => round($discount),
+    'type'        => $coupon['discount_type'],
+    'value'       => $coupon['discount_value']
+]);
+    echo json_encode([
+        "status" => true,
+        "message" => "Coupon applied successfully",
+        "subtotal" => round($subtotal),
+        "discount" => round($discount),
+        "gst" => round($gst),
+        "cgst" => round($cgst),
+        "sgst" => round($sgst),
+        "igst" => round($igst),
+        "shipping" => $shipping,
+        "final_total" => round($final_total)
     ]);
 }
 }

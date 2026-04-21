@@ -37,5 +37,21 @@ public function get_promotion_by_id($id)
 
 
 }
+/*
+public function get_coupon_by_code($code)
+{
+    $this->db->where('coupon_code', $code);
+    $this->db->where('delete_status', 0);
+    $this->db->where('status','Active');
+    return $this->db->get('promotions_tbl')->row_array();
+}*/
 
+public function get_coupon_by_code($code)
+{
+    return $this->db
+        ->where('coupon_code', $code)
+        ->where('delete_status', 0)
+        ->get('promotions_tbl')
+        ->row_array();
+}
 }

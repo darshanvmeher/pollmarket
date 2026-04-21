@@ -206,10 +206,13 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                     <span>Subtotal</span>
                     <strong id="checkoutSubtotal"><?php echo '&#8377;' . number_format((float) ($summary['subtotal'] ?? 0), 2); ?></strong>
                 </div>
-                <div class="d-flex justify-content-between py-2">
-                    <span>Shipping</span>
-                    <strong id="checkoutShipping"><?php echo '&#8377;' . number_format((float) ($summary['shipping'] ?? 0), 2); ?></strong>
+
+                 <div class="d-flex justify-content-between py-2">
+                    <span>Discount</span>
+                    <strong id="checkoutDiscount">-<?php echo '&#8377;' . number_format((float) ($summary['discount'] ?? 0), 2); ?></strong>
                 </div>
+
+    
                 <div class="d-flex justify-content-between py-2">
                     <span>GST</span>
                     <strong id="checkoutGst"><?php echo '&#8377;' . number_format((float) ($summary['gst'] ?? 0), 2); ?></strong>
@@ -230,6 +233,12 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                         <span id="checkoutIgst"><?php echo '&#8377;' . number_format((float) ($summary['igst'] ?? 0), 2); ?></span>
                     </div>
                 </div>
+
+                 <div class="d-flex justify-content-between py-2">
+                    <span>Shipping</span>
+                    <strong id="checkoutShipping"><?php echo '&#8377;' . number_format((float) ($summary['shipping'] ?? 0), 2); ?></strong>
+                </div>
+                
                 <div class="d-flex justify-content-between py-2 border-top mt-2 pt-3">
                     <span>Total</span>
                     <strong id="checkoutTotal"><?php echo '&#8377;' . number_format((float) ($summary['total'] ?? 0), 2); ?></strong>

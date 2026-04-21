@@ -41,7 +41,7 @@ class Frontend extends CI_Controller
 
         return $user_id;
     }
-
+/*
     private function calculate_checkout_totals($items, $state)
     {
         $subtotal = 0;
@@ -70,7 +70,7 @@ class Frontend extends CI_Controller
             'total' => $subtotal + $shipping + $gst
         );
     }
-
+*/
    /* private function build_dummy_checkout_address($customer)
     {
         return array(
@@ -377,6 +377,7 @@ public function cart()
 
     $this->load->view('frontend/pages/cart', $data);
 }
+/*
     public function checkout()
     {
         $user_id = $this->require_customer_login();
@@ -404,7 +405,103 @@ public function cart()
         );
 
         $this->load->view('frontend/pages/checkout', $data);
+    }*/
+private function calculate_checkout_totals($items, $state = 'Other')
+{
+    $subtotal = 0;
+    $item_count = 0;
+
+    foreach ($items as $item) {
+
+        $price = (float) ($item['price'] ?? 0);
+
+        // ✅ FIX (handles both cases safely)
+        $qty = (int) ($item['quantity'] ?? $item['qty'] ?? 1);
+
+        $subtotal += $price * $qty;
+        $item_count += $qty;
     }
+
+    $discount = 0;
+    $cgst = $sgst = $igst = 0;
+    $gst = 0;
+    $shipping = 99;
+
+    // ✅ COUPON FROM SESSION
+    $coupon = $this->session->userdata('coupon_data');
+
+    if (!empty($coupon)) {
+        $discount = $coupon['discount'] ?? 0;
+
+        if ($discount > $subtotal) {
+            $discount = $subtotal;
+        }
+    }
+
+    $after_discount = $subtotal - $discount;
+
+    // ✅ GST
+    if (strtolower(trim($state)) == 'maharashtra') {
+        $cgst = ($after_discount * 2.5) / 100;
+        $sgst = ($after_discount * 2.5) / 100;
+        $gst = $cgst + $sgst;
+    } else {
+        $igst = ($after_discount * 5) / 100;
+        $gst = $igst;
+    }
+
+    $total = $after_discount + $gst + $shipping;
+
+    return [
+        'item_count' => $item_count,
+        'subtotal' => round($subtotal),
+        'discount' => round($discount),
+        'after_discount' => round($after_discount),
+        'gst' => round($gst),
+        'cgst' => round($cgst),
+        'sgst' => round($sgst),
+        'igst' => round($igst),
+        'shipping' => $shipping,
+        'total' => round($total)
+    ];
+}
+    public function checkout()
+{
+    $user_id = $this->require_customer_login();
+    $customer = $this->Customer_model->get_customer_by_id($user_id);
+    $items = $this->Cart_model->get_cart_by_user_id($user_id);
+   // echo "<pre>";
+    //print_r($items);
+    //exit;
+    $addresses = $this->Address_model->get_addresses($user_id);
+
+    if (empty($addresses)) {
+        $addresses = [];
+    }
+
+    $selected_address = !empty($addresses) ? $addresses[0] : null;
+    $selected_state = $selected_address['state'] ?? ($customer['state'] ?? 'Other');
+
+    // ✅ GET COUPON FROM SESSION
+    $coupon = $this->session->userdata('coupon_data');
+
+    // ✅ PASS COUPON TO CALCULATION
+
+    $summary = $this->calculate_checkout_totals($items, $selected_state);
+
+    $data = array(
+        'title' => 'Checkout',
+        'nav_items' => $this->nav_items(),
+        'customer' => $customer,
+        'items' => $items,
+        'addresses' => $addresses,
+        'selected_address' => $selected_address,
+        'summary' => $summary,
+        'coupon' => $coupon // optional for UI
+    );
+
+    $this->load->view('frontend/pages/checkout', $data);
+}
 
     public function save_address()
     {

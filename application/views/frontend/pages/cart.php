@@ -37,13 +37,21 @@
                             <input id="qty-cart-<?php echo html_escape($index); ?>" class="form-control text-center cart-qty-input"  value="<?php echo html_escape($item['qty'] ?? 1); ?>">
                             <button class="btn btn-outline-dark btn-sm" data-qty-action="increase" data-qty-target="#qty-cart-<?php echo html_escape($index); ?>">+</button>
                         </div>
-                        <button 
+                        <!--<button 
                         class="btn btn-link text-danger cart-remove-btn"
                         data-product-id="<?= $item['product_id']; ?>"
                         type="button">
                         <i class="bi bi-trash3 me-1"></i>Remove
-                    </button>
-                    </div>
+                    </button>-->
+                        <button 
+    class="btn btn-link text-danger cart-remove-btn"
+    data-cart-id="<?= $item['cart_id']; ?>"
+    type="button">
+    <i class="bi bi-trash3 me-1"></i>Remove
+</button>
+
+
+                           </div>
                     <!--<div class="fw-bold"><?php echo html_escape($item['subtotal'] ?? ($item['price'] ?? 0) * ($item['qty'] ?? 1)); ?></div>-->
                     <div class="fw-bold cart-item-total"> ₹<?= ($item['price'] ?? 0) * ($item['qty'] ?? 1); ?>
                     </div>
@@ -55,14 +63,32 @@
         <div class="cart-summary-sticky">
             <div class="surface-card p-4">
                 <h2 class="h5 fw-bold mb-3">Order summary</h2>
-                <div class="coupon-box mb-3">
+               <!-- <div class="coupon-box mb-3">
                     <label class="form-label fw-semibold">Discount coupon</label>
                     <div class="d-flex gap-2">
                         <input class="form-control" placeholder="Enter coupon code">
                         <button class="btn btn-outline-dark">Apply</button>
                     </div>
                     <div class="text-muted small mt-2">Use your promo code before checkout.</div>
-                </div>
+                </div>-->
+                <div class="coupon-box mb-3">
+    <label class="form-label fw-semibold">Discount coupon</label>
+
+    <div class="d-flex gap-2">
+        <input id="coupon_code" class="form-control" placeholder="Enter coupon code">
+        <button id="apply_coupon" class="btn btn-outline-dark">Apply</button>
+    </div>
+
+    <p id="coupon_msg" class="mt-2"></p>
+
+    <div class="text-muted small mt-2">
+        Use your promo code before checkout.
+    </div>
+</div>
+<!--
+<p>Subtotal: ₹<span id="subtotal">0</span></p>
+<p>Discount: ₹<span id="discount">0</span></p>
+<p>Total: ₹<span id="total">0</span></p>-->
                 <!--<div class="d-flex justify-content-between py-2"><span>Subtotal</span><strong>₹2,697</strong></div>
                 <div class="d-flex justify-content-between py-2"><span>Shipping</span><strong>₹99</strong></div>
                 <div class="d-flex justify-content-between py-2"><span>Discount</span><strong class="text-success">-₹0</strong></div>
@@ -86,9 +112,61 @@
                     <span>Total</span>
                     <strong id="cart-total">₹0</strong>
                 </div>-->
-                <div class="d-flex justify-content-between py-2">
+             <!--   <div class="d-flex justify-content-between py-2">
     <span>Subtotal</span>
     <strong id="cart-subtotal">₹0</strong>
+</div>-->
+
+
+<!-- GST TOTAL 
+<div class="d-flex justify-content-between py-2">
+    <span>GST (5%)</span>
+    <strong id="gst-total">₹0</strong>
+</div>-->
+
+<!-- CGST + SGST 
+<div id="cgst-sgst-row" style="display:none;">
+    <div class="d-flex justify-content-between small text-muted">
+        <span>CGST (2.5%)</span>
+        <span id="cgst-amount">₹0</span>
+    </div>
+    <div class="d-flex justify-content-between small text-muted">
+        <span>SGST (2.5%)</span>
+        <span id="sgst-amount">₹0</span>
+    </div>
+</div>
+            -->
+
+<!-- IGST 
+<div id="igst-row" style="display:none;">
+    <div class="d-flex justify-content-between small text-muted">
+        <span>IGST (5%)</span>
+        <span id="igst-amount">₹0</span>
+    </div>
+</div>-->
+
+<!-- SHIPPING 
+<div class="d-flex justify-content-between py-2">
+    <span>Shipping</span>
+    <strong>₹99</strong>
+</div>
+
+<hr>
+
+<div class="d-flex justify-content-between py-2">
+    <span>Total</span>
+    <strong id="cart-total">₹0</strong>
+</div>-->
+
+<div class="d-flex justify-content-between py-2">
+    <span>Subtotal</span>
+    <strong id="cart-subtotal">₹0</strong>
+</div>
+
+<!-- DISCOUNT -->
+<div class="d-flex justify-content-between py-2">
+    <span>Discount</span>
+    <strong class="text-success">-₹<span id="discount">0</span></strong>
 </div>
 
 <!-- GST TOTAL -->
@@ -390,9 +468,12 @@ $(document).ready(function () {
 });
 </script>-->
 
-
+<!--
 <script>
 $(document).ready(function () {
+    let appliedDiscount = 0;
+
+    
 
     // 🔥 UPDATE TOTAL + GST
     function updateCartTotal() {
@@ -546,6 +627,543 @@ $(document).ready(function () {
             }
         });
 
+    });
+
+});
+</script>-->
+
+<!--
+<script>
+let appliedDiscount = 0;
+
+$(document).ready(function () {
+
+    // ✅ APPLY COUPON
+    $('#apply_coupon').click(function () {
+
+        let code = $('#coupon_code').val().trim();
+        let token = localStorage.getItem("token");
+
+        if (code === "") {
+            $('#coupon_msg').html("❌ Enter coupon code");
+            return;
+        }
+
+        $.ajax({
+            url: "<?= base_url('index.php/Api_handler/apply_coupon') ?>",
+            type: "POST",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            data: { coupon_code: code },
+
+            success: function (res) {
+
+                let data = JSON.parse(res);
+
+                if (data.status) {
+
+                    $('#coupon_msg').html("✅ " + data.message);
+
+                    // ✅ store discount globally
+                    appliedDiscount = parseFloat(data.discount) || 0;
+
+                    $('#discount').text(appliedDiscount);
+
+                    updateFinalTotal(); // 🔥 update total
+
+                } else {
+                    $('#coupon_msg').html("❌ " + data.message);
+                }
+            },
+
+            error: function () {
+                $('#coupon_msg').html("❌ Server error");
+            }
+        });
+
+    });
+
+});
+
+
+/* ✅ FUNCTION: UPDATE FINAL TOTAL */
+function updateFinalTotal() {
+
+    let subtotal = parseFloat($('#subtotal').text()) || 0;
+
+    let final_total = subtotal - appliedDiscount;
+
+    if (final_total < 0) final_total = 0;
+
+    $('#total').text(final_total);
+}
+
+
+/* ✅ EXAMPLE: WHEN YOU UPDATE SUBTOTAL */
+function updateCartSubtotal() {
+
+    let subtotal = 0;
+
+    $('.cart-line').each(function () {
+
+        let price = parseFloat($(this).find('.price').text()) || 0;
+        let qty = parseInt($(this).find('.qty').val()) || 0;
+
+        subtotal += price * qty;
+    });
+
+    $('#summary_subtotal').text(subtotal);
+    updateFinalTotal(); // 🔥 VERY IMPORTANT
+}
+</script>-->
+<!--
+<script>
+$(document).ready(function () {
+
+    // =========================
+    // APPLY COUPON
+    // =========================
+    $('#apply_coupon').click(function () {
+
+        let code = $('#coupon_code').val().trim();
+        let token = localStorage.getItem("token");
+
+        if (code === "") {
+            $('#coupon_msg').html("❌ Enter coupon code");
+            return;
+        }
+
+        $.ajax({
+            url: "<?= base_url('index.php/api_handler/apply_coupon') ?>",
+            type: "POST",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            data: { coupon_code: code },
+
+            success: function (res) {
+
+                let data = JSON.parse(res);
+
+                if (data.status) {
+
+                    $('#coupon_msg').html("✅ " + data.message);
+
+                    // ✅ SET DISCOUNT
+                    $('#discount').text(data.discount);
+
+                    // ✅ UPDATE TOTAL
+                    updateFinalTotal();
+
+                } else {
+                    $('#coupon_msg').html("❌ " + data.message);
+                }
+            },
+
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                $('#coupon_msg').html("❌ Server error");
+            }
+        });
+
+    });
+
+    // =========================
+    // INITIAL LOAD
+    // =========================
+    updateCartSubtotal();
+
+});
+
+
+// =========================
+// CALCULATE SUBTOTAL
+// =========================
+function updateCartSubtotal() {
+
+    let subtotal = 0;
+
+    $('.cart-line').each(function () {
+
+        let price = parseFloat($(this).find('.price').text().replace(/[^0-9]/g, '')) || 0;
+        let qty = parseInt($(this).find('.qty').val()) || 0;
+
+        subtotal += price * qty;
+    });
+
+    $('#subtotal').text(subtotal);
+
+    updateFinalTotal();
+}
+
+
+// =========================
+// FINAL TOTAL = SUBTOTAL - DISCOUNT
+// =========================
+function updateFinalTotal() {
+
+    let subtotal = parseFloat($('#subtotal').text()) || 0;
+    let discount = parseFloat($('#discount').text()) || 0;
+
+    let total = subtotal - discount;
+
+    if (total < 0) total = 0;
+
+    $('#total').text(total);
+}
+</script>
+
+<script>
+$(document).ready(function () {
+
+    // APPLY COUPON
+    $('#apply_coupon').click(function () {
+
+        let code = $('#coupon_code').val().trim();
+        let token = localStorage.getItem("token");
+
+        if (code === "") {
+            $('#coupon_msg').html("❌ Enter coupon code");
+            return;
+        }
+
+        $.ajax({
+            url: "<?= base_url('index.php/api_handler/apply_coupon') ?>",
+            type: "POST",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            data: { coupon_code: code },
+
+            success: function (res) {
+
+                let data = JSON.parse(res);
+
+                if (data.status) {
+
+                    $('#coupon_msg').html("✅ " + data.message);
+
+                    // store discount directly in UI
+                    $('#discount').text(data.discount);
+
+                    updateFinalTotal();
+
+                } else {
+                    $('#coupon_msg').html("❌ " + data.message);
+                }
+            }
+        });
+
+    });
+
+});
+
+
+// FINAL TOTAL = subtotal - discount
+function updateFinalTotal() {
+
+    let subtotal = parseFloat($('#subtotal').text()) || 0;
+    let discount = parseFloat($('#discount').text()) || 0;
+
+    let final_total = subtotal - discount;
+
+    if (final_total < 0) final_total = 0;
+
+    $('#total').text(final_total);
+}
+</script>
+
+<script>
+    function updateFinalTotal() {
+
+    let subtotal = parseFloat($('#subtotal').text()) || 0;
+    let discount = parseFloat($('#discount').text()) || 0;
+
+    let final_total = subtotal - discount;
+
+    if (final_total < 0) final_total = 0;
+
+    $('#total').text(final_total);
+}
+</script>
+
+<script>
+
+$('#apply_coupon').on('click', function () {
+
+    let coupon = $('#coupon_code').val();
+
+    if (!coupon) {
+        $('#coupon_msg').text('Enter coupon code').css('color', 'red');
+        return;
+    }
+
+    $.ajax({
+        url: "<?= base_url('index.php/api_handler/apply_coupon'); ?>",
+        type: "POST",
+        data: { coupon_code: coupon },
+
+        success: function (res) {
+
+            let data = (typeof res === "string") ? JSON.parse(res) : res;
+
+            if (data.status) {
+
+                $('#coupon_msg').text(data.message).css('color', 'green');
+
+                // ✅ Update discount
+                $('#discount').text(data.discount);
+
+                // ✅ Update final total
+                $('#total').text(data.final_total);
+
+            } else {
+                $('#coupon_msg').text(data.message).css('color', 'red');
+            }
+        },
+
+        error: function () {
+            $('#coupon_msg').text('Server error').css('color', 'red');
+        }
+    });
+});
+
+</script>-->
+
+<!--
+<script>
+
+$(document).ready(function () {
+
+    $('#apply_coupon').click(function () {
+
+        let code = $('#coupon_code').val().trim();
+        let token = localStorage.getItem("token");
+
+        if (code === "") {
+            $('#coupon_msg').html("❌ Enter coupon code");
+            return;
+        }
+
+        $.ajax({
+            url: "<?= base_url('index.php/api_handler/apply_coupon') ?>",
+            type: "POST",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            data: { coupon_code: code },
+
+            success: function (res) {
+
+                let data = (typeof res === "string") ? JSON.parse(res) : res;
+
+                if (data.status) {
+
+                    $('#coupon_msg').html("✅ " + data.message);
+
+                    // ✅ ONLY UPDATE UI FROM API
+                    $('#discount').text(data.discount);
+                    $('#cart-total').text('₹' + data.final_total);
+
+                } else {
+                    $('#coupon_msg').html("❌ " + data.message);
+                }
+            },
+
+            error: function () {
+                $('#coupon_msg').html("❌ Server error");
+            }
+        });
+
+    });
+
+});
+</script>-->
+
+<!--
+<script>
+
+$('#apply_coupon').click(function () {
+
+    let code = $('#coupon_code').val().trim();
+    let token = localStorage.getItem("token");
+
+    if (code === "") {
+        $('#coupon_msg').html("❌ Enter coupon code");
+        return;
+    }
+
+    $.ajax({
+        url: "<?= base_url('index.php/api_handler/apply_coupon') ?>",
+        type: "POST",
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        data: { coupon_code: code },
+
+        success: function (res) {
+
+            let data = (typeof res === "string") ? JSON.parse(res) : res;
+
+            if (data.status) {
+
+                $('#coupon_msg').html("✅ " + data.message);
+
+                // ✅ UPDATE UI FROM API
+                $('#cart-subtotal').text('₹' + data.subtotal);
+                $('#discount').text('₹' + data.discount);
+                $('#gst-total').text('₹' + data.gst);
+                $('#cart-total').text('₹' + data.final_total);
+
+            } else {
+                $('#coupon_msg').html("❌ " + data.message);
+            }
+        }
+    });
+
+});
+
+</script>-->
+
+<script>
+
+$(document).ready(function () {
+
+    function updateCartTotal() {
+        let subtotal = 0;
+
+        $('.cart-line').each(function () {
+            let price = parseFloat($(this).data('price')) || 0;
+            let qty = parseInt($(this).find('.cart-qty-input').val()) || 1;
+
+            subtotal += price * qty;
+        });
+
+        $('#cart-subtotal').text('₹' + subtotal.toLocaleString());
+    }
+
+    // initial load
+    updateCartTotal();
+
+    // qty change
+    $(document).on('click', '[data-qty-action]', function () {
+
+        const btn = $(this);
+        const input = $(btn.data('qty-target'));
+        const row = input.closest('.cart-line');
+
+        let qty = parseInt(input.val()) || 1;
+        let price = parseFloat(row.data('price')) || 0;
+
+        if (btn.data('qty-action') === 'increase') qty++;
+        else if (qty > 1) qty--;
+
+        input.val(qty);
+
+        row.find('.cart-item-total')
+            .text('₹' + (price * qty).toLocaleString());
+
+        updateCartTotal();
+    });
+
+});
+</script>
+
+
+<script>
+
+$('#apply_coupon').click(function () {
+
+    let code = $('#coupon_code').val().trim();
+    let token = localStorage.getItem("token");
+    let state = "<?= $user_state ?? 'Other' ?>";
+
+    if (!code) {
+        $('#coupon_msg').html("❌ Enter coupon code");
+        return;
+    }
+
+    $.ajax({
+        url: "<?= base_url('index.php/api_handler/apply_coupon') ?>",
+        type: "POST",
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        data: {
+            coupon_code: code,
+            state: state
+        },
+
+        success: function (res) {
+
+            let data = (typeof res === "string") ? JSON.parse(res) : res;
+
+            if (data.status) {
+
+                $('#coupon_msg').html("✅ " + data.message);
+
+                // ✅ update all from API
+                $('#cart-subtotal').text('₹' + data.subtotal);
+                $('#discount').text(data.discount);
+                $('#gst-total').text('₹' + data.gst);
+                $('#cart-total').text('₹' + data.final_total);
+
+                // GST display
+                if (state === "Maharashtra") {
+                    $('#cgst-sgst-row').show();
+                    $('#igst-row').hide();
+
+                    $('#cgst-amount').text('₹' + data.cgst);
+                    $('#sgst-amount').text('₹' + data.sgst);
+
+                } else {
+                    $('#igst-row').show();
+                    $('#cgst-sgst-row').hide();
+
+                    $('#igst-amount').text('₹' + data.igst);
+                }
+
+            } else {
+                $('#coupon_msg').html("❌ " + data.message);
+            }
+        }
+    });
+
+});
+</script>    
+
+<script>
+$(document).on('click', '.cart-remove-btn', function () {
+
+    let cart_id = $(this).data('cart-id');
+
+    if (!cart_id) {
+        console.log("Cart ID missing");
+        return;
+    }
+
+    if (!confirm("Remove this item?")) return;
+
+    $.ajax({
+        url: base_url + "api_handler/remove_cart",
+        type: "POST",
+        data: { cart_id: cart_id },
+
+        success: function (res) {
+            let response = JSON.parse(res);
+
+            if (response.status) {
+                location.reload(); // refresh cart
+            } else {
+                alert(response.message);
+            }
+        },
+
+        error: function (xhr) {
+            console.log(xhr.responseText);
+            alert("Server error");
+        }
     });
 
 });
