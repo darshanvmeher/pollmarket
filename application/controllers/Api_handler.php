@@ -10,6 +10,8 @@ class Api_handler extends CI_Controller {
     public function __construct() {
         parent::__construct();
 
+
+        $this->load->library('session'); 
         $this->load->model('Admin_model');
         $this->load->model('Customer_model');
         $this->load->model('Category_model');
@@ -1751,8 +1753,8 @@ public function add_promotion()
 
 public function update_promotion()
 {
-    $decoded = $this->verify_token();
-    $admin_id = $decoded->admin_id;   
+   // $decoded = $this->verify_token();
+    //$admin_id = $decoded->admin_id;   
 
     $id = $this->input->post('id');
 
@@ -2130,7 +2132,7 @@ public function wishlist()
         "data" => $wishlist
     ]);
 }
-
+/*
 public function wishlist_count()
 {
     $decoded = $this->verify_token();
@@ -2143,12 +2145,35 @@ public function wishlist_count()
         "status" => true,
         "count" => $count
     ]);
+}*/
+
+public function wishlist_count()
+{
+    $decoded = $this->verify_token();
+
+    // ✅ FIX: check token first
+    if (!$decoded || !isset($decoded->customer_id)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Invalid token"
+        ]);
+        return;
+    }
+
+    $user_id = $decoded->customer_id;
+
+    $count = $this->Wishlist_model->get_wishlist_count($user_id);
+
+    echo json_encode([
+        "status" => true,
+        "count" => $count
+    ]);
 }
 
 //cart api
 
 //add
-
+/*
 public function add_to_cart()
 {
     $decoded = $this->verify_token();
@@ -2159,6 +2184,45 @@ public function add_to_cart()
     $cart_status = $this->input->post('cart_status');
 
     /*if (empty($product_id) || empty($quantity)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Product ID and quantity are required"
+        ]);
+        return;
+    }*
+
+    $result = $this->Cart_model->added_to_cart($user_id, $product_id, $quantity);
+
+    if ($result == 'added') {
+        echo json_encode([
+            "status" => true,
+            "message" => "Added to cart"
+        ]);
+    } elseif ($result == 'updated') {
+        echo json_encode([
+            "status" => true,
+            "message" => "Quantity updated"
+        ]);
+    } elseif ($result === false) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Already in cart"
+        ]);
+    }
+}
+*/
+
+
+public function add_to_cart()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    
+    $product_id = $this->input->post('product_id');
+    $quantity = $this->input->post('quantity');
+
+   /* if (empty($product_id) || empty($quantity)) {
         echo json_encode([
             "status" => false,
             "message" => "Product ID and quantity are required"
@@ -2178,10 +2242,10 @@ public function add_to_cart()
             "status" => true,
             "message" => "Quantity updated"
         ]);
-    } elseif ($result === false) {
+    } else {
         echo json_encode([
             "status" => false,
-            "message" => "Already in cart"
+            "message" => "Something went wrong"
         ]);
     }
 }
@@ -2203,6 +2267,7 @@ public function remove_from_cart()
         return;
     }
 
+    // ✅ call MODEL
     $delete = $this->Cart_model->remove_from_cart($user_id, $product_id);
 
     echo json_encode([
@@ -2210,6 +2275,30 @@ public function remove_from_cart()
         "message" => $delete > 0 ? "Removed successfully" : "Already removed"
     ]);
 }
+
+/*
+public function remove_from_cart()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $product_id = $this->input->post('product_id');
+
+    if (empty($product_id)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Product ID required"
+        ]);
+        return;
+    }
+
+    $delete = $this->Cart_model->remove_from_cart($user_id, $product_id);
+
+    echo json_encode([
+        "status" => $delete > 0,
+        "message" => $delete > 0 ? "Removed successfully" : "Already removed"
+    ]);
+}*/
 
 //cart list
 
@@ -2342,6 +2431,8 @@ public function place_order()
         "order_id" => $order_id
     ]);
 }*/
+
+/*
 public function place_order()
 {
     $decoded = $this->verify_token();
@@ -2440,6 +2531,152 @@ public function place_order()
     $this->Cart_model->clear_cart($user_id);
 
     // ✅ Complete transaction
+    $this->db->trans_complete();
+
+    echo json_encode([
+        "status" => true,
+        "message" => "Order placed successfully",
+        "order_id" => $order_id
+    ]);
+}*/
+
+public function place_order()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $payment_method = $this->input->post('payment_method') ?? 'COD';
+    $address_id     = $this->input->post('address_id');
+  //  $coupons_id      = $this->input->post('coupon_id');
+   // $discounted_value = $this->input->post('discount_value');
+
+    // ✅ GET ADDRESS (FOR GST LOGIC)
+    $address = $this->Address_model->get_address_by_id($address_id);
+    $state   = strtolower(trim($address['state'] ?? ''));
+
+    // ✅ GET CART ITEMS
+    $cart_items = $this->Cart_model->get_cart_by_user_id($user_id);
+
+    if (empty($cart_items)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Cart is empty"
+        ]);
+        return;
+    }
+
+    // ✅ CALCULATE SUBTOTAL
+    $subtotal = 0;
+
+    foreach ($cart_items as $item) {
+        $price = (float) $item['price'];
+        $qty   = (int) $item['quantity']; // ✅ FIXED
+
+        $subtotal += $price * $qty;
+    }
+
+    // ✅ GET COUPON FROM SESSION
+    $coupon = $this->session->userdata('coupon_data');
+
+    $discount = 0;
+    $coupon_id = null;
+
+    if (!empty($coupon)) {
+        $coupon_id = $coupon['coupon_id'];
+
+        if ($coupon['discount_type'] == 'percent') {
+            $discount = ($subtotal * $coupon['discount_value']) / 100;
+        } else {
+            $discount = $coupon['discount_value'];
+        }
+
+        if ($discount > $subtotal) {
+            $discount = $subtotal;
+        }
+    }
+
+    // ✅ AFTER DISCOUNT
+    $after_discount = $subtotal - $discount;
+
+    // ✅ GST CALCULATION
+    $cgst = $sgst = $igst = $gst = 0;
+
+    if ($state == "maharashtra") {
+        $cgst = ($after_discount * 2.5) / 100;
+        $sgst = ($after_discount * 2.5) / 100;
+        $gst  = $cgst + $sgst;
+    } else {
+        $igst = ($after_discount * 5) / 100;
+        $gst  = $igst;
+    }
+
+    // ✅ SHIPPING
+    $shipping = 99;
+
+    // ✅ FINAL TOTAL
+    $total_amount = $after_discount + $gst + $shipping;
+
+    // ✅ START TRANSACTION
+    $this->db->trans_start();
+
+    // ✅ INSERT ORDER
+    $order_data = [
+        "user_id"      => $user_id,
+        "subtotal"     => round($subtotal),
+        "discount_value" => round($discount),
+        "gst"          => round($gst),
+        "cgst"         => round($cgst),
+        "sgst"         => round($sgst),
+        "igst"         => round($igst),
+        "shipping"     => $shipping,
+        "total_amount" => round($total_amount),
+        "order_status" => "pending",
+        "address_id"   => $address_id,
+        "coupon_id"    => $coupon_id
+    ];
+
+    $order_id = $this->Order_model->insert_order($order_data);
+
+    if (!$order_id) {
+        $this->db->trans_rollback();
+        echo json_encode([
+            "status" => false,
+            "message" => "Order creation failed"
+        ]);
+        return;
+    }
+
+    // ✅ INSERT ORDER ITEMS
+    foreach ($cart_items as $item) {
+
+        $price = (float) $item['price'];
+        $qty   = (int) $item['quantity'];
+
+        $this->Order_model->insert_order_items([
+            "order_id"   => $order_id,
+            "product_id" => $item['product_id'],
+            "quantity"   => $qty,
+            "price"      => $price * $qty // total price
+        ]);
+    }
+
+    // ✅ PAYMENT ENTRY
+    $this->Order_model->insert_payment_details([
+        "order_id"       => $order_id,
+        "payment_method" => $payment_method,
+        "amount"         => round($total_amount),
+        "payment_status" => "pending",
+        "transaction_id" => uniqid('txn_')
+    ]);
+
+    // ✅ HARD DELETE CART
+    $this->db->where('user_id', $user_id);
+    $this->db->delete('cart_tbl');
+
+    // ✅ CLEAR COUPON SESSION
+    $this->session->unset_userdata('coupon_data');
+
+    // ✅ COMPLETE TRANSACTION
     $this->db->trans_complete();
 
     echo json_encode([
@@ -2651,15 +2888,13 @@ public function apply_coupon()
     ]);
 }*/
 
+/*
 public function apply_coupon()
 {
-    error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
     $decoded = $this->verify_token();
     $user_id = $decoded->customer_id;
 
-    $code = $this->input->post('coupon_code');
+    $code  = $this->input->post('coupon_code');
     $state = $this->input->post('state');
 
     $coupon = $this->Promotion_model->get_coupon_by_code($code);
@@ -2681,42 +2916,42 @@ ini_set('display_errors', 1);
         return;
     }
 
-    // discount
+    // ✅ CALCULATE DISCOUNT
     if ($coupon['discount_type'] == 'percent') {
         $discount = ($subtotal * $coupon['discount_value']) / 100;
     } else {
         $discount = $coupon['discount_value'];
     }
 
-    if ($discount > $subtotal) $discount = $subtotal;
+    if ($discount > $subtotal) {
+        $discount = $subtotal;
+    }
 
     $after_discount = $subtotal - $discount;
 
-    // GST by state
-    $cgst = $sgst = $igst = 0;
-
+    // ✅ GST
     if ($state == "Maharashtra") {
         $cgst = ($after_discount * 2.5) / 100;
         $sgst = ($after_discount * 2.5) / 100;
-        $gst = $cgst + $sgst;
+        $gst  = $cgst + $sgst;
+        $igst = 0;
     } else {
         $igst = ($after_discount * 5) / 100;
-        $gst = $igst;
+        $gst  = $igst;
+        $cgst = $sgst = 0;
     }
 
     $shipping = 99;
-
     $final_total = $after_discount + $gst + $shipping;
 
-    // ✅ STORE IN SESSION
+    // ✅ STORE ONLY RAW COUPON DATA (IMPORTANT)
+    $this->session->set_userdata('coupon_data', [
+        'coupon_id'      => $coupon['id'],
+        'coupon_code'    => $coupon['coupon_code'],
+        'discount_type'  => $coupon['discount_type'],
+        'discount_value' => $coupon['discount_value']
+    ]);
 
-$this->session->set_userdata('coupon_data', [
-    'coupon_id'   => $coupon['id'],
-    'coupon_code' => $coupon['coupon_code'],
-    'discount'    => round($discount),
-    'type'        => $coupon['discount_type'],
-    'value'       => $coupon['discount_value']
-]);
     echo json_encode([
         "status" => true,
         "message" => "Coupon applied successfully",
@@ -2728,6 +2963,126 @@ $this->session->set_userdata('coupon_data', [
         "igst" => round($igst),
         "shipping" => $shipping,
         "final_total" => round($final_total)
+    ]);
+}
+    */
+
+
+public function apply_coupon()
+{
+ //   $decoded = $this->verify_token();
+   // $user_id = $decoded->customer_id;
+
+       $user_id = $this->session->userdata('user_id');
+
+
+    $code  = $this->input->post('coupon_code');
+    $state = $this->input->post('state');
+
+    $coupon = $this->Promotion_model->get_coupon_by_code($code);
+
+    if (!$coupon) {
+        echo json_encode(["status" => false, "message" => "Invalid coupon"]);
+        return;
+    }
+
+    if ($coupon['status'] != 'Active') {
+        echo json_encode(["status" => false, "message" => "Coupon not active"]);
+        return;
+    }
+
+    // ✅ GET CART ITEMS (IMPORTANT FIX)
+    $items = $this->Cart_model->get_cart_by_user_id($user_id);
+
+    if (empty($items)) {
+        echo json_encode(["status" => false, "message" => "Cart is empty"]);
+        return;
+    }
+
+    // ✅ CALCULATE SUBTOTAL (SAME AS CHECKOUT)
+    $subtotal = 0;
+
+    foreach ($items as $item) {
+        $price = (float) ($item['price'] ?? 0);
+        $qty   = (int) ($item['quantity'] ?? 1); // or qty if used
+
+        $subtotal += $price * $qty;
+    }
+
+    // ✅ DISCOUNT
+    if ($coupon['discount_type'] == 'percent') {
+        $discount = ($subtotal * $coupon['discount_value']) / 100;
+    } else {
+        $discount = $coupon['discount_value'];
+    }
+
+    if ($discount > $subtotal) {
+        $discount = $subtotal;
+    }
+
+    // ✅ AFTER DISCOUNT
+    $after_discount = $subtotal - $discount;
+
+    // safety
+    if ($after_discount < 0) {
+        $after_discount = 0;
+    }
+
+    // ✅ GST (CORRECT LOGIC)
+    $cgst = $sgst = $igst = $gst = 0;
+
+    if (strtolower(trim($state)) == "maharashtra") {
+        $cgst = ($after_discount * 2.5) / 100;
+        $sgst = ($after_discount * 2.5) / 100;
+        $gst  = $cgst + $sgst;
+    } else {
+        $igst = ($after_discount * 5) / 100;
+        $gst  = $igst;
+    }
+
+    // ✅ TOTAL
+    $shipping = 99;
+    $final_total = $after_discount + $gst + $shipping;
+
+    // ✅ STORE RAW COUPON ONLY
+    $this->session->set_userdata('coupon_data', [
+        'coupon_id'      => $coupon['id'],
+        'coupon_code'    => $coupon['coupon_code'],
+        'discount_type'  => $coupon['discount_type'],
+        'discount_value' => $coupon['discount_value']
+    ]);
+
+   
+
+    echo json_encode([
+    "status" => true,
+    "message" => "Coupon applied successfully",
+    "subtotal" => round($subtotal),
+    "discount" => round($discount),
+    "gst" => round($gst),
+    "cgst" => round($cgst),
+    "sgst" => round($sgst),
+    "igst" => round($igst),
+    "shipping" => $shipping,
+    "final_total" => round($final_total),
+
+    // ✅ ADD THIS
+    "discount_type" => $coupon['discount_type'],
+    "discount_value" => $coupon['discount_value']
+]);
+
+}
+
+//remove coupon
+
+public function remove_coupon()
+{
+    // ✅ remove coupon from session
+    $this->session->unset_userdata('coupon_data');
+
+    echo json_encode([
+        "status" => true,
+        "message" => "Coupon removed successfully"
     ]);
 }
 }

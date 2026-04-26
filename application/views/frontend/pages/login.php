@@ -26,6 +26,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!--Ajax-->
+
+<!--
 <script>
  $(document).ready(function() {
     $('#loginForm').submit(function(e){
@@ -48,9 +50,13 @@ $.ajax({
                 icon: 'success',
                 title: 'Login Successful',
                 text: res.message
+           // }).then(() => {
+             //   window.location.href = "<?=base_url('index.php/frontend/')?>";
+            //});
             }).then(() => {
-                window.location.href = "<?=base_url('index.php/frontend/')?>";
+                location.reload(); // 🔥 THIS FIXES EVERYTHING
             });
+
 
         } else {
             Swal.fire({
@@ -67,4 +73,56 @@ $.ajax({
 
     
 
+</script>-->
+
+<script>
+$(document).ready(function () {
+
+    $('#loginForm').submit(function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: "<?= base_url('index.php/Api_handler/customer_login') ?>",
+            type: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+
+            success: function (res) {
+
+                console.log(res);
+
+                if (res.status) {
+
+                    // store token (optional)
+                    localStorage.setItem("token", res.token);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Successful',
+                        text: res.message
+                    }).then(() => {
+
+                        // ✅ REDIRECT TO HOME (NOT reload)
+                        window.location.href = "<?= base_url('index.php/frontend') ?>";
+
+                    });
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Failed',
+                        text: res.message
+                    });
+                }
+            },
+
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                alert("Login error");
+            }
+        });
+
+    });
+
+});
 </script>

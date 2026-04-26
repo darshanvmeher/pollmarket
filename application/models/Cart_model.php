@@ -97,6 +97,8 @@ public function added_to_cart($user_id, $product_id, $quantity)
     return 'added';
 }*/
 
+/*
+
 public function added_to_cart($user_id, $product_id, $quantity)
 {
     // ✅ CHECK PRODUCT EXISTS
@@ -136,9 +138,123 @@ public function added_to_cart($user_id, $product_id, $quantity)
 
         return 'added';
     }
+}*/
+/*
+public function added_to_cart($user_id, $product_id, $quantity)
+{
+    $existing = $this->db->get_where('cart_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id
+    ])->row();
+
+    if ($existing) {
+
+        // ✅ ADD quantity (NOT replace)
+        $new_qty = $existing->quantity + $quantity;
+
+        $this->db->where('id', $existing->id);
+        $this->db->update('cart_tbl', [
+            'quantity' => $new_qty
+        ]);
+
+        return 'updated';
+
+    } else {
+
+        $this->db->insert('cart_tbl', [
+            'user_id' => $user_id,
+            'product_id' => $product_id,
+            'quantity' => $quantity,
+            'cart_status' => 1,
+            'delete_status' => 0,
+        ]);
+
+        return 'added';
+    }
 }
 
+*/
 
+/*
+public function added_to_cart($user_id, $product_id, $quantity)
+{
+    // check existing product
+    $existing = $this->db->get_where('cart_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id
+    ])->row_array();
+
+    if ($existing) {
+
+        // ✅ ADD quantity (not replace)
+        $new_qty = $existing['quantity'] + $quantity;
+
+        $this->db->where('id', $existing['id']);
+        $this->db->update('cart_tbl', [
+            'quantity' => $new_qty
+        ]);
+
+        return 'updated';
+
+    } else {
+
+        // ✅ INSERT with correct quantity
+        $this->db->insert('cart_tbl', [
+            'user_id' => $user_id,
+            'product_id' => $product_id,
+            'quantity' => $quantity,
+            'cart_status' => 1,
+        ]);
+
+        return 'added';
+    }
+}*/
+
+
+public function added_to_cart($user_id, $product_id, $quantity)
+{
+    // check if already exists
+    $existing = $this->db->get_where('cart_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id
+    ])->row_array();
+
+    if ($existing) {
+
+        // ✅ ADD quantity (IMPORTANT FIX)
+        $new_qty = $existing['quantity'] + $quantity;
+
+        $this->db->where('id', $existing['id']);
+        $this->db->update('cart_tbl', [
+            'quantity' => $new_qty
+        ]);
+
+        return 'updated';
+
+    } else {
+
+        // ✅ insert correct quantity
+        $this->db->insert('cart_tbl', [
+            'user_id' => $user_id,
+            'product_id' => $product_id,
+            'quantity' => $quantity,
+            'cart_status' => 1
+        ]);
+
+        return 'added';
+    }
+}
+public function remove_from_cart($user_id, $product_id)
+{
+    $this->db->delete('cart_tbl', [
+        'user_id' => $user_id,
+        'product_id' => $product_id
+    ]);
+
+    return $this->db->affected_rows(); // ✅ THIS LINE IS KEY
+}
+
+/*
     public function remove_from_cart($user_id, $product_id) {
         $this->db->delete('cart_tbl', [
             'user_id' => $user_id,
@@ -274,6 +390,15 @@ public function get_cart_count($user_id) {
     $this->db->where('cart_status', 1);
     return $this->db->count_all_results('cart_tbl');    
 }
+/*
+public function get_cart_count($user_id)
+{
+    $this->db->select_sum('quantity');
+    $this->db->where('user_id', $user_id);
+    $result = $this->db->get('cart_tbl')->row();
+
+    return $result->quantity ?? 0;
+}*/
 
 //clear cart
 
@@ -317,4 +442,16 @@ public function get_cart_total($user_id)
 
     return $result->total ?? 0;
 }
+/*
+public function get_cart_count($user_id) {
+    $this->db->select('SUM(quantity) as total_qty');
+    $this->db->where('user_id', $user_id);
+    $this->db->where('cart_status', 1);
+
+    $result = $this->db->get('cart_tbl')->row();
+
+    return (!empty($result) && $result->total_qty !== null)
+        ? (int)$result->total_qty
+        : 0;
+}*/
 }

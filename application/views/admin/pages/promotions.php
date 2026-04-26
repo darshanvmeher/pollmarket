@@ -92,6 +92,8 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content category-modal">
                         <form id="couponForm" class="row g-3">
+
+                        <input type="hidden" id="coupon_id" name="id">
  
 
             <div class="modal-header border-0 pb-0">
@@ -250,6 +252,8 @@ function showUpdatePopup(message, error = false) {
     }, 2000);
 }
 </script>
+
+<!--
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -298,7 +302,7 @@ if (idElement) {
     });
 
 });
-</script>
+</script>-->
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -404,6 +408,76 @@ document.addEventListener('DOMContentLoaded', function () {
             showUpdatePopup('Server error ❌', true);
         });
 
+    });
+
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const form = document.getElementById('couponForm');
+
+    // ✅ EDIT BUTTON CLICK (SET DATA IN FORM)
+    document.querySelectorAll('[data-coupon-mode="edit"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+
+            document.getElementById('coupon_id').value = this.dataset.couponId || '';
+
+            document.querySelector('[name="coupon_code"]').value = this.dataset.couponCode || '';
+            document.querySelector('[name="discount_value"]').value = this.dataset.couponDiscountValue || '';
+            document.querySelector('[name="discount_type"]').value = this.dataset.couponDiscountType || '';
+            document.querySelector('[name="coupon_type"]').value = this.dataset.couponType || '';
+            document.querySelector('[name="validity"]').value = this.dataset.couponValidity || '';
+            document.querySelector('[name="status"]').value = this.dataset.couponStatus || '';
+            document.querySelector('[name="description"]').value = this.dataset.couponDescription || '';
+        });
+    });
+
+    // ✅ FORM SUBMIT
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        // ✅ GET ID SAFELY
+        const id = document.getElementById('coupon_id')?.value?.trim();
+
+        // ✅ DECIDE API
+        const url = (id && id !== "")
+            ? "<?= base_url('index.php/api_handler/update_promotion'); ?>"
+            : "<?= base_url('index.php/api_handler/add_promotion'); ?>";
+
+        // ✅ DEBUG (optional)
+        console.log("Submitting ID:", id, "URL:", url);
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status) {
+                showUpdatePopup(data.message || "Success ✅");
+
+                // ✅ RESET FORM AFTER SAVE
+                form.reset();
+                document.getElementById('coupon_id').value = "";
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1200);
+            } else {
+                showUpdatePopup(data.message || "Failed ❌", true);
+            }
+        })
+        .catch(() => {
+            showUpdatePopup("Server error ❌", true);
+        });
     });
 
 });
