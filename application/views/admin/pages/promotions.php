@@ -253,56 +253,6 @@ function showUpdatePopup(message, error = false) {
 }
 </script>
 
-<!--
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    const form = document.getElementById('couponForm');
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        
-        let id = null;
-
-const idElement = document.getElementById('coupon_id');
-
-if (idElement) {
-    id = idElement.value;
-}
-
-        const url = id
-            ? "<?= base_url('index.php/api_handler/update_promotion'); ?>"
-            : "<?= base_url('index.php/api_handler/add_promotion'); ?>";
-
-        fetch(url, {
-    method: "POST",
-    headers: {
-        "Authorization": "Bearer " + localStorage.getItem("token")
-    },
-    body: formData
-})
-.then(res => res.json())
-.then(data => {
-    if (data.status) {
-        showUpdatePopup(data.message || "Success ✅");
-
-        setTimeout(() => {
-            window.location.reload();
-        }, 1200);
-    } else {
-        showUpdatePopup(data.message || "Failed ❌", true);
-    }
-})
-.catch(() => {
-    showUpdatePopup("Server error ❌", true);
-});
-
-    });
-
-});
-</script>-->
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
