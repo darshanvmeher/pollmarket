@@ -446,8 +446,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // ✅ DECIDE API
         const url = (id && id !== "")
-            ? "<?= base_url('index.php/api_handler/update_promotion'); ?>"
-            : "<?= base_url('index.php/api_handler/add_promotion'); ?>";
+            ? "<?= base_url('index.php/middle/updating_promotion'); ?>"
+            : "<?= base_url('index.php/middle/adding_promotion'); ?>";
 
         // ✅ DEBUG (optional)
         console.log("Submitting ID:", id, "URL:", url);

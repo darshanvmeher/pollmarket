@@ -666,7 +666,10 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
 })(jQuery);
 </script>
 
+<!-- ✅ jQuery (if not already included in header) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $('#placeOrderBtn').on('click', function () {
 
@@ -700,8 +703,15 @@ $('#placeOrderBtn').on('click', function () {
 
         success: function (res) {
             if (res.status) {
-                alert("Order placed successfully!");
-                window.location.href = "<?= site_url('frontend') ?>";
+                swal .fire({
+                    icon: 'success',
+                    title: 'Order placed successfully!',
+                    text: res.message || 'Your order has been placed.'
+                }).then(() => {
+                    window.location.href = "<?= site_url('frontend') ?>";
+                });
+                // alert("Order placed successfully!");
+                // window.location.href = "<?= site_url('frontend') ?>";
             } else {
                 alert(res.message || "Order failed");
             }

@@ -1683,8 +1683,8 @@ private function upload_file($field, $path, $types)
 
 public function add_promotion()
 {
-   // $decoded = $this->verify_token();
-    //$admin_id = $decoded->admin_id;   
+   $decoded = $this->verify_token();
+    $admin_id = $decoded->admin_id;   
 
     $data = [
         "coupon_code" => $this->input->post('coupon_code'),
@@ -1753,8 +1753,8 @@ public function add_promotion()
 
 public function update_promotion()
 {
-   // $decoded = $this->verify_token();
-    //$admin_id = $decoded->admin_id;   
+   $decoded = $this->verify_token();
+    $admin_id = $decoded->admin_id;   
 
     $id = $this->input->post('id');
 
