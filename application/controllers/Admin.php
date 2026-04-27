@@ -158,22 +158,28 @@ class Admin extends CI_Controller
 
     public function orders()
     {
+
+    $this->load->model('Order_model');
         $data = array(
             'active' => 'orders',
             'title' => 'Orders',
             'subtitle' => 'Track fulfillment, shipping, and returns.',
             'table_title' => 'Saved Orders',
-            'headers' => array('Order', 'Customer', 'Amount', 'Items', 'Status', 'Date'),
-            'rows' => array(
+            'headers' => array("Order", "Customer", "Amount", "Products", "Items", "Status", "Date"),
+           /* 'rows' => array(
                 array('#PM-2901', 'Retail Mart Pvt.', '$214.00', '16', 'Shipped', '05 Mar 2026'),
                 array('#PM-2896', 'Shakti Traders', '$89.40', '8', 'Packed', '05 Mar 2026'),
                 array('#PM-2888', 'Prime Supplies', '$420.10', '34', 'Delivered', '04 Mar 2026'),
                 array('#PM-2879', 'Westline Stores', '$63.50', '5', 'Payment Failed', '04 Mar 2026')
-            )
+            )*/
+
+           "rows" => $this->Order_model->get_orders_for_admin() // ✅ DB DATA
         );
 
-        $this->render('master_table', $data);
+        $this->render('orders', $data);
     }
+
+        
 
     public function customers()
     {

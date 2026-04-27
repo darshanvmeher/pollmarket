@@ -124,4 +124,84 @@ public function get_orders_with_address()
     $this->db->where('o.delete_status', 0);
     return $this->db->get()->result_array();
 }
+
+/*public function get_orders_for_admin()
+{
+    $this->db->select('concat(u.firstname, " ", u.lastname) as customer_name,o.id as order_id,o.order_status as Status,o.created_at as Date,o.total_amount as Amount, p.product_name as Product,oi.quantity as Items'); // Select order and address fields, and customer name
+    $this->db->from('order_tbl o');
+    //$this->db->join('address_book_tbl a', 'o.address_id = a.id', 'left');
+    $this->db->join('order_items_tbl oi', 'o.id = oi.order_id', 'left');
+    $this->db->join('product_tbl p', 'oi.product_id = p.id', 'left');
+    $this->db->join('users_tbl u', 'o.user_id = u.id', 'left');
+    $this->db->where('o.delete_status', 0);
+    return $this->db->get()->result_array();
+}*/
+
+/*
+public function get_orders_for_admin()
+{
+    $this->db->select('
+        o.id as order_id,
+        CONCAT(u.firstname, " ", u.lastname) as customer_name,
+        o.total_amount as Amount,
+        SUM(oi.quantity) as Items,
+        o.order_status as Status,
+        o.created_at as Date
+    ');
+
+    $this->db->from('order_tbl o');
+    $this->db->join('order_items_tbl oi', 'o.id = oi.order_id', 'left');
+    $this->db->join('users_tbl u', 'o.user_id = u.id', 'left');
+
+    $this->db->group_by('o.id'); // 🔥 IMPORTANT
+
+    return $this->db->get()->result_array();
+}*/
+
+/*
+public function get_orders_for_admin()
+{
+    $this->db->select('
+        o.id as Order,
+        CONCAT(u.firstname, " ", u.lastname) as Customer,
+        o.total_amount as Amount,
+        GROUP_CONCAT(p.product_name SEPARATOR ", ") as Products,
+        (oi.quantity) as Items,
+        o.order_status as Status,
+        o.created_at as Date
+    ');
+
+    $this->db->from('order_tbl o');
+    $this->db->join('order_items_tbl oi', 'o.id = oi.order_id', 'left');
+    $this->db->join('product_tbl p', 'oi.product_id = p.id', 'left');
+    $this->db->join('users_tbl u', 'o.user_id = u.id', 'left');
+
+    $this->db->group_by('o.id');
+
+    return $this->db->get()->result_array();
+}
+    */
+
+
+public function get_orders_for_admin()
+{
+    $this->db->select('
+        o.id as Order,
+        CONCAT(u.firstname, " ", u.lastname) as Customer,
+        o.total_amount as Amount,
+        GROUP_CONCAT(p.product_name SEPARATOR ", ") as Products,
+        SUM(oi.quantity) as Items,
+        o.order_status as Status,
+        o.created_at as Date
+    ');
+
+    $this->db->from('order_tbl o');
+    $this->db->join('order_items_tbl oi', 'o.id = oi.order_id', 'left');
+    $this->db->join('product_tbl p', 'oi.product_id = p.id', 'left');
+    $this->db->join('users_tbl u', 'o.user_id = u.id', 'left');
+
+    $this->db->group_by('o.id');
+
+    return $this->db->get()->result_array();
+}
 }

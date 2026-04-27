@@ -237,12 +237,17 @@ class Frontend extends CI_Controller
     }
 
     public function shop()
-    {
+    { 
+        $this->load->model('Products_model');
+        $this->load->model('Category_model');
+        $this->load->model('Sub_category_model');
         $data = array(
             'title' => 'Shop',
             'nav_items' => $this->nav_items(),
-            'products' => $this->product_catalog(),
-            'categories' => array('All', 'Plastic Bags', 'Stationery', 'Silver Foil', 'RFID Seals', 'Paper Bags')
+            'products' => $this->Products_model->get_product_list(),
+          'categories' => array('All', 'Plastic Bags', 'Stationery', 'Silver Foil', 'RFID Seals', 'Paper Bags')
+           // 'categories' => $this->Category_model->get_categories(),
+            //'sub_categories' => $this->Sub_category_model->get_sub_categories()
         );
 
         $this->load->view('frontend/pages/shop', $data);

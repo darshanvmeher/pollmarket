@@ -30,15 +30,15 @@
                         <div class="product-card">
                             <div class="product-thumb d-flex flex-column justify-content-between">
                                 <div class="product-photo">
-                                    <img src="<?php echo html_escape($product['image_url']); ?>" alt="<?php echo html_escape($product['name']); ?>">
+                                    <img src="<?php echo html_escape($product['image_url']); ?>" alt="<?php echo html_escape($product['product_name']); ?>">
                                 </div>
                                 <div class="d-flex justify-content-between align-items-start">
                                     <span class="product-pill"><?php echo html_escape($product['badge']); ?></span>
                                     <span class="product-pill"><i class="bi bi-star-fill"></i> <?php echo html_escape($product['rating']); ?></span>
                                 </div>
                                 <div>
-                                    <div class="text-white-50 small"><?php echo html_escape($product['category']); ?></div>
-                                    <h3 class="h5 mt-1 mb-0"><?php echo html_escape($product['name']); ?></h3>
+                                    <div class="text-white-50 small"><?php echo html_escape($product['category_name']); ?></div>
+                                    <h3 class="h5 mt-1 mb-0"><?php echo html_escape($product['product_name']); ?></h3>
                                 </div>
                             </div>
                             <div class="p-3">
