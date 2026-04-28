@@ -235,24 +235,77 @@ class Frontend extends CI_Controller
 
         $this->load->view('frontend/pages/home', $data);
     }
-
+/*
     public function shop()
     { 
         $this->load->model('Products_model');
         $this->load->model('Category_model');
         $this->load->model('Sub_category_model');
+        $category_id = $this->input->post('category_id');
+
+if ($category_id == 'all') {
+    $products = $this->Products_model->get_all_products();
+} else {
+    $products = $this->Products_model->get_products_by_category($category_id);
+}
         $data = array(
             'title' => 'Shop',
             'nav_items' => $this->nav_items(),
-            'products' => $this->Products_model->get_product_list(),
-          'categories' => array('All', 'Plastic Bags', 'Stationery', 'Silver Foil', 'RFID Seals', 'Paper Bags')
+            'products' => $products,
+            'categories' => $this->Category_model->get_categories(),
+            'subcategories' => $this->Sub_category_model->get_sub_categories()
            // 'categories' => $this->Category_model->get_categories(),
             //'sub_categories' => $this->Sub_category_model->get_sub_categories()
         );
 
         $this->load->view('frontend/pages/shop', $data);
-    }
+    }*/
+/*
+public function shop()
+{ 
+    $this->load->model('Products_model');
+    $this->load->model('Category_model');
+    $this->load->model('Sub_category_model');
 
+    $category_id = $this->input->get('id') ?? 'all';
+
+    // ✅ Only ONE function call
+    $products = $this->Products_model->get_products_by_category($category_id);
+
+    $data = array(
+        'title' => 'Shop',
+        'nav_items' => $this->nav_items(),
+        'products' => $products,
+        'categories' => $this->Category_model->get_categories(),
+        'subcategories' => $this->Sub_category_model->get_sub_categories(),
+        'active_category' => $category_id
+    );
+
+    $this->load->view('frontend/pages/shop', $data);
+}*/
+
+public function shop()
+{ 
+    $this->load->model('Products_model');
+    $this->load->model('Category_model');
+    $this->load->model('Sub_category_model');
+
+    $category_id = $this->input->get('id') ?? 'all';
+
+    // ✅ IMPORTANT
+    $products = $this->Products_model->get_products_by_category($category_id);
+
+    $data = array(
+        'title' => 'Shop',
+        'nav_items' => $this->nav_items(),
+        'products' => $products,
+        'categories' => $this->Category_model->get_categories(),
+        'subcategories' => $this->Sub_category_model->get_sub_categories(),
+        'active_category' => $category_id
+    );
+
+    $this->load->view('frontend/pages/shop', $data);
+}
     /*public function product($id')
     {   
          $this->load->model('Products_model');

@@ -12,6 +12,7 @@ public function insert_category($data)
 public function get_categories()
 {
     $this->db->where('delete_status',0);
+    $this->db->where('status','Active');
     return $this->db->get('category_tbl')->result_array();
 }
 

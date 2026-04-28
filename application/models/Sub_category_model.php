@@ -15,6 +15,7 @@ class Sub_category_model extends CI_Model {
         $this->db->from('sub_category_tbl');
         $this->db->join('category_tbl','category_tbl.id = sub_category_tbl.category_id');
         $this->db->where('sub_category_tbl.delete_status',0);
+        $this->db->where('sub_category_tbl.status','Active');
 
         return $this->db->get()->result_array();
     }

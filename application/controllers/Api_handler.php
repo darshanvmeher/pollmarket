@@ -2804,4 +2804,115 @@ public function remove_coupon()
         "message" => "Coupon removed successfully"
     ]);
 }
+
+
+//shop
+
+//get all products by categories 
+
+/*
+public function products_by_category()
+{
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $category_id = $this->input->post('category_id');
+
+    /*if (empty($category_id)) {
+       echo json_encode([
+          "status" => false,
+            "message" => "Category ID is required"
+        ]);
+        return;
+    }
+
+    $products = $this->Product_model->get_products_by_category($category_id);
+
+    echo json_encode([
+        "status" => true,
+        "data" => $products
+    ]);
+}*/
+/*
+public function products_by_category()
+{
+    $category_id = $this->input->post('category_id');
+
+    $products = $this->Product_model->get_products_by_category($category_id);
+
+    echo json_encode([
+        "status" => !empty($products),
+        "data" => $products
+    ]);
+}*/
+
+/*
+public function products_by_category()
+{
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+
+    $category_id = $this->input->post('category_id');
+
+    $products = $this->Product_model->get_products_by_category($category_id);
+
+    echo json_encode([
+        "status" => true,
+        "data" => $products
+    ]);
+}
+
+
+public function products_by_category()
+{
+    // ❌ REMOVE THIS
+    // $decoded = $this->verify_token();
+    // $user_id = $decoded->customer_id;
+
+    $category_id = $this->input->post('category_id');
+
+    $products = $this->Product_model->get_products_by_category($category_id);
+
+    echo json_encode([
+        "status" => true,
+        "data" => $products
+    ]);
+}
+*/
+
+public function products_by_category()
+{
+    header('Content-Type: application/json');
+
+    $category_id = $this->input->post('category_id');
+
+    $products = $this->Products_model->get_products_by_category($category_id);
+
+ //   $sub_category_ids = $this->Subcategory_model->get_subcategories($category_id);
+
+    echo json_encode([
+        "status" => true,
+        "data" => $products
+     //   "sub_category_ids" => $sub_category_ids
+    ]);
+}
+
+
+public function get_subcategories_by_category()
+{
+    $category_id = $this->input->post('category_id');
+
+    $this->load->model('Products_model');
+
+    $subcategories = $this->Products_model->get_subcategories($category_id);
+
+    echo json_encode([
+        "status" => true,
+        "data" => $subcategories
+    ]);
+}
+
+
+
+
 }
