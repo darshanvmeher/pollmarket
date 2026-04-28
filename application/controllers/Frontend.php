@@ -86,7 +86,7 @@ class Frontend extends CI_Controller
         );
     }*/
 
-   /* private function product_catalog()
+    /*private function product_catalog()
     {
         return array(
             array('name' => 'Heavy Duty Garbage Bags', 'category' => 'Plastic Bags', 'price' => '₹349', 'old_price' => '₹399', 'badge' => 'Best Seller', 'rating' => '4.8', 'image' => 'garbage-bag', 'image_url' => base_url('assets/frontend/images/products/garbage-bag.png')),
@@ -97,7 +97,7 @@ class Frontend extends CI_Controller
             array('name' => 'Cling Film Roll', 'category' => 'Cling Films', 'price' => '₹579', 'old_price' => '₹699', 'badge' => 'New', 'rating' => '4.7', 'image' => 'cling-film', 'image_url' => base_url('assets/frontend/images/products/cling-film.jpg')),
             array('name' => 'Office Stationery Kit', 'category' => 'Stationery', 'price' => '₹1,499', 'old_price' => '₹1,799', 'badge' => 'Combo', 'rating' => '4.9', 'image' => 'kit', 'image_url' => base_url('assets/frontend/images/products/stationery.jpg'))
         );
-    }*/
+    }/
 
    /*private function find_product($slug)
     {
@@ -794,8 +794,8 @@ public function checkout()
         $data = array(
             'title' => 'Bulk Buyers',
             'nav_items' => $this->nav_items(),
-            'hero_products' => array_slice($this->product_catalog(), 0, 3),
-            'hero' => array(
+           // 'hero_products' => array_slice($this->product_catalog(), 0, 3),
+          /*  'hero' => array(
                 'title' => 'Bulk pricing, reliable supply, and faster reordering for Indian businesses',
                 'subtitle' => 'A dedicated procurement landing page for wholesalers, distributors, retail chains, and GST-registered business accounts that buy in volume.'
             ),
@@ -831,9 +831,9 @@ public function checkout()
                 array('name' => 'Prime Supplies', 'tag' => 'Corporate'),
                 array('name' => 'Nova Retail', 'tag' => 'Retail Group'),
                 array('name' => 'Shakti Traders', 'tag' => 'Distributor')
-            )
+            )*/
         );
 
-        $this->load->view('frontend/pages/bulk_buyers', $data);
+        $this->load->view('frontend/pages/contact', $data);
     }
 }
