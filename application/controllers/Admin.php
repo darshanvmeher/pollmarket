@@ -158,25 +158,53 @@ class Admin extends CI_Controller
 
     public function orders()
     {
-
-    $this->load->model('Order_model');
+        $this->load->model('Order_model');
         $data = array(
             'active' => 'orders',
             'title' => 'Orders',
             'subtitle' => 'Track fulfillment, shipping, and returns.',
             'table_title' => 'Saved Orders',
             'headers' => array("Order", "Customer", "Amount", "Products", "Items", "Status", "Date"),
-           /* 'rows' => array(
-                array('#PM-2901', 'Retail Mart Pvt.', '$214.00', '16', 'Shipped', '05 Mar 2026'),
-                array('#PM-2896', 'Shakti Traders', '$89.40', '8', 'Packed', '05 Mar 2026'),
-                array('#PM-2888', 'Prime Supplies', '$420.10', '34', 'Delivered', '04 Mar 2026'),
-                array('#PM-2879', 'Westline Stores', '$63.50', '5', 'Payment Failed', '04 Mar 2026')
-            )*/
-
-           "rows" => $this->Order_model->get_orders_for_admin() // ✅ DB DATA
+           "rows" => $this->Order_model->get_orders_for_admin()
         );
 
         $this->render('orders', $data);
+    }
+
+    public function order_detail($order_id = 0)
+    {
+        $this->load->model('Order_model');
+        $order_id = (int) $order_id;
+
+        if (strtoupper($this->input->method()) === 'POST' && $order_id > 0) {
+            $order_status = trim((string) $this->input->post('order_status'));
+            if ($order_status !== '') {
+                $this->Order_model->update_order_status($order_id, array(
+                    'order_status' => $order_status
+                ));
+            }
+
+            redirect('admin/orders/' . $order_id . '?updated=1');
+            return;
+        }
+
+        $order = $this->Order_model->get_order_detail_for_admin($order_id);
+
+        if (!$order) {
+            show_404();
+        }
+
+        $data = array(
+            'active' => 'orders',
+            'title' => 'Order Detail',
+            'subtitle' => 'Review customer, products, payment, and shipping information in one place.',
+            'order' => $order,
+            'order_items' => $this->Order_model->get_order_items_for_admin($order_id),
+            'status_options' => array('pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'),
+            'updated' => (bool) $this->input->get('updated')
+        );
+
+        $this->render('order_detail', $data);
     }
 
         

@@ -76,6 +76,7 @@ $route['admin/products'] = 'admin/products';
 $route['admin/categories'] = 'admin/categories';
 $route['admin/subcategories'] = 'admin/subcategories';
 $route['admin/orders'] = 'admin/orders';
+$route['admin/orders/(:num)'] = 'admin/order_detail/$1';
 $route['admin/customers'] = 'admin/customers';
 $route['admin/inventory'] = 'admin/inventory';
 $route['admin/suppliers'] = 'admin/suppliers';
