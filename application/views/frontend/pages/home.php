@@ -1,36 +1,108 @@
 <?php $this->load->view('frontend/partials/header'); ?>
+<?php
+$hero_collage = array(
+    array(
+        'title' => 'Garbage Bags',
+        'copy' => 'Heavy-duty liners for warehouses, retail, and facility ops.',
+        'image' => base_url('assets/frontend/images/products/garbage-bag.jpg'),
+        'tone' => 'primary'
+    ),
+    array(
+        'title' => 'Cling Film',
+        'copy' => 'Food-safe wrap and dispatch-ready packaging rolls.',
+        'image' => base_url('assets/frontend/images/products/cling-film.jpg'),
+        'tone' => 'steel'
+    ),
+    array(
+        'title' => 'RFID Seals',
+        'copy' => 'Industrial control, traceability, and tamper security.',
+        'image' => base_url('assets/frontend/images/products/rfid-seal.jpg'),
+        'tone' => 'accent'
+    )
+);
+?>
 
-<section class="hero-section hero-lite">
-    <div class="row align-items-center g-4">
-        <div class="col-lg-6">
-            <div class="hero-card fade-up">
-                <div class="eyebrow"><i class="bi bi-stars"></i> India-focused wholesale storefront</div>
-                <h1 class="hero-title"><?php echo html_escape($hero['title']); ?></h1>
-                <p class="hero-copy"><?php echo html_escape($hero['subtitle']); ?></p>
-                <div class="d-flex flex-wrap gap-2 mt-4">
-                    <a class="btn btn-primary btn-lg" href="<?php echo site_url('frontend/shop'); ?>">Shop Products</a>
-                    <a class="btn btn-outline-dark btn-lg" href="<?php echo site_url('frontend/bulk-buyers'); ?>">Bulk Buyers</a>
+<section class="hero-industrial-shell">
+    <div class="hero-industrial-grid">
+        <div class="hero-industrial-copy fade-up">
+            <div class="hero-industrial-kicker">
+                <span class="hero-industrial-dot"></span>
+                Industrial Packaging Supply
+            </div>
+            <h1 class="hero-industrial-title">Premium packaging essentials for fast-moving industrial buying.</h1>
+            <p class="hero-industrial-copy-text">Source garbage bags, cling film, RFID seals, and business-ready consumables from a storefront designed for procurement teams, plant operators, and repeat wholesale ordering.</p>
+
+            <div class="hero-industrial-cta">
+                <a class="btn btn-primary btn-lg" href="<?php echo site_url('frontend/shop'); ?>">Explore Catalog</a>
+                <a class="btn btn-outline-light btn-lg" href="<?php echo site_url('frontend/contact'); ?>">Talk to Sales</a>
+            </div>
+
+            <div class="hero-industrial-metrics">
+                <div class="hero-industrial-metric">
+                    <span>Dispatch-ready SKUs</span>
+                    <strong>250+</strong>
                 </div>
-                <div class="hero-product-tags mt-4">
-                    <span class="hero-tag">Garbage bags</span>
-                    <span class="hero-tag">Paper bags</span>
-                    <span class="hero-tag">Cling films</span>
+                <div class="hero-industrial-metric">
+                    <span>Industrial segments</span>
+                    <strong>Retail to logistics</strong>
+                </div>
+                <div class="hero-industrial-metric">
+                    <span>Service layer</span>
+                    <strong>GST and bulk billing</strong>
                 </div>
             </div>
+
+            <div class="hero-industrial-tags">
+                <span class="hero-industrial-tag">Garbage bags</span>
+                <span class="hero-industrial-tag">Cling film</span>
+                <span class="hero-industrial-tag">RFID seals</span>
+                <span class="hero-industrial-tag">Premium industrial supply</span>
+            </div>
         </div>
-        <div class="col-lg-6">
-            <div class="hero-gallery fade-up delay-1">
-                <div class="hero-gallery-main">
-                    <img src="<?php echo html_escape($hero_scene['warehouse']); ?>" alt="Indian warehouse supply">
+
+        <div class="hero-industrial-visual fade-up delay-1">
+            <div class="hero-industrial-collage">
+                <div class="hero-industrial-panel">
+                    <div class="hero-industrial-panel__eyebrow">Industrial Range</div>
+                    <h2>Made for procurement teams that need speed, consistency, and clean presentation.</h2>
                 </div>
-                <div class="hero-gallery-side">
-                    <div class="hero-gallery-tile">
-                        <img src="<?php echo html_escape($hero_scene['office']); ?>" alt="Indian business procurement team">
+
+                <article class="hero-industrial-card hero-industrial-card-main">
+                    <div class="hero-industrial-card__media">
+                        <img src="<?php echo html_escape($hero_collage[0]['image']); ?>" alt="<?php echo html_escape($hero_collage[0]['title']); ?>">
                     </div>
-                    <div class="hero-gallery-tile">
-                        <img src="<?= base_url($hero_products[0]['media'][0]['media_path'] ?? 'assets/no-image.png') ?>"
-                            alt="<?= html_escape($hero_products[0]['product_name'] ?? 'Product') ?>">
+                    <div class="hero-industrial-card__overlay"></div>
+                    <div class="hero-industrial-card__content">
+                        <div class="hero-industrial-card__eyebrow">Bulk utility</div>
+                        <h2><?php echo html_escape($hero_collage[0]['title']); ?></h2>
+                        <p><?php echo html_escape($hero_collage[0]['copy']); ?></p>
+                    </div>
+                </article>
+
+                <div class="hero-industrial-card-stack">
+                    <article class="hero-industrial-card hero-industrial-card-secondary">
+                        <div class="hero-industrial-card__media">
+                            <img src="<?php echo html_escape($hero_collage[1]['image']); ?>" alt="<?php echo html_escape($hero_collage[1]['title']); ?>">
                         </div>
+                        <div class="hero-industrial-card__overlay"></div>
+                        <div class="hero-industrial-card__content">
+                            <div class="hero-industrial-card__eyebrow">Food and retail wrap</div>
+                            <h2><?php echo html_escape($hero_collage[1]['title']); ?></h2>
+                            <p><?php echo html_escape($hero_collage[1]['copy']); ?></p>
+                        </div>
+                    </article>
+
+                    <article class="hero-industrial-card hero-industrial-card-secondary">
+                        <div class="hero-industrial-card__media">
+                            <img src="<?php echo html_escape($hero_collage[2]['image']); ?>" alt="<?php echo html_escape($hero_collage[2]['title']); ?>">
+                        </div>
+                        <div class="hero-industrial-card__overlay"></div>
+                        <div class="hero-industrial-card__content">
+                            <div class="hero-industrial-card__eyebrow">Secure tracking</div>
+                            <h2><?php echo html_escape($hero_collage[2]['title']); ?></h2>
+                            <p><?php echo html_escape($hero_collage[2]['copy']); ?></p>
+                        </div>
+                    </article>
                 </div>
             </div>
         </div>
@@ -62,18 +134,44 @@
     <div class="section-heading d-flex justify-content-between align-items-end gap-3 flex-wrap">
         <div>
             <div class="section-kicker">Shop by category</div>
-            <h2 class="section-title">Simple, visual, and product-first</h2>
+            <h2 class="section-title">Large visual lanes for fast category discovery</h2>
         </div>
         <a class="btn btn-outline-dark" href="<?php echo site_url('frontend/categories'); ?>">View categories</a>
     </div>
-    <div class="row g-3">
+    <div class="category-showcase-grid">
         <?php foreach ($featured_categories as $index => $category): ?>
-            <div class="col-6 col-lg-3">
-                <div class="category-tile fade-up delay-<?php echo min($index + 1, 3); ?>">
-                    <div class="category-tile-label"><?php echo html_escape($category['label']); ?></div>
-                    <div class="category-tile-count"><?php echo html_escape($category['count']); ?></div>
+            <a
+                class="category-showcase-card fade-up delay-<?php echo min($index + 1, 3); ?>"
+                href="<?php echo html_escape($category['url']); ?>"
+            >
+                <div class="category-showcase-card__media">
+                    <img src="<?php echo html_escape($category['image']); ?>" alt="<?php echo html_escape($category['label']); ?>">
                 </div>
-            </div>
+                <div class="category-showcase-card__overlay"></div>
+                <div class="category-showcase-card__content">
+                    <div class="category-showcase-card__label"><?php echo html_escape($category['label']); ?></div>
+                    <div class="category-showcase-card__count"><?php echo html_escape($category['count']); ?></div>
+                </div>
+            </a>
+        <?php endforeach; ?>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="section-heading">
+        <div class="section-kicker">Why Choose Us</div>
+        <h2 class="section-title">Built for practical, high-volume business supply</h2>
+        <p class="section-copy">Clear strengths that matter when customers compare industrial packaging partners.</p>
+    </div>
+    <div class="why-choose-grid">
+        <?php foreach ($why_choose_us as $index => $feature): ?>
+            <article class="why-choose-card fade-up delay-<?php echo min($index + 1, 3); ?>">
+                <div class="why-choose-card__icon">
+                    <i class="bi <?php echo html_escape($feature['icon']); ?>"></i>
+                </div>
+                <h3 class="why-choose-card__title"><?php echo html_escape($feature['title']); ?></h3>
+                <p class="why-choose-card__copy"><?php echo html_escape($feature['copy']); ?></p>
+            </article>
         <?php endforeach; ?>
     </div>
 </section>

@@ -175,10 +175,30 @@ class Frontend extends CI_Controller
                 'office' => base_url('assets/frontend/images/products/indian-office-team.jpg')
             ),
             'featured_categories' => array(
-                array('label' => 'Plastic Garbage Bags', 'count' => '120+ SKUs'),
-                array('label' => 'Stationery Materials', 'count' => '90+ SKUs'),
-                array('label' => 'Silver Foil Papers', 'count' => '40+ SKUs'),
-                array('label' => 'RFID Seals', 'count' => '25+ SKUs')
+                array(
+                    'label' => 'Plastic Garbage Bags',
+                    'count' => '120+ SKUs',
+                    'image' => base_url('assets/frontend/images/products/garbage-bag.jpg'),
+                    'url' => site_url('frontend/categories')
+                ),
+                array(
+                    'label' => 'Stretch Cling Films',
+                    'count' => '90+ SKUs',
+                    'image' => base_url('assets/frontend/images/products/cling-film.jpg'),
+                    'url' => site_url('frontend/categories')
+                ),
+                array(
+                    'label' => 'Silver Foil Papers',
+                    'count' => '40+ SKUs',
+                    'image' => base_url('assets/frontend/images/products/silver-foil.jpg'),
+                    'url' => site_url('frontend/categories')
+                ),
+                array(
+                    'label' => 'RFID Seals',
+                    'count' => '25+ SKUs',
+                    'image' => base_url('assets/frontend/images/products/rfid-seal.jpg'),
+                    'url' => site_url('frontend/categories')
+                )
             ),
             /*'hero_products' => array(
                 $this->product_catalog()[0],
@@ -188,6 +208,28 @@ class Frontend extends CI_Controller
             'hero_products' => array_slice($products, 0, 3),
             //  'featured_products' => array_slice($this->product_catalog(), 0, 4),
             'featured_products' => array_slice($products, 0, 4),
+            'why_choose_us' => array(
+                array(
+                    'icon' => 'bi-rulers',
+                    'title' => 'Custom Sizes',
+                    'copy' => 'Packaging dimensions tailored for your product and dispatch needs.'
+                ),
+                array(
+                    'icon' => 'bi-box-seam',
+                    'title' => 'Bulk Orders',
+                    'copy' => 'Reliable volume supply for retail, warehouse, and procurement teams.'
+                ),
+                array(
+                    'icon' => 'bi-shield-check',
+                    'title' => 'Durable Material',
+                    'copy' => 'Built for strength, handling, storage, and daily commercial use.'
+                ),
+                array(
+                    'icon' => 'bi-truck',
+                    'title' => 'Fast Delivery',
+                    'copy' => 'Quick turnaround that keeps repeat ordering and fulfillment moving.'
+                )
+            ),
 
 
             'clients' => array(
@@ -624,7 +666,12 @@ public function cart()
     {
         $data = array(
             'title' => 'About',
-            'nav_items' => $this->nav_items()
+            'nav_items' => $this->nav_items(),
+            'about_hero' => array(
+                'title' => 'Built for industrial packaging teams that need reliability at scale',
+                'subtitle' => 'Poll Market Solutions supports warehouses, distributors, retailers, and procurement teams with practical product ranges and a clear inquiry-driven supply experience.',
+                'image' => base_url('assets/frontend/images/products/indian-warehouse.jpg')
+            )
         );
 
         $this->load->view('frontend/pages/about', $data);
@@ -652,9 +699,82 @@ public function cart()
 
     public function categories()
     {
+        $products = array_slice($this->Products_model->get_product_list(), 0, 8);
+        $category_products = array();
+
+        foreach ($products as $product) {
+            $attribute_values = array();
+            foreach (($product['attributes'] ?? array()) as $attribute) {
+                if (!empty($attribute['value'])) {
+                    $attribute_values[] = $attribute['value'];
+                }
+            }
+
+            $spec_parts = array_filter(array(
+                $product['category_name'] ?? '',
+                $product['sub_category_name'] ?? '',
+                !empty($attribute_values) ? implode(' | ', array_slice($attribute_values, 0, 2)) : ''
+            ));
+
+            $category_products[] = array(
+                'id' => $product['id'],
+                'name' => $product['product_name'] ?? 'Product',
+                'specs' => !empty($spec_parts) ? implode(' | ', $spec_parts) : 'Commercial packaging product',
+                'description' => !empty($product['description']) ? $product['description'] : 'Built for commercial use, repeat ordering, and reliable dispatch across business supply workflows.',
+                'image' => base_url($product['media'][0]['media_path'] ?? 'assets/no-image.png')
+            );
+        }
+
+        if (empty($category_products)) {
+            $category_products = array(
+                array(
+                    'id' => 0,
+                    'name' => 'Industrial Garbage Bag Roll',
+                    'specs' => 'Plastic Garbage Bags | Heavy Duty',
+                    'description' => 'High-strength liners for warehouse, facility, and retail cleanup operations.',
+                    'image' => base_url('assets/frontend/images/products/garbage-bag.jpg')
+                ),
+                array(
+                    'id' => 0,
+                    'name' => 'Stretch Cling Film Pack',
+                    'specs' => 'Stretch Cling Films | Standard',
+                    'description' => 'Clear commercial wrap built for packaging, storage, and dispatch handling.',
+                    'image' => base_url('assets/frontend/images/products/cling-film.jpg')
+                ),
+                array(
+                    'id' => 0,
+                    'name' => 'Silver Foil Wrap Sheet',
+                    'specs' => 'Silver Foil Papers | Food Grade',
+                    'description' => 'Reliable foil rolls for food service, takeaway packaging, and kitchen operations.',
+                    'image' => base_url('assets/frontend/images/products/silver-foil.jpg')
+                ),
+                array(
+                    'id' => 0,
+                    'name' => 'RFID Tamper Seal Set',
+                    'specs' => 'RFID Seals | Warehouse Use',
+                    'description' => 'Tamper-aware RFID sealing for logistics, security, and inventory traceability.',
+                    'image' => base_url('assets/frontend/images/products/rfid-seal.jpg')
+                )
+            );
+        }
+
         $data = array(
             'title' => 'Categories',
-            'nav_items' => $this->nav_items()
+            'nav_items' => $this->nav_items(),
+            'category_hero' => array(
+                'title' => 'Industrial categories built for fast product discovery',
+                'subtitle' => 'Browse the full packaging and supply range with a cleaner path into wholesale-ready product lines.',
+                'image' => base_url('assets/frontend/images/products/indian-warehouse.jpg')
+            ),
+            'category_list' => array(
+                'Plastic Garbage Bags',
+                'Stretch Cling Films',
+                'Silver Foil Papers',
+                'RFID Seals',
+                'Paper Bags',
+                'Office Kits'
+            ),
+            'category_products' => $category_products
         );
 
         $this->load->view('frontend/pages/categories', $data);
