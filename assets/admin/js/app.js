@@ -100,7 +100,8 @@
         const submitLabel = couponFormModal.querySelector('[data-coupon-submit-label]');
         const codeInput = couponFormModal.querySelector('[data-coupon-input="code"]');
         const typeInput = couponFormModal.querySelector('[data-coupon-input="type"]');
-        const discountInput = couponFormModal.querySelector('[data-coupon-input="discount"]');
+        const discounttypeInput = couponFormModal.querySelector('[data-coupon-input="discount_type"]');
+        const discountvalueInput = couponFormModal.querySelector('[data-coupon-input="discount_value"]')
         const validityInput = couponFormModal.querySelector('[data-coupon-input="validity"]');
         const statusInput = couponFormModal.querySelector('[data-coupon-input="status"]');
         const descriptionInput = couponFormModal.querySelector('[data-coupon-input="description"]');
@@ -111,7 +112,8 @@
           submitLabel.textContent = 'Update Coupon';
           codeInput.value = trigger.getAttribute('data-coupon-code') || '';
           typeInput.value = trigger.getAttribute('data-coupon-type') || 'Order Value';
-          discountInput.value = trigger.getAttribute('data-coupon-discount') || '';
+          discounttypeInput.value = trigger.getAttribute('data-coupon-discount_type') || '';
+           discountvalueInput.value = trigger.getAttribute('data-coupon-discount_value') || '';
           validityInput.value = trigger.getAttribute('data-coupon-validity') || '';
           statusInput.value = trigger.getAttribute('data-coupon-status') || 'Active';
           descriptionInput.value = trigger.getAttribute('data-coupon-description') || '';
@@ -123,7 +125,8 @@
         submitLabel.textContent = 'Save Coupon';
         codeInput.value = '';
         typeInput.value = 'Order Value';
-        discountInput.value = '';
+        discounttypeInput.value = '';
+        discountvalueInput.value = '';
         validityInput.value = '';
         statusInput.value = 'Active';
         descriptionInput.value = '';

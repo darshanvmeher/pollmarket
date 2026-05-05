@@ -237,4 +237,296 @@ public function get_product_by_id($id)
 
     return $this->db->get()->row_array();
 }
+
+// Get products by category
+
+
+/*
+public function get_products_by_category($category_id)
+{
+    $this->db->select('
+        p.id,
+        p.product_name,
+        p.price,
+        p.strike_price,
+        p.description,
+        p.stock,
+        p.badge,
+        p.rating,
+        p.status,
+        sc.id as sub_category_id,
+        sc.sub_category_name,
+        c.id as category_id,
+        c.category_name
+    ');
+    
+    $this->db->from('product_tbl p');
+    $this->db->join('sub_category_tbl sc', 'sc.id = p.sub_category_id', 'left');
+    $this->db->join('category_tbl c', 'c.id = sc.category_id', 'left');
+
+    $this->db->where('c.id', $category_id);
+    $this->db->where('p.delete_status', 0);
+
+    $products = $this->db->get()->result_array();
+
+    // Attach media and attributes
+    foreach ($products as &$product) {
+        $product['media'] = $this->get_product_media($product['id']);
+        $product['attributes'] = $this->get_product_attributes($product['id']);
+    }
+
+    return $products;
+}*/
+
+/*
+
+public function get_products_by_category($category_id = null)
+{
+    $this->db->select('
+        p.id,
+        p.product_name,
+        p.price,
+        p.strike_price,
+        p.description,
+        p.stock,
+        p.badge,
+        p.rating,
+        p.status,
+        sc.id as sub_category_id,
+        sc.sub_category_name,
+        c.id as category_id,
+        c.category_name
+    ');
+    
+    $this->db->from('product_tbl p');
+    $this->db->join('sub_category_tbl sc', 'sc.id = p.sub_category_id', 'left');
+    $this->db->join('category_tbl c', 'c.id = sc.category_id', 'left');
+
+    // ✅ Apply filter ONLY if category exists
+    if (!empty($category_id) && $category_id != 'all') {
+        $this->db->where('c.id', $category_id);
+    }
+
+    $this->db->where('p.delete_status', 0);
+
+    $products = $this->db->get()->result_array();
+
+    // ✅ Attach media & attributes
+    foreach ($products as &$product) {
+        $product['media'] = $this->get_product_media($product['id']);
+        $product['attributes'] = $this->get_product_attributes($product['id']);
+    }
+
+    return $products;
+}*/
+
+/*
+public function get_products_by_category($category_id = null)
+{
+    $this->db->select('*');
+    $this->db->from('product_tbl p');
+
+    if (!empty($category_id) && $category_id != 'all') {
+        $this->db->where('p.category_id', $category_id); // ✅ FIX
+    }
+
+    $this->db->where('p.delete_status', 0);
+
+    $products = $this->db->get()->result_array();
+
+    foreach ($products as &$product) {
+        $product['media'] = $this->get_product_media($product['id']);
+        $product['attributes'] = $this->get_product_attributes($product['id']);
+    }
+
+    return $products;
+}*/
+
+/*
+public function get_products_by_category($category_id = null)
+{
+    $this->db->select('
+        p.*,
+        c.category_name
+    ');
+    
+    $this->db->from('product_tbl p');
+    $this->db->join('category_tbl c', 'c.id = p.category_id', 'left');
+
+    if (!empty($category_id) && $category_id != 'all') {
+        $this->db->where('p.category_id', $category_id); // ✅ correct
+    }
+
+    $this->db->where('p.delete_status', 0);
+
+    $products = $this->db->get()->result_array();
+
+    foreach ($products as &$product) {
+        $product['media'] = $this->get_product_media($product['id']);
+        $product['attributes'] = $this->get_product_attributes($product['id']);
+    }
+
+    return $products;
+}
+*/
+
+/*
+public function get_products_by_category($category_id = null)
+{
+    $this->db->select('
+        p.*,
+        c.category_name
+    ');
+    
+    $this->db->from('product_tbl p');
+    $this->db->join('sub_category_tbl sc', 'sc.id = p.sub_category_id', 'left'); // ✅ FIX
+    $this->db->join('category_tbl c', 'c.id = sc.category_id', 'left');
+
+    if (!empty($category_id) && $category_id != 'all') {
+        $this->db->where('c.id', $category_id);
+    }
+
+    $this->db->where('p.delete_status', 0);
+
+    $products = $this->db->get()->result_array();
+
+    foreach ($products as &$product) {
+        $product['media'] = $this->get_product_media($product['id']);
+        $product['attributes'] = $this->get_product_attributes($product['id']);
+    }
+
+    return $products;
+}
+    */
+
+
+/*
+public function get_products_by_category($category_id = null)
+{
+    $this->db->select('
+        p.*,
+        c.category_name
+    ');
+    
+    $this->db->from('product_tbl p');
+    $this->db->join('sub_category_tbl sc', 'sc.id = p.sub_category_id', 'left');
+    $this->db->join('category_tbl c', 'c.id = sc.category_id', 'left');
+
+    // ✅ CHANGE THIS LINE
+    if (!empty($category_id) && $category_id != 'all') {
+        $this->db->where('sc.category_id', $category_id);
+    }
+
+    $this->db->where('p.delete_status', 0);
+
+    $products = $this->db->get()->result_array();
+
+    foreach ($products as &$product) {
+        $product['media'] = $this->get_product_media($product['id']);
+        $product['attributes'] = $this->get_product_attributes($product['id']);
+    }
+
+    return $products;
+}
+
+
+
+
+public function get_products_by_category($category_id = null)
+{
+    $this->db->select('
+        p.id,
+        p.product_name,
+        p.price,
+        p.strike_price,
+        p.description,
+        p.stock,
+        p.badge,
+        p.rating,
+        p.status,
+        p.sub_category_id,
+        c.category_name
+    ');
+    
+    $this->db->from('product_tbl p');
+
+    // ✅ Correct joins
+    $this->db->join('sub_category_tbl sc', 'sc.id = p.sub_category_id', 'left');
+    $this->db->join('category_tbl c', 'c.id = sc.category_id', 'left');
+
+    // ✅ Category filter
+    if (!empty($category_id) && $category_id != 'all') {
+        $this->db->where('sc.category_id', $category_id);
+    }
+
+    // ✅ Only active / non-deleted products
+    $this->db->where('p.delete_status', 0);
+
+    // (Optional but recommended)
+    $this->db->where('sc.delete_status', 0);
+    $this->db->where('c.delete_status', 0);
+
+    $products = $this->db->get()->result_array();
+
+    // ✅ Attach media & attributes safely
+    foreach ($products as &$product) {
+        $product['media'] = $this->get_product_media($product['id']) ?? [];
+        $product['attributes'] = $this->get_product_attributes($product['id']) ?? [];
+    }
+
+    return $products;
+}*/
+
+public function get_products_by_category($category_id = null)
+{
+    $this->db->select('
+        p.id,
+        p.product_name,
+        p.price,
+        p.strike_price,
+        p.description,
+        p.stock,
+        p.badge,
+        p.rating,
+        p.status,
+        p.sub_category_id,
+        c.category_name
+    ');
+    
+    $this->db->from('product_tbl p');
+
+    // ✅ Correct join
+    $this->db->join('sub_category_tbl sc', 'sc.id = p.sub_category_id', 'left');
+    $this->db->join('category_tbl c', 'c.id = sc.category_id', 'left');
+
+    // ✅ IMPORTANT FIX
+    if (!empty($category_id) && $category_id != 'all') {
+        $this->db->group_start();
+        $this->db->where('sc.category_id', $category_id);
+        $this->db->or_where('p.sub_category_id IN (
+            SELECT id FROM sub_category_tbl WHERE category_id = '.$this->db->escape_str($category_id).'
+        )', NULL, FALSE);
+        $this->db->group_end();
+    }
+
+    $this->db->where('p.delete_status', 0);
+
+    $products = $this->db->get()->result_array();
+
+    foreach ($products as &$product) {
+        $product['media'] = $this->get_product_media($product['id']) ?? [];
+        $product['attributes'] = $this->get_product_attributes($product['id']) ?? [];
+    }
+
+    return $products;
+}
+
+public function get_subcategories($category_id)
+{
+    $this->db->where('category_id', $category_id);
+    $this->db->where('delete_status', 0);
+    $this->db->where('status', 'Active');
+
+    return $this->db->get('sub_category_tbl')->result_array();
+}
 }

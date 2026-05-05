@@ -210,7 +210,7 @@ $(document).on("click", "[data-wishlist-add]", function (e) {
 
 
 //add to cart ajax
-
+<!--
 <script>
 $(document).ready(function () {
     $('[data-add-cart]').on('click', function () {
@@ -256,5 +256,80 @@ $(document).ready(function () {
             }
         });
     });
+});
+</script>
+    
+
+        -->
+
+
+        <script>
+$(document).ready(function () {
+
+    $(document).on('click', '[data-add-cart]', function () {
+
+        const btn = $(this);
+        const productId = btn.data('add-cart');
+
+        // 🔥 get qty (if exists, else default = 1)
+        let qty = 1;
+        if ($('#qty').length) {
+            qty = parseInt($('#qty').val()) || 1;
+        }
+
+        let token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Please login first");
+            return;
+        }
+
+        // 🔥 disable button to prevent multiple clicks
+        btn.prop('disabled', true).text('Adding...');
+
+        $.ajax({
+            url: "<?=base_url('index.php/Api_handler/add_to_cart')?>",
+            type: "POST",
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            data: {
+                product_id: productId,
+                quantity: qty
+            },
+
+            success: function (res) {
+
+                if (res.status) {
+
+                    // ✅ success message
+                    alert(res.message);
+
+                    // ✅ update cart count
+                    if (typeof loadCartCount === "function") {
+                        loadCartCount();
+                    }
+
+                    // ✅ OPTIONAL: change button text
+                    btn.text('Added ✔');
+
+                    // ✅ OPTIONAL: redirect
+                    // window.location.href = "<?= base_url('index.php/frontend/cart') ?>";
+
+                } else {
+                    alert(res.message);
+                    btn.prop('disabled', false).text('Add to Cart');
+                }
+            },
+
+            error: function () {
+                alert("Something went wrong");
+                btn.prop('disabled', false).text('Add to Cart');
+            }
+        });
+
+    });
+
 });
 </script>

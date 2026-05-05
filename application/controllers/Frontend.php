@@ -41,7 +41,7 @@ class Frontend extends CI_Controller
 
         return $user_id;
     }
-
+/*
     private function calculate_checkout_totals($items, $state)
     {
         $subtotal = 0;
@@ -70,7 +70,7 @@ class Frontend extends CI_Controller
             'total' => $subtotal + $shipping + $gst
         );
     }
-
+*/
    /* private function build_dummy_checkout_address($customer)
     {
         return array(
@@ -86,7 +86,7 @@ class Frontend extends CI_Controller
         );
     }*/
 
-   /* private function product_catalog()
+    /*private function product_catalog()
     {
         return array(
             array('name' => 'Heavy Duty Garbage Bags', 'category' => 'Plastic Bags', 'price' => '₹349', 'old_price' => '₹399', 'badge' => 'Best Seller', 'rating' => '4.8', 'image' => 'garbage-bag', 'image_url' => base_url('assets/frontend/images/products/garbage-bag.png')),
@@ -97,7 +97,7 @@ class Frontend extends CI_Controller
             array('name' => 'Cling Film Roll', 'category' => 'Cling Films', 'price' => '₹579', 'old_price' => '₹699', 'badge' => 'New', 'rating' => '4.7', 'image' => 'cling-film', 'image_url' => base_url('assets/frontend/images/products/cling-film.jpg')),
             array('name' => 'Office Stationery Kit', 'category' => 'Stationery', 'price' => '₹1,499', 'old_price' => '₹1,799', 'badge' => 'Combo', 'rating' => '4.9', 'image' => 'kit', 'image_url' => base_url('assets/frontend/images/products/stationery.jpg'))
         );
-    }*/
+    }/
 
    /*private function find_product($slug)
     {
@@ -277,19 +277,77 @@ class Frontend extends CI_Controller
 
         $this->load->view('frontend/pages/home', $data);
     }
-
+/*
     public function shop()
-    {
+    { 
+        $this->load->model('Products_model');
+        $this->load->model('Category_model');
+        $this->load->model('Sub_category_model');
+        $category_id = $this->input->post('category_id');
+
+if ($category_id == 'all') {
+    $products = $this->Products_model->get_all_products();
+} else {
+    $products = $this->Products_model->get_products_by_category($category_id);
+}
         $data = array(
             'title' => 'Shop',
             'nav_items' => $this->nav_items(),
-            'products' => $this->product_catalog(),
-            'categories' => array('All', 'Plastic Bags', 'Stationery', 'Silver Foil', 'RFID Seals', 'Paper Bags')
+            'products' => $products,
+            'categories' => $this->Category_model->get_categories(),
+            'subcategories' => $this->Sub_category_model->get_sub_categories()
+           // 'categories' => $this->Category_model->get_categories(),
+            //'sub_categories' => $this->Sub_category_model->get_sub_categories()
         );
 
         $this->load->view('frontend/pages/shop', $data);
-    }
+    }*/
+/*
+public function shop()
+{ 
+    $this->load->model('Products_model');
+    $this->load->model('Category_model');
+    $this->load->model('Sub_category_model');
 
+    $category_id = $this->input->get('id') ?? 'all';
+
+    // ✅ Only ONE function call
+    $products = $this->Products_model->get_products_by_category($category_id);
+
+    $data = array(
+        'title' => 'Shop',
+        'nav_items' => $this->nav_items(),
+        'products' => $products,
+        'categories' => $this->Category_model->get_categories(),
+        'subcategories' => $this->Sub_category_model->get_sub_categories(),
+        'active_category' => $category_id
+    );
+
+    $this->load->view('frontend/pages/shop', $data);
+}*/
+
+public function shop()
+{ 
+    $this->load->model('Products_model');
+    $this->load->model('Category_model');
+    $this->load->model('Sub_category_model');
+
+    $category_id = $this->input->get('id') ?? 'all';
+
+    // ✅ IMPORTANT
+    $products = $this->Products_model->get_products_by_category($category_id);
+
+    $data = array(
+        'title' => 'Shop',
+        'nav_items' => $this->nav_items(),
+        'products' => $products,
+        'categories' => $this->Category_model->get_categories(),
+        'subcategories' => $this->Sub_category_model->get_sub_categories(),
+        'active_category' => $category_id
+    );
+
+    $this->load->view('frontend/pages/shop', $data);
+}
     /*public function product($id')
     {   
          $this->load->model('Products_model');
@@ -367,86 +425,137 @@ class Frontend extends CI_Controller
         $this->load->view('frontend/pages/cart', $data);
     }*/
 
-/*
-    public function cart()
-{
-    // echo $this->session->userdata('user_id');
-    //exit;
-    $this->load->model('Cart_model');
-    $this->load->model('Customer_model');
-
-    // ✅ get user id from session
-    $user_id = $this->session->userdata('user_id');
-
-    // ✅ check login
-    //if (!$user_id) {
-      //  redirect('frontend/login');
-    //}
-
-    // ✅ get cart items
-    $items = $this->Cart_model->get_cart_by_user_id($user_id);
-
-    $data = array(
-        'title' => 'Cart',
-        'nav_items' => $this->nav_items(),
-        'items' => $items // ❌ no array_slice needed
-    );
-
-    $this->load->view('frontend/pages/cart', $data);
-}*/
-
 
 public function cart()
 {
     $user_id = $this->session->userdata('user_id');
 
-    // OPTIONAL: enable later
-    // if (!$user_id) {
-    //     redirect('frontend/login');
-    // }
-
     $items = $this->Cart_model->get_cart_by_user_id($user_id);
 
     $customer = $this->Customer_model->get_customer_by_id($user_id);
-    $user_state = $customer['state'] ?? 'Other';
 
-    $data = array(
+    // 🔥 SAME STATE AS CHECKOUT (FIX)
+    $addresses = $this->Address_model->get_addresses($user_id);
+    $selected_address = !empty($addresses) ? $addresses[0] : null;
+
+    $user_state = $selected_address['state'] ?? ($customer['state'] ?? 'Other');
+
+    // ✅ COUPON
+    $coupon = $this->session->userdata('coupon_data');
+
+    // ✅ CALCULATE
+    $summary = $this->calculate_checkout_totals($items, $user_state, $coupon);
+
+    $data = [
         'title' => 'Cart',
         'nav_items' => $this->nav_items(),
         'items' => $items,
-        'user_state' => $user_state // 🔥 IMPORTANT
-    );
+        'user_state' => $user_state,
+        'cart_summary' => $summary,
+        'coupon' => $coupon
+    ];
 
     $this->load->view('frontend/pages/cart', $data);
 }
-    public function checkout()
-    {
-        $user_id = $this->require_customer_login();
-        $customer = $this->Customer_model->get_customer_by_id($user_id);
-        $items = $this->Cart_model->get_cart_by_user_id($user_id);
-        $addresses = $this->Address_model->get_addresses($user_id);
 
-        if (empty($addresses)) {
-           // $addresses[] = $this->build_dummy_checkout_address($customer ?: array());
-           $addresses=[];
+
+private function calculate_checkout_totals($items, $state = 'Other', $coupon = [])
+{
+    $subtotal = 0;
+    $item_count = 0;
+
+    foreach ($items as $item) {
+        $price = (float) ($item['price'] ?? 0);
+        $qty   = (int) ($item['quantity'] ?? 1);
+
+        $subtotal += $price * $qty;
+        $item_count += $qty;
+    }
+
+    // DISCOUNT
+    $discount = 0;
+
+    if (!empty($coupon) && isset($coupon['discount_type'], $coupon['discount_value'])) {
+
+        if ($coupon['discount_type'] == 'percent') {
+            $discount = ($subtotal * $coupon['discount_value']) / 100;
+        } else {
+            $discount = $coupon['discount_value'];
         }
 
-        $selected_address = !empty($addresses) ? $addresses[0] : null;
-        $selected_state = $selected_address['state'] ?? ($customer['state'] ?? 'Other');
-        $summary = $this->calculate_checkout_totals($items, $selected_state);
-
-        $data = array(
-            'title' => 'Checkout',
-            'nav_items' => $this->nav_items(),
-            'customer' => $customer,
-            'items' => $items,
-            'addresses' => $addresses,
-            'selected_address' => $selected_address,
-            'summary' => $summary
-        );
-
-        $this->load->view('frontend/pages/checkout', $data);
+        if ($discount > $subtotal) {
+            $discount = $subtotal;
+        }
     }
+
+    $after_discount = max(0, $subtotal - $discount);
+
+    // ✅ GST FIX (IMPORTANT)
+    $cgst = $sgst = $igst = $gst = 0;
+
+    $normalized_state = strtolower(trim($state));
+
+    if (strpos($normalized_state, 'maharashtra') !== false) {
+        $cgst = ($after_discount * 2.5) / 100;
+        $sgst = ($after_discount * 2.5) / 100;
+        $gst  = $cgst + $sgst;
+    } else {
+        $igst = ($after_discount * 5) / 100;
+        $gst  = $igst;
+    }
+
+    $shipping = 99;
+    $total = $after_discount + $gst + $shipping;
+
+    return [
+        'item_count'      => $item_count,
+        'subtotal'        => round($subtotal),
+        'discount'        => round($discount),
+        'after_discount'  => round($after_discount),
+        'gst'             => round($gst),
+        'cgst'            => round($cgst),
+        'sgst'            => round($sgst),
+        'igst'            => round($igst),
+        'shipping'        => $shipping,
+        'total'           => round($total)
+    ];
+}
+
+
+
+public function checkout()
+{
+    $user_id = $this->require_customer_login();
+
+    $customer  = $this->Customer_model->get_customer_by_id($user_id);
+    $items     = $this->Cart_model->get_cart_by_user_id($user_id);
+    $addresses = $this->Address_model->get_addresses($user_id);
+
+    // ✅ SELECT ADDRESS
+    $selected_address = !empty($addresses) ? $addresses[0] : null;
+
+    // ✅ SAME STATE LOGIC
+    $user_state = $selected_address['state'] ?? ($customer['state'] ?? 'Other');
+
+    // ✅ COUPON
+    $coupon = $this->session->userdata('coupon_data');
+
+    // ✅ CALCULATE
+    $summary = $this->calculate_checkout_totals($items, $user_state, $coupon);
+
+    $data = [
+        'title' => 'Checkout',
+        'customer' => $customer,
+        'nav_items' => $this->nav_items(),
+        'items' => $items,
+        'addresses' => $addresses,
+        'selected_address' => $selected_address,
+        'summary' => $summary,
+        'coupon' => $coupon
+    ];
+
+    $this->load->view('frontend/pages/checkout', $data);
+}
 
     public function save_address()
     {
@@ -805,8 +914,8 @@ public function cart()
         $data = array(
             'title' => 'Bulk Buyers',
             'nav_items' => $this->nav_items(),
-            'hero_products' => array_slice($this->product_catalog(), 0, 3),
-            'hero' => array(
+           // 'hero_products' => array_slice($this->product_catalog(), 0, 3),
+          /*  'hero' => array(
                 'title' => 'Bulk pricing, reliable supply, and faster reordering for Indian businesses',
                 'subtitle' => 'A dedicated procurement landing page for wholesalers, distributors, retail chains, and GST-registered business accounts that buy in volume.'
             ),
@@ -842,9 +951,9 @@ public function cart()
                 array('name' => 'Prime Supplies', 'tag' => 'Corporate'),
                 array('name' => 'Nova Retail', 'tag' => 'Retail Group'),
                 array('name' => 'Shakti Traders', 'tag' => 'Distributor')
-            )
+            )*/
         );
 
-        $this->load->view('frontend/pages/bulk_buyers', $data);
+        $this->load->view('frontend/pages/contact', $data);
     }
 }

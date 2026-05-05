@@ -967,7 +967,8 @@ public function adding_promotion()
     $postData = [
         'coupon_code' => $this->input->post('coupon_code'),
         'coupon_type' => $this->input->post('coupon_type'),
-        'discount' => $this->input->post('discount'),
+        'discount_type' => $this->input->post('discount_type'),
+        'discount_value' => $this->input->post('discount_value'),
         'validity' => $this->input->post('validity'),
         'status' => $this->input->post('status'),
         'description' => $this->input->post('description')
@@ -1043,7 +1044,8 @@ public function updating_promotion()
         'id' => $this->input->post('id'),
         'coupon_code' => $this->input->post('coupon_code'),
         'coupon_type' => $this->input->post('coupon_type'),
-        'discount' => $this->input->post('discount'),
+        'discount_type' => $this->input->post('discount_type'),
+        'discount_value' => $this->input->post('discount_value'),
         'validity' => $this->input->post('validity'),
         'status' => $this->input->post('status'),
         'description' => $this->input->post('description')

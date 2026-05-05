@@ -21,7 +21,8 @@
             <tr>
                 <th>Coupon Code</th>
                 <th>Type</th>
-                <th>Discount</th>
+                <th>Discount Type</th>
+                <th>Discount Value</th>
                 <th>Validity</th>
                 <th>Description</th>
                 <th>Status</th>
@@ -48,7 +49,8 @@
                     </td>
                  
                     <td><?php echo html_escape($promotion['coupon_type']); ?></td>
-                    <td><?php echo html_escape($promotion['discount']); ?></td>
+                    <td><?php echo html_escape($promotion['discount_type']); ?></td>
+                    <td><?php echo html_escape($promotion['discount_value']); ?></td>
                     <td><?php echo html_escape($promotion['validity']); ?></td>
                     <td><?php echo html_escape($promotion['description']); ?></td>
                     <td><span class="status-pill <?php echo $status_class; ?>"><?php echo html_escape($promotion['status']); ?></span></td>
@@ -62,7 +64,8 @@
                             data-coupon-id="<?php echo $promotion['id']; ?>"
                             data-coupon-code="<?php echo html_escape($promotion['coupon_code']); ?>"
                             data-coupon-type="<?php echo html_escape($promotion['coupon_type']); ?>"
-                            data-coupon-discount="<?php echo html_escape($promotion['discount']); ?>"
+                            data-coupon-discount-type="<?php echo html_escape($promotion['discount_type']); ?>"
+                            data-coupon-discount-value="<?php echo html_escape($promotion['discount_value']); ?>"
                             data-coupon-validity="<?php echo html_escape($promotion['validity']); ?>"
                             data-coupon-status="<?php echo html_escape($promotion['status']); ?>"
                             data-coupon-description="<?php echo html_escape($promotion['description']); ?>"
@@ -90,6 +93,8 @@
         <div class="modal-content category-modal">
                         <form id="couponForm" class="row g-3">
 
+                        <input type="hidden" id="coupon_id" name="id">
+ 
 
             <div class="modal-header border-0 pb-0">
                 <div>
@@ -98,43 +103,87 @@
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body pt-3">
-                <input type="hidden" name="id" id="coupon_id">
-                        <div class="col-md-6">
-                        <label class="form-label">Coupon Code</label>
-                        <input type="id" class="form-control" data-coupon-input="code" name="coupon_code" placeholder="SUMMER10" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Coupon Type</label>
-                        <select class="form-select" data-coupon-input="type" name="coupon_type" required>
-                            <?php foreach ($coupon_types as $coupon_type): ?>
-                                <option value="<?php echo html_escape($coupon_type); ?>"><?php echo html_escape($coupon_type); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                            
-                    <div class="col-md-6">
-                        <label class="form-label">Discount</label>
-                        <input type="text" class="form-control" data-coupon-input="discount" name="discount"placeholder="10% or $5 off" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Validity</label>
-                        <input type="text" class="form-control" data-coupon-input="validity" name="validity" placeholder="Mar 01 - Mar 31" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Status</label>
-                        <select class="form-select" data-coupon-input="status" name="status" required>
-                            <?php foreach ($coupon_status_options as $coupon_status): ?>
-                                <option value="<?php echo html_escape($coupon_status); ?>"><?php echo html_escape($coupon_status); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" rows="4" data-coupon-input="description" name="description" placeholder="Describe this coupon (e.g. 10% off on electronics)" required></textarea>
-                    </div>
-              
-            </div>
+    <div class="modal-body pt-3">
+
+    <!-- Coupon Code -->
+    <div class="col-md-6">
+        <label class="form-label">Coupon Code</label>
+        <input type="text" class="form-control" 
+               data-coupon-input="code" 
+               name="coupon_code" 
+               placeholder="SUMMER10" required>
+    </div>
+
+    <!-- Coupon Type -->
+    <div class="col-md-6">
+        <label class="form-label">Coupon Type</label>
+        <select class="form-select" 
+                data-coupon-input="type" 
+                name="coupon_type" required>
+            <?php foreach ($coupon_types as $coupon_type): ?>
+                <option value="<?php echo html_escape($coupon_type); ?>">
+                    <?php echo html_escape($coupon_type); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- Discount Type -->
+    <div class="col-md-6">
+        <label class="form-label">Discount Type</label>
+        <select class="form-select" 
+                data-coupon-input="discount_type" 
+                name="discount_type" required>
+            <option value="percent">Percentage</option>
+            <option value="flat">Flat Amount</option>
+        </select>
+    </div>
+
+
+    <!-- Discount Value -->
+    <div class="col-md-6">
+        <label class="form-label">Discount Value</label>
+        <input type="number" class="form-control" 
+               data-coupon-input="discount_value" 
+               name="discount_value" 
+               placeholder="10 or 100" required>
+    </div>
+
+            <!--Validity-->
+    
+            <div class="col-md-6">
+    <label class="form-label">Validity</label>
+    <input type="text" class="form-control" 
+           data-coupon-input="validity" 
+           name="validity" 
+           placeholder="01May-20May" required>
+</div>
+
+    <!-- Status -->
+    <div class="col-md-6">
+        <label class="form-label">Status</label>
+        <select class="form-select" 
+                data-coupon-input="status" 
+                name="status" required>
+            <?php foreach ($coupon_status_options as $coupon_status): ?>
+                <option value="<?php echo html_escape($coupon_status); ?>">
+                    <?php echo html_escape($coupon_status); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- Description -->
+    <div class="col-12">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" rows="4" 
+                  data-coupon-input="description" 
+                  name="description"
+                  placeholder="Describe this coupon"
+                  required></textarea>
+    </div>
+
+</div>
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary" data-coupon-submit-label>Save Coupon</button>
@@ -203,44 +252,7 @@ function showUpdatePopup(message, error = false) {
     }, 2000);
 }
 </script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
 
-    const form = document.getElementById('couponForm');
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        const id = document.getElementById('coupon_id').value;
-
-        const url = id
-            ? "<?= base_url('index.php/middle/updating_promotion'); ?>"
-            : "<?= base_url('index.php/middle/adding_promotion'); ?>";
-
-        fetch(url, {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status) {
-                showUpdatePopup(data.message || "Success ✅");
-
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1200);
-            } else {
-                showUpdatePopup(data.message || "Failed ❌", true);
-            }
-        })
-        .catch(() => {
-            showUpdatePopup("Server error ❌", true);
-        });
-    });
-
-});
-</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -256,7 +268,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const mode = button.getAttribute('data-coupon-mode');
         const code = button.getAttribute('data-coupon-code');
         const type = button.getAttribute('data-coupon-type');
-        const discount = button.getAttribute('data-coupon-discount');
+        const discount_value = button.getAttribute('data-coupon-discount-value'); // ✅ new
+        const discount_type = button.getAttribute('data-coupon-discount-type'); // ✅ new
         const validity = button.getAttribute('data-coupon-validity');
         const status = button.getAttribute('data-coupon-status');
         const description = button.getAttribute('data-coupon-description');
@@ -267,7 +280,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (mode === 'edit') {
             document.querySelector('[name="coupon_code"]').value = code;
             document.querySelector('[name="coupon_type"]').value = type;
-            document.querySelector('[name="discount"]').value = discount;
+            document.querySelector('[name="discount_type"]').value = discount_type; // ✅ new
+            document.querySelector('[name="discount_value"]').value = discount_value; // ✅ new
             document.querySelector('[name="validity"]').value = validity;
             document.querySelector('[name="status"]').value = status;
             document.querySelector('[name="description"]').value = description;
@@ -344,6 +358,76 @@ document.addEventListener('DOMContentLoaded', function () {
             showUpdatePopup('Server error ❌', true);
         });
 
+    });
+
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const form = document.getElementById('couponForm');
+
+    // ✅ EDIT BUTTON CLICK (SET DATA IN FORM)
+    document.querySelectorAll('[data-coupon-mode="edit"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+
+            document.getElementById('coupon_id').value = this.dataset.couponId || '';
+
+            document.querySelector('[name="coupon_code"]').value = this.dataset.couponCode || '';
+            document.querySelector('[name="discount_value"]').value = this.dataset.couponDiscountValue || '';
+            document.querySelector('[name="discount_type"]').value = this.dataset.couponDiscountType || '';
+            document.querySelector('[name="coupon_type"]').value = this.dataset.couponType || '';
+            document.querySelector('[name="validity"]').value = this.dataset.couponValidity || '';
+            document.querySelector('[name="status"]').value = this.dataset.couponStatus || '';
+            document.querySelector('[name="description"]').value = this.dataset.couponDescription || '';
+        });
+    });
+
+    // ✅ FORM SUBMIT
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        // ✅ GET ID SAFELY
+        const id = document.getElementById('coupon_id')?.value?.trim();
+
+        // ✅ DECIDE API
+        const url = (id && id !== "")
+            ? "<?= base_url('index.php/middle/updating_promotion'); ?>"
+            : "<?= base_url('index.php/middle/adding_promotion'); ?>";
+
+        // ✅ DEBUG (optional)
+        console.log("Submitting ID:", id, "URL:", url);
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status) {
+                showUpdatePopup(data.message || "Success ✅");
+
+                // ✅ RESET FORM AFTER SAVE
+                form.reset();
+                document.getElementById('coupon_id').value = "";
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1200);
+            } else {
+                showUpdatePopup(data.message || "Failed ❌", true);
+            }
+        })
+        .catch(() => {
+            showUpdatePopup("Server error ❌", true);
+        });
     });
 
 });

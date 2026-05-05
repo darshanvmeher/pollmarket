@@ -204,35 +204,50 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                 </div>
                 <div class="d-flex justify-content-between py-2">
                     <span>Subtotal</span>
-                    <strong id="checkoutSubtotal"><?php echo '&#8377;' . number_format((float) ($summary['subtotal'] ?? 0), 2); ?></strong>
+                    <!--<strong id="checkoutSubtotal"><?php echo '&#8377;' . number_format((float) ($summary['subtotal'] ?? 0), 2); ?></strong>-->
+                    <strong id="checkoutSubtotal"> ₹<?= number_format($summary['subtotal'], 2); ?></strong>
                 </div>
-                <div class="d-flex justify-content-between py-2">
-                    <span>Shipping</span>
-                    <strong id="checkoutShipping"><?php echo '&#8377;' . number_format((float) ($summary['shipping'] ?? 0), 2); ?></strong>
+
+                 <div class="d-flex justify-content-between py-2">
+                    <span>Discount</span>
+                    <!-- <strong id="checkoutDiscount">-<?php echo '&#8377;' . number_format((float) ($summary['discount'] ?? 0), 2); ?></strong> -->
+            
+                    <strong id="checkoutDiscount">₹<?= number_format($summary['discount'], 2); ?></strong>
                 </div>
+
+    
                 <div class="d-flex justify-content-between py-2">
                     <span>GST</span>
-                    <strong id="checkoutGst"><?php echo '&#8377;' . number_format((float) ($summary['gst'] ?? 0), 2); ?></strong>
+                    <strong id="checkoutGst">₹<?= number_format($summary['gst'], 2); ?></strong>
+                  <!--  <strong id="checkoutGst"><?php echo '&#8377;' . number_format((float) ($summary['gst'] ?? 0), 2); ?></strong>-->
                 </div>
                 <div id="intraStateTaxRows" class="<?php echo strtolower(trim($selected_state)) === 'maharashtra' ? '' : 'd-none'; ?>">
                     <div class="d-flex justify-content-between small text-muted">
                         <span>CGST (2.5%)</span>
-                        <span id="checkoutCgst"><?php echo '&#8377;' . number_format((float) ($summary['cgst'] ?? 0), 2); ?></span>
+                        <span id="checkoutCgst">₹<?= number_format($summary['cgst'], 2); ?></span>
                     </div>
                     <div class="d-flex justify-content-between small text-muted">
                         <span>SGST (2.5%)</span>
-                        <span id="checkoutSgst"><?php echo '&#8377;' . number_format((float) ($summary['sgst'] ?? 0), 2); ?></span>
+                        <span id="checkoutSgst">₹<?= number_format($summary['sgst'], 2); ?></span>
                     </div>
                 </div>
                 <div id="interStateTaxRows" class="<?php echo strtolower(trim($selected_state)) === 'maharashtra' ? 'd-none' : ''; ?>">
                     <div class="d-flex justify-content-between small text-muted">
                         <span>IGST (5%)</span>
-                        <span id="checkoutIgst"><?php echo '&#8377;' . number_format((float) ($summary['igst'] ?? 0), 2); ?></span>
+                        <span id="checkoutIgst">₹<?= number_format($summary['igst'], 2); ?></span>
                     </div>
                 </div>
+
+                 <div class="d-flex justify-content-between py-2">
+                    <span>Shipping</span>
+                    <strong id="checkoutShipping"><?php echo '&#8377;' . number_format((float) ($summary['shipping'] ?? 0), 2); ?></strong>
+                </div>
+                
                 <div class="d-flex justify-content-between py-2 border-top mt-2 pt-3">
                     <span>Total</span>
-                    <strong id="checkoutTotal"><?php echo '&#8377;' . number_format((float) ($summary['total'] ?? 0), 2); ?></strong>
+                   <!-- <strong id="checkoutTotal"><?php echo '&#8377;' . number_format((float) ($summary['total'] ?? 0), 2); ?></strong>-->
+                    
+                    <strong id="checkoutTotal"> ₹<?= number_format($summary['total'], 2); ?></strong>
                 </div>
 
                 <?php if (!empty($items)): ?>
@@ -241,9 +256,9 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
                             <div class="checkout-summary-item">
                                 <div>
                                     <div class="fw-semibold"><?php echo html_escape($item['product_name'] ?? 'Product'); ?></div>
-                                    <div class="text-muted small">Qty <?php echo (int) ($item['qty'] ?? 1); ?></div>
+                                    <div class="text-muted small">Qty <?php echo (int) ($item['quantity'] ?? 1); ?></div>
                                 </div>
-                                <div class="fw-semibold"><?php echo '&#8377;' . number_format(((float) ($item['price'] ?? 0) * (int) ($item['qty'] ?? 1)), 2); ?></div>
+                                <div class="fw-semibold"><?php echo '&#8377;' . number_format(((float) ($item['price'] ?? 0) * (int) ($item['quantity'] ?? 1)), 2); ?></div>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -277,8 +292,8 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
     const addressFormCopy = $('[data-address-form-copy]');
     const addressIdInput = $('[data-address-id-input]');
     const selectedAddressIdInput = $('#selected_address_id');
-    const subtotal = Number(page.data('subtotal') || 0);
-    const shipping = Number(page.data('shipping') || 0);
+    //const subtotal = Number(page.data('subtotal') || 0);
+    //const shipping = Number(page.data('shipping') || 0);
     const createAddressUrl = <?php echo json_encode(site_url('frontend/save_address')); ?>;
     const updateAddressUrl = <?php echo json_encode(site_url('frontend/update_address')); ?>;
     const deleteAddressUrl = <?php echo json_encode(site_url('frontend/delete_address')); ?>;
@@ -412,7 +427,13 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
         `;
     }
 
-    function updateSummaryForState(state) {
+
+    
+    var subtotal = <?= $summary['subtotal'] ?? 0 ?>;
+    var discount = <?= $summary['discount'] ?? 0 ?>;
+    var shipping = <?= $summary['shipping'] ?? 99 ?>;
+
+/*    function updateSummaryForState(state) {
         const normalizedState = String(state || '').trim().toLowerCase();
         const gst = subtotal * 0.05;
         let cgst = 0;
@@ -438,6 +459,48 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
         $('#checkoutIgst').text(formatCurrency(igst));
         $('#checkoutTotal').text(formatCurrency(subtotal + shipping + gst));
     }
+    */
+
+    function updateSummaryForState(state) {
+
+    const normalizedState = String(state || '').trim().toLowerCase();
+
+    // ✅ IMPORTANT FIX
+    const afterDiscount = subtotal - discount;
+
+    let gst = afterDiscount * 0.05;
+    let cgst = 0;
+    let sgst = 0;
+    let igst = gst;
+
+    if (normalizedState === 'maharashtra') {
+
+        cgst = afterDiscount * 0.025;
+        sgst = afterDiscount * 0.025;
+        igst = 0;
+
+        $('#intraStateTaxRows').removeClass('d-none');
+        $('#interStateTaxRows').addClass('d-none');
+
+    } else {
+
+        $('#intraStateTaxRows').addClass('d-none');
+        $('#interStateTaxRows').removeClass('d-none');
+    }
+
+    $('#checkoutSubtotal').text(formatCurrency(subtotal));
+    $('#checkoutShipping').text(formatCurrency(shipping));
+
+    $('#checkoutGst').text(formatCurrency(gst));
+    $('#checkoutCgst').text(formatCurrency(cgst));
+    $('#checkoutSgst').text(formatCurrency(sgst));
+    $('#checkoutIgst').text(formatCurrency(igst));
+
+    // ✅ IMPORTANT FIX
+    $('#checkoutTotal').text(formatCurrency(afterDiscount + shipping + gst));
+}
+
+
 
     function syncSelectedAddress(card) {
         if (!card || !card.length) {
@@ -603,7 +666,10 @@ $customer_name = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastnam
 })(jQuery);
 </script>
 
+<!-- ✅ jQuery (if not already included in header) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $('#placeOrderBtn').on('click', function () {
 
@@ -637,8 +703,15 @@ $('#placeOrderBtn').on('click', function () {
 
         success: function (res) {
             if (res.status) {
-                alert("Order placed successfully!");
-                window.location.href = "<?= site_url('frontend') ?>";
+                swal .fire({
+                    icon: 'success',
+                    title: 'Order placed successfully!',
+                    text: res.message || 'Your order has been placed.'
+                }).then(() => {
+                    window.location.href = "<?= site_url('frontend') ?>";
+                });
+                // alert("Order placed successfully!");
+                // window.location.href = "<?= site_url('frontend') ?>";
             } else {
                 alert(res.message || "Order failed");
             }
