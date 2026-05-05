@@ -204,6 +204,77 @@ public function get_orders_for_admin()
     return $this->db->get()->result_array();
 }
 
+public function get_orders_for_customer($user_id)
+{
+    $select = array(
+        'o.*',
+        'COUNT(DISTINCT oi.id) as line_items_count',
+        'COALESCE(SUM(oi.quantity), 0) as total_quantity',
+        'GROUP_CONCAT(DISTINCT p.product_name ORDER BY p.product_name SEPARATOR ", ") as product_names'
+    );
+
+    $has_payment_table = $this->db->table_exists('payment_tbl');
+    $has_address_id = $this->db->field_exists('address_id', 'order_tbl');
+
+    if ($has_payment_table) {
+        $select[] = 'pay.payment_method';
+        $select[] = 'pay.payment_status';
+        $select[] = 'pay.transaction_id';
+    }
+
+    if ($has_address_id) {
+        $select[] = 'a.address';
+        $select[] = 'a.city';
+        $select[] = 'a.state';
+        $select[] = 'a.pincode';
+        $select[] = 'a.country';
+    }
+
+    $this->db->select(implode(',', $select));
+    $this->db->from('order_tbl o');
+    $this->db->join('order_items_tbl oi', 'oi.order_id = o.id AND oi.delete_status = 0', 'left');
+    $this->db->join('product_tbl p', 'p.id = oi.product_id', 'left');
+
+    if ($has_payment_table) {
+        $this->db->join('payment_tbl pay', 'pay.order_id = o.id', 'left');
+    }
+
+    if ($has_address_id) {
+        $this->db->join('address_book_tbl a', 'a.id = o.address_id', 'left');
+    }
+
+    $this->db->where('o.user_id', $user_id);
+    $this->db->where('o.delete_status', 0);
+    $this->db->group_by('o.id');
+    $this->db->order_by('o.id', 'DESC');
+
+    return $this->db->get()->result_array();
+}
+
+public function get_order_items_for_customer($order_id)
+{
+    $this->db->select('
+        oi.id,
+        oi.order_id,
+        oi.product_id,
+        oi.quantity,
+        oi.price,
+        p.product_name,
+        p.description,
+        p.badge,
+        p.rating,
+        MIN(pm.media_path) as image_url
+    ');
+    $this->db->from('order_items_tbl oi');
+    $this->db->join('product_tbl p', 'p.id = oi.product_id', 'left');
+    $this->db->join('product_media_tbl pm', 'pm.product_id = p.id AND pm.delete_status = 0', 'left');
+    $this->db->where('oi.order_id', $order_id);
+    $this->db->where('oi.delete_status', 0);
+    $this->db->group_by('oi.id');
+
+    return $this->db->get()->result_array();
+}
+
 public function get_order_detail_for_admin($order_id)
 {
     $select = array(

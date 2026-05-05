@@ -60,6 +60,7 @@ $route['frontend/cart'] = 'frontend/cart';
 $route['frontend/checkout'] = 'frontend/checkout';
 $route['frontend/wishlist'] = 'frontend/wishlist';
 $route['frontend/account'] = 'frontend/account';
+$route['frontend/orders'] = 'frontend/orders';
 $route['frontend/login'] = 'frontend/login';
 $route['frontend/register'] = 'frontend/register';
 $route['frontend/about'] = 'frontend/about';

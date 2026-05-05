@@ -11,6 +11,7 @@ class Frontend extends CI_Controller
         $this->load->model('Customer_model');
         $this->load->model('Cart_model');
         $this->load->model('Address_model');
+        $this->load->model('Order_model');
     }
 
     private function nav_items()
@@ -743,12 +744,38 @@ public function checkout()
 
     public function account()
     {
+        $user_id = $this->require_customer_login();
+        $orders = $this->Order_model->get_orders_for_customer($user_id);
+        $addresses = $this->Address_model->get_addresses($user_id);
+
         $data = array(
             'title' => 'My Account',
-            'nav_items' => $this->nav_items()
+            'nav_items' => $this->nav_items(),
+            'orders_count' => count($orders),
+            'saved_addresses_count' => count($addresses)
         );
 
         $this->load->view('frontend/pages/account', $data);
+    }
+
+    public function orders()
+    {
+        $user_id = $this->require_customer_login();
+        $customer = $this->Customer_model->get_customer_by_id($user_id);
+        $orders = $this->Order_model->get_orders_for_customer($user_id);
+
+        foreach ($orders as &$order) {
+            $order['items'] = $this->Order_model->get_order_items_for_customer((int) $order['id']);
+        }
+
+        $data = array(
+            'title' => 'My Orders',
+            'nav_items' => $this->nav_items(),
+            'customer' => $customer,
+            'orders' => $orders
+        );
+
+        $this->load->view('frontend/pages/orders', $data);
     }
 
     public function login()
