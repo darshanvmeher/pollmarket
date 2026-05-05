@@ -68,6 +68,8 @@ $route['frontend/contact'] = 'frontend/contact';
 $route['frontend/offers'] = 'frontend/offers';
 $route['frontend/categories'] = 'frontend/categories';
 $route['frontend/track-order'] = 'frontend/track_order';
+$route['track-order'] = 'frontend/track_order';
+//$route['track-order'] = 'frontend/track_order';
 $route['frontend/faq'] = 'frontend/faq';
 $route['frontend/bulk-buyers'] = 'frontend/bulk_buyers';
 

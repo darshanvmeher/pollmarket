@@ -12,6 +12,7 @@ class Frontend extends CI_Controller
         $this->load->model('Cart_model');
         $this->load->model('Address_model');
         $this->load->model('Order_model');
+        
     }
 
     private function nav_items()
@@ -22,7 +23,8 @@ class Frontend extends CI_Controller
             array('label' => 'Categories', 'url' => 'frontend/categories'),
             array('label' => 'Offers', 'url' => 'frontend/offers'),
             array('label' => 'About', 'url' => 'frontend/about'),
-            array('label' => 'Contact', 'url' => 'frontend/contact')
+            array('label' => 'Contact', 'url' => 'frontend/contact'),
+           array('label' => 'My Orders', 'url' => 'frontend/orders')
         );
     }
 

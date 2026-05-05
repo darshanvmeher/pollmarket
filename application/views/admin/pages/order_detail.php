@@ -209,9 +209,26 @@ $address_parts = array_filter(array(
     </a>
 </section>
 
-<?php if (!empty($updated)): ?>
+<!-- <?php if (!empty($updated)): ?>
     <div class="alert alert-success mt-3 mb-0">Order status updated successfully.</div>
+<?php endif; ?> -->
+
+
+
+<?php if (!empty($updated)): ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Order status updated successfully!',
+        confirmButtonColor: '#3085d6'
+    });
+});
+</script>
 <?php endif; ?>
+
 
 <section class="order-detail-layout mt-3">
     <div class="order-detail-stack">
@@ -264,7 +281,7 @@ $address_parts = array_filter(array(
                             <div>
                                 <div class="order-item-name"><?php echo html_escape($item['product_name'] ?? 'Product'); ?></div>
                                 <div class="order-item-sub">Quantity: <?php echo (int) ($item['quantity'] ?? 0); ?></div>
-                                <div class="order-item-sub">Product ID: <?php echo (int) ($item['product_id'] ?? 0); ?></div>
+                                <!-- <div class="order-item-sub">Product ID: <?php echo (int) ($item['product_id'] ?? 0); ?></div> -->
                             </div>
                             <div class="order-item-total">
                                 Rs. <?php echo number_format((float) ($item['price'] ?? 0), 2); ?>

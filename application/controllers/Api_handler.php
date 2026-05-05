@@ -2913,6 +2913,114 @@ public function get_subcategories_by_category()
 }
 
 
+/*
+public function track_order()
+{
+    $order_number = $this->input->post('order_number');
+
+    $order = $this->db->where('order_number', $order_number)
+                      ->get('order_tbl')
+                      ->row();
+
+    if ($order) {
+        $data['order_status'] = $order->status;
+    } else {
+        $data['order_status'] = "Order not found";
+    }
+
+    $this->load->view('frontend/pages/track_order', $data);
+}
 
 
+public function track_order()
+{
+    $order_number = $this->input->post('order_number');
+
+    $order = $this->db->where('id', $order_number) // or order_number if exists
+                      ->get('order_tbl')
+                      ->row();
+
+    if ($order) {
+        $data['order_status'] = $order->order_status; // ✅ FIX
+    } else {
+        $data['order_status'] = "Order not found";
+    }
+
+    $this->load->view('frontend/pages/track_order', $data);
+}
+*/
+
+/*
+public function track_order()
+{
+    //$input = $this->input->post('order_number');
+
+   
+    echo $this->input->get('order_number');
+exit;
+
+    // Convert PM-0032 → 32
+    $order_id = preg_replace('/\D/', '', $input);
+
+    $order = $this->db->where('id', $order_id)
+                      ->get('order_tbl')
+                      ->row();
+
+    if ($order) {
+        $data['order_status'] = $order->order_status;
+    } else {
+        $data['order_status'] = "Order not found";
+    }
+
+    $this->load->view('frontend/pages/track_order', $data);
+}
+*/
+
+public function track_order_api()
+{
+    header('Content-Type: application/json');
+
+    // ✅ Verify user
+    $decoded = $this->verify_token();
+    $user_id = $decoded->customer_id;
+
+    $input = $this->input->post('order_number');
+
+    if (empty($input)) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Order number required'
+        ]);
+        return;
+    }
+
+    // Convert PM-0032 → 32
+    $order_id = preg_replace('/\D/', '', $input);
+
+    if (empty($order_id)) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Invalid order number'
+        ]);
+        return;
+    }
+
+    // 🔐 SECURE QUERY
+    $order = $this->db->where('id', $order_id)
+                      ->where('user_id', $user_id) // ✅ KEY FIX
+                      ->get('order_tbl')
+                      ->row();
+
+    if ($order) {
+        echo json_encode([
+            'status' => true,
+            'order_status' => $order->order_status
+        ]);
+    } else {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Order not found'
+        ]);
+    }
+}
 }
