@@ -15,6 +15,7 @@ class Admin extends CI_Controller
         'categories' => array('label' => 'Categories', 'icon' => 'bi bi-tags', 'url' => 'admin/categories'),
         'subcategories' => array('label' => 'Subcategories', 'icon' => 'bi bi-diagram-3', 'url' => 'admin/subcategories'),
         'orders' => array('label' => 'Orders', 'icon' => 'bi bi-receipt', 'url' => 'admin/orders'),
+        'invoice' => array('label' => 'Invoice', 'icon' => 'bi bi-file-earmark-text', 'url' => 'admin/invoice'),
         'customers' => array('label' => 'Customers', 'icon' => 'bi bi-people', 'url' => 'admin/customers'),
         'inventory' => array('label' => 'Inventory', 'icon' => 'bi bi-boxes', 'url' => 'admin/inventory'),
         'suppliers' => array('label' => 'Suppliers', 'icon' => 'bi bi-truck', 'url' => 'admin/suppliers'),
@@ -205,6 +206,47 @@ class Admin extends CI_Controller
         );
 
         $this->render('order_detail', $data);
+    }
+
+    public function invoice($invoice_id = 0)
+    {
+        $invoice_id = (int) $invoice_id;
+
+        $data = array(
+            'active' => 'invoice',
+            'title' => 'Invoice',
+            'subtitle' => 'Design-only invoice preview for admin use and future generation workflow.',
+            'invoice_meta' => array(
+                'invoice_no' => 'PM-INV-2026-001',
+                'order_no' => 'PM-0007',
+                'invoice_date' => '06 May 2026',
+                'due_date' => '13 May 2026',
+                'status' => 'Draft',
+                'invoice_id' => $invoice_id
+            ),
+            'billing' => array(
+                'customer_name' => 'Shakti Traders',
+                'company_name' => 'Shakti Traders Pvt. Ltd.',
+                'address' => '120, Industrial Estate, Andheri East, Mumbai, Maharashtra 400059',
+                'phone' => '+91 98765 43210',
+                'email' => 'billing@shaktitraders.in',
+                'gst' => '27AAECS1234F1Z5'
+            ),
+            'summary' => array(
+                'sub_total' => '₹12,480.00',
+                'discount' => '₹480.00',
+                'tax' => '₹2,160.00',
+                'shipping' => '₹0.00',
+                'grand_total' => '₹14,160.00'
+            ),
+            'items' => array(
+                array('sku' => 'GB-50L-BLK', 'name' => 'Heavy Duty Garbage Bag 50L', 'qty' => 10, 'rate' => '₹420.00', 'amount' => '₹4,200.00'),
+                array('sku' => 'RF-TS-100', 'name' => 'RFID Tamper Seal Pack of 100', 'qty' => 4, 'rate' => '₹1,850.00', 'amount' => '₹7,400.00'),
+                array('sku' => 'SF-ROLL-1KG', 'name' => 'Silver Foil Sheet Roll 1kg', 'qty' => 2, 'rate' => '₹440.00', 'amount' => '₹880.00')
+            )
+        );
+
+        $this->render('invoice', $data);
     }
 
         

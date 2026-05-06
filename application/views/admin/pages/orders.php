@@ -60,9 +60,14 @@
                                 <?php echo !empty($row['Date']) ? date('d M Y, h:i A', strtotime($row['Date'])) : 'N/A'; ?>
                             </td>
                             <td class="text-end">
-                                <a class="btn btn-sm btn-primary" href="<?php echo site_url('admin/orders/' . (int) ($row['Order'] ?? 0)); ?>">
-                                    <i class="bi bi-eye me-1"></i>View Order
-                                </a>
+                                <div class="d-inline-flex flex-wrap gap-2 justify-content-end">
+                                    <a class="btn btn-sm btn-primary" href="<?php echo site_url('admin/orders/' . (int) ($row['Order'] ?? 0)); ?>">
+                                        <i class="bi bi-eye me-1"></i>View Order
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-secondary" href="<?php echo site_url('admin/invoice/' . (int) ($row['Order'] ?? 0)); ?>">
+                                        <i class="bi bi-file-earmark-text me-1"></i>Create Invoice
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
