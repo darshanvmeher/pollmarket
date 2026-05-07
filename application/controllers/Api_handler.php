@@ -3023,4 +3023,399 @@ public function track_order_api()
         ]);
     }
 }
+
+
+
+//invoice api
+
+//insert
+
+public function insert_invoice()
+{
+    // ✅ Verify Token
+     //$decoded = $this->verify_token();
+    //$admin_id = $decoded->admin_id;
+
+    // ✅ Get Order ID
+    $order_id = $this->input->post('order_id');
+
+    // ✅ Validate Order ID
+    if (empty($order_id)) {
+
+        echo json_encode(array(
+
+            'status' => false,
+
+            'message' => 'Order ID required'
+        ));
+
+        return;
+    }
+
+    $result = $this->Order_model->insert_invoice($order_id);
+
+    // ✅ Response
+    echo json_encode($result);
+}
+
+/*
+
+public function download_invoice_pdf($order_id = 0)
+{
+    $order_id = (int) $order_id;
+
+    // ✅ Get Invoice Data
+    $invoice_data = $this->db
+        ->where('fk_order_id', $order_id)
+        ->get('invoice_tbl')
+        ->result();
+
+    // ✅ Check Invoice Exists
+    if (empty($invoice_data)) {
+
+        show_error('Invoice not found');
+    }
+
+    // ✅ First Row
+    $first = $invoice_data[0];
+
+    // ✅ Prepare Items Array
+    $items = array();
+
+    foreach ($invoice_data as $item) {
+
+        $items[] = array(
+
+            'sku' => $item->sku ?? '',
+
+            'name' => $item->product_name ?? '',
+
+            'qty' => $item->quantity ?? 0,
+
+            'rate' => '₹' . number_format(
+                $item->rate ?? 0,
+                2
+            ),
+
+            'amount' => '₹' . number_format(
+                $item->amount ?? 0,
+                2
+            )
+        );
+    }
+
+    // ✅ View Data
+    $data = array(
+
+        'subtitle' => 'Invoice PDF Preview',
+
+        'invoice_meta' => array(
+
+            'invoice_id' => $first->fk_order_id,
+
+            'invoice_no' => $first->invoice_no ?? '',
+
+            'order_no' => 'PM-' . str_pad(
+                $first->fk_order_id,
+                4,
+                '0',
+                STR_PAD_LEFT
+            ),
+
+            'invoice_date' => !empty($first->invoice_date)
+                ? date(
+                    'd M Y',
+                    strtotime($first->invoice_date)
+                )
+                : '',
+
+            'due_date' => !empty($first->due_date)
+                ? date(
+                    'd M Y',
+                    strtotime($first->due_date)
+                )
+                : '',
+
+            'status' => ucfirst(
+                $first->status ?? 'Pending'
+            )
+        ),
+
+        'billing' => array(
+
+            'customer_name' => 'Mrunali Jadhav',
+
+            'company_name' => '',
+
+            'address' => 'Shivaji Maharaj Chowk, Badlapur, Maharashtra, India, 421503',
+
+            'phone' => '7894561230',
+
+            'email' => 'mrunali1703@gmail.com',
+
+            'gst' => $first->gstin ?? ''
+        ),
+
+        'summary' => array(
+
+            'sub_total' => '₹' . number_format(
+                $first->sub_total ?? 0,
+                2
+            ),
+
+            'discount' => '₹' . number_format(
+                $first->discount ?? 0,
+                2
+            ),
+
+            'tax' => '₹' . number_format(
+                $first->tax ?? 0,
+                2
+            ),
+
+            'shipping' => '₹' . number_format(
+                $first->shipping ?? 0,
+                2
+            ),
+
+            'grand_total' => '₹' . number_format(
+                $first->grand_total ?? 0,
+                2
+            )
+        ),
+
+        'items' => $items
+    );
+
+    // ✅ Load PDF View
+    $html = $this->load->view(
+        'admin/pages/invoice_pdf',
+        $data,
+        true
+    );
+
+    // ✅ mPDF
+    $mpdf = new \Mpdf\Mpdf([
+
+        'mode' => 'utf-8',
+
+        'format' => 'A4',
+
+        'margin_left' => 10,
+
+        'margin_right' => 10,
+
+        'margin_top' => 10,
+
+        'margin_bottom' => 10
+    ]);
+
+    // ✅ Load CSS File
+    $stylesheet = file_get_contents(
+        FCPATH . 'assets/css/invoice.css'
+    );
+
+    // ✅ Apply CSS
+    $mpdf->WriteHTML($stylesheet, 1);
+
+    // ✅ Write HTML
+    $mpdf->WriteHTML($html, 2);
+
+    // ✅ Download PDF
+    $mpdf->Output(
+        'Invoice_' . $order_id . '.pdf',
+        'D'
+    );
+}
+
+*/
+
+public function download_invoice_pdf($order_id = 0)
+{
+    $order_id = (int) $order_id;
+
+    // ✅ Get Invoice Data
+    $invoice_data = $this->db
+        ->where('fk_order_id', $order_id)
+        ->get('invoice_tbl')
+        ->result();
+
+    // ✅ Check Invoice Exists
+    if (empty($invoice_data)) {
+
+        show_error('Invoice not found');
+    }
+
+    // ✅ First Row
+    $first = $invoice_data[0];
+
+    // ✅ Get Address
+    $address = $this->db
+        ->where('id', $first->fk_address_id)
+        ->get('address_book_tbl')
+        ->row();
+
+    // ✅ Get Customer
+    $customer = $this->db
+        ->where('id', $first->fk_user_id)
+        ->get('users_tbl')
+        ->row();
+
+    // ✅ Prepare Items Array
+    $items = array();
+
+    foreach ($invoice_data as $item) {
+
+        $items[] = array(
+
+            'sku' => $item->sku ?? '',
+
+            'name' => $item->product_name ?? '',
+
+            'qty' => $item->quantity ?? 0,
+
+            'rate' => '₹' . number_format(
+                $item->rate ?? 0,
+                2
+            ),
+
+            'amount' => '₹' . number_format(
+                $item->amount ?? 0,
+                2
+            )
+        );
+    }
+
+    // ✅ View Data
+    $data = array(
+
+        'subtitle' => 'Invoice PDF Preview',
+
+        'invoice_meta' => array(
+
+            'invoice_id' => $first->fk_order_id,
+
+            'invoice_no' => $first->invoice_no ?? '',
+
+            'order_no' => 'PM-' . str_pad(
+                $first->fk_order_id,
+                4,
+                '0',
+                STR_PAD_LEFT
+            ),
+
+            'invoice_date' => !empty($first->invoice_date)
+                ? date(
+                    'd M Y',
+                    strtotime($first->invoice_date)
+                )
+                : '',
+
+            'due_date' => !empty($first->due_date)
+                ? date(
+                    'd M Y',
+                    strtotime($first->due_date)
+                )
+                : '',
+
+            'status' => ucfirst(
+                $first->status ?? 'Pending'
+            )
+        ),
+
+        // ✅ Dynamic Billing Data
+        'billing' => array(
+
+            'customer_name' => trim(
+                ($customer->firstname ?? '') . ' ' .
+                ($customer->lastname ?? '')
+            ),
+
+            'company_name' => '',
+
+            'address' => ($address->address ?? '') . ', ' .
+                         ($address->city ?? '') . ', ' .
+                         ($address->state ?? '') . ', ' .
+                         ($address->country ?? '') . ' - ' .
+                         ($address->pincode ?? ''),
+
+            'phone' => $customer->phone_no ?? '',
+
+            'email' => $customer->email ?? '',
+
+            'gst' => $first->gstin ?? ''
+        ),
+
+        'summary' => array(
+
+            'sub_total' => '₹' . number_format(
+                $first->sub_total ?? 0,
+                2
+            ),
+
+            'discount' => '₹' . number_format(
+                $first->discount ?? 0,
+                2
+            ),
+
+            'tax' => '₹' . number_format(
+                $first->tax ?? 0,
+                2
+            ),
+
+            'shipping' => '₹' . number_format(
+                $first->shipping ?? 0,
+                2
+            ),
+
+            'grand_total' => '₹' . number_format(
+                $first->grand_total ?? 0,
+                2
+            )
+        ),
+
+        'items' => $items
+    );
+
+    // ✅ Load PDF View
+    $html = $this->load->view(
+        'admin/pages/invoice_pdf',
+        $data,
+        true
+    );
+
+    // ✅ mPDF
+    $mpdf = new \Mpdf\Mpdf([
+
+        'mode' => 'utf-8',
+
+        'format' => 'A4',
+
+        'margin_left' => 10,
+
+        'margin_right' => 10,
+
+        'margin_top' => 10,
+
+        'margin_bottom' => 10
+    ]);
+
+    // ✅ Load CSS File
+    $stylesheet = file_get_contents(
+        FCPATH . 'assets/css/invoice.css'
+    );
+
+    // ✅ Apply CSS
+    $mpdf->WriteHTML($stylesheet, 1);
+
+    // ✅ Write HTML
+    $mpdf->WriteHTML($html, 2);
+
+    // ✅ Download PDF
+    $mpdf->Output(
+        'Invoice_' . $order_id . '.pdf',
+        'D'
+    );
+}
+
 }

@@ -208,6 +208,8 @@ class Admin extends CI_Controller
         $this->render('order_detail', $data);
     }
 
+
+  /*  
     public function invoice($invoice_id = 0)
     {
         $invoice_id = (int) $invoice_id;
@@ -248,8 +250,437 @@ class Admin extends CI_Controller
 
         $this->render('invoice', $data);
     }
+*/
 
-        
+
+/*
+public function invoice($invoice_id = 0)
+{
+    $invoice_id = (int) $invoice_id;
+
+    // ✅ Get order
+    $order = $this->db
+        ->where('id', $invoice_id)
+        ->get('order_tbl')
+        ->row();
+
+    if (!$order) {
+        show_404();
+    }
+
+    // ✅ Get customer
+    $customer = $this->db
+        ->where('id', $order->user_id)
+        ->get('users_tbl')
+        ->row();
+
+    // ✅ Get order items
+    $items = $this->db
+        ->where('order_id', $order->id)
+        ->get('order_items_tbl')
+        ->result();
+
+    // ✅ Invoice items array
+    $invoice_items = [];
+
+    foreach ($items as $item) {
+
+        $invoice_items[] = array(
+            'sku'    => $item->sku ?? '-',
+            'name'   => $item->product_name ?? '',
+            'qty'    => $item->quantity ?? 0,
+            'rate'   => '₹' . number_format($item->price ?? 0, 2),
+            'amount' => '₹' . number_format(($item->price ?? 0) * ($item->quantity ?? 0), 2)
+        );
+    }
+
+    // ✅ Pass dynamic data
+    $data = array(
+
+        'active' => 'invoice',
+
+        'title' => 'Invoice',
+
+        'subtitle' => 'Invoice Preview',
+
+        'invoice_meta' => array(
+            'invoice_no'  => 'PM-INV-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
+
+            'order_no'    => 'PM-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
+
+            'invoice_date'=> !empty($order->created_at)
+                ? date('d M Y', strtotime($order->created_at))
+                : date('d M Y'),
+
+            'due_date'    => !empty($order->created_at)
+                ? date('d M Y', strtotime($order->created_at . ' +7 days'))
+                : date('d M Y'),
+
+            'status'      => ucfirst($order->order_status ?? 'Pending'),
+
+            'invoice_id'  => $order->id
+        ),
+
+        'billing' => array(
+            'customer_name' => $customer->name ?? '',
+            'company_name'  => $customer->company_name ?? '',
+            'address'       => $customer->address ?? '',
+            'phone'         => $customer->mobile ?? '',
+            'email'         => $customer->email ?? '',
+            'gst'           => $customer->gst_number ?? ''
+        ),
+
+        'summary' => array(
+            'sub_total'   => '₹' . number_format($order->subtotal ?? 0, 2),
+
+            'discount'    => '₹' . number_format($order->discount_value ?? 0, 2),
+
+            'tax'         => '₹' . number_format($order->gst ?? 0, 2),
+
+            'shipping'    => '₹' . number_format($order->shipping_charge ?? 0, 2),
+
+            'grand_total' => '₹' . number_format($order->total_amount ?? 0, 2)
+        ),
+
+        'items' => $invoice_items
+    );
+
+    $this->render('invoice', $data);
+}
+
+
+  */
+
+/*
+public function invoice($invoice_id = 0)
+{
+    $invoice_id = (int) $invoice_id;
+
+    // ✅ Get Order
+    $order = $this->db
+        ->where('id', $invoice_id)
+        ->get('order_tbl')
+        ->row();
+
+    if (!$order) {
+        show_404();
+    }
+
+    // ✅ Get Customer
+    $customer = $this->db
+        ->where('id', $order->user_id)
+        ->get('users_tbl')
+        ->row();
+
+    // ✅ Get Order Items + Product Details
+    $items = $this->db
+        ->select('
+            order_items_tbl.*,
+            product_tbl.product_name,
+            product_tbl.sku
+        ')
+        ->from('order_items_tbl')
+        ->join(
+            'product_tbl',
+            'product_tbl.id = order_items_tbl.product_id',
+            'left'
+        )
+        ->where('order_items_tbl.order_id', $order->id)
+        ->get()
+        ->result();
+
+    // ✅ Invoice Items Array
+    $invoice_items = [];
+
+    foreach ($items as $item) {
+
+        $invoice_items[] = array(
+
+            'sku' => $item->sku ?? '-',
+
+            'name' => $item->product_name ?? '',
+
+            'qty' => $item->quantity ?? 0,
+
+            'rate' => '₹' . number_format($item->price ?? 0, 2),
+
+            'amount' => '₹' . number_format(
+                ($item->price ?? 0) * ($item->quantity ?? 0),
+                2
+            )
+        );
+    }
+
+    // ✅ Final Data
+    $data = array(
+
+        'active' => 'invoice',
+
+        'title' => 'Invoice',
+
+        'subtitle' => 'Invoice Preview',
+
+        'invoice_meta' => array(
+
+            'invoice_no' => 'PM-INV-' . str_pad(
+                $order->id,
+                4,
+                '0',
+                STR_PAD_LEFT
+            ),
+
+            'order_no' => 'PM-' . str_pad(
+                $order->id,
+                4,
+                '0',
+                STR_PAD_LEFT
+            ),
+
+            'invoice_date' => !empty($order->created_at)
+                ? date('d M Y', strtotime($order->created_at))
+                : date('d M Y'),
+
+            'due_date' => !empty($order->created_at)
+                ? date(
+                    'd M Y',
+                    strtotime($order->created_at . ' +7 days')
+                )
+                : date('d M Y'),
+
+            'status' => ucfirst(
+                $order->order_status ?? 'Pending'
+            ),
+
+            'invoice_id' => $order->id
+        ),
+
+        'billing' => array(
+
+            'customer_name' => trim(
+                ($customer->firstname ?? '') . ' ' .
+                ($customer->lastname ?? '')
+            ),
+
+            'company_name' => '',
+
+            'address' => ($customer->address ?? ''). ', ' .
+                ($customer->city ?? '') . ', ' .
+                ($customer->state ?? '') . ' , ' .
+                ($customer->country ?? '') . ' , ' .
+                ($customer->pincode ?? ''),
+            
+
+            'phone' => $customer->phone_no ?? '',
+
+            'email' => $customer->email ?? '',
+
+            'gst' => '27AAECS1234F1Z5'
+        ),
+
+        'summary' => array(
+
+            'sub_total' => '₹' . number_format(
+                $order->subtotal ?? 0,
+                2
+            ),
+
+            'discount' => '₹' . number_format(
+                $order->discount_value ?? 0,
+                2
+            ),
+
+            'tax' => '₹' . number_format(
+                $order->gst ?? 0,
+                2
+            ),
+
+            'shipping' => '₹' . number_format(
+                $order->shipping ?? 0,
+                2
+            ),
+
+            'grand_total' => '₹' . number_format(
+                $order->total_amount ?? 0,
+                2
+            )
+        ),
+
+        'items' => $invoice_items
+    );
+
+    $this->render('invoice', $data);
+}*/
+
+public function invoice($invoice_id = 0)
+{
+    $invoice_id = (int) $invoice_id;
+
+    // ✅ Get Order
+    $order = $this->db
+        ->where('id', $invoice_id)
+        ->get('order_tbl')
+        ->row();
+
+    if (!$order) {
+        show_404();
+    }
+
+    // ✅ Get Customer
+    $customer = $this->db
+        ->where('id', $order->user_id)
+        ->get('users_tbl')
+        ->row();
+
+    // ✅ Get Order Items + Product Details
+    $items = $this->db
+        ->select('
+            order_items_tbl.*,
+            product_tbl.product_name,
+            product_tbl.sku,
+            product_tbl.price as product_price
+        ')
+        ->from('order_items_tbl')
+        ->join(
+            'product_tbl',
+            'product_tbl.id = order_items_tbl.product_id',
+            'left'
+        )
+        ->where('order_items_tbl.order_id', $order->id)
+        ->get()
+        ->result();
+
+    // ✅ Invoice Items Array
+    $invoice_items = [];
+
+    foreach ($items as $item) {
+
+        $qty = $item->quantity ?? 0;
+
+        $rate = $item->product_price ?? 0;
+
+        $amount = $rate * $qty;
+
+        $invoice_items[] = array(
+
+            'sku' => $item->sku ?? '-',
+
+            'name' => $item->product_name ?? '',
+
+            'qty' => $qty,
+
+            'rate' => '₹' . number_format($rate, 2),
+
+            'amount' => '₹' . number_format($amount, 2)
+        );
+    }
+
+    // ✅ Final Data
+
+    // ✅ Get Selected Address
+        $address = $this->db
+            ->where('id', $order->address_id)
+            ->get('address_book_tbl')
+            ->row();
+    $data = array(
+
+        'active' => 'invoice',
+
+        'title' => 'Invoice',
+
+        'subtitle' => 'Invoice Preview',
+
+        'invoice_meta' => array(
+
+            'invoice_no' => 'PM-INV-' . str_pad(
+                $order->id,
+                4,
+                '0',
+                STR_PAD_LEFT
+            ),
+
+            'order_no' => 'PM-' . str_pad(
+                $order->id,
+                4,
+                '0',
+                STR_PAD_LEFT
+            ),
+
+            'invoice_date' => !empty($order->created_at)
+                ? date('d M Y', strtotime($order->created_at))
+                : date('d M Y'),
+
+            'due_date' => !empty($order->created_at)
+                ? date(
+                    'd M Y',
+                    strtotime($order->created_at . ' +7 days')
+                )
+                : date('d M Y'),
+
+            'status' => ucfirst(
+                $order->order_status ?? 'Pending'
+            ),
+
+            'invoice_id' => $order->id
+        ),
+
+        'billing' => array(
+
+            'customer_name' => trim(
+                ($customer->firstname ?? '') . ' ' .
+                ($customer->lastname ?? '')
+            ),
+
+            'company_name' => '',
+
+            'address' => trim(
+                ($address->address ?? '') . ', ' .
+                ($address->city ?? '') . ', ' .
+                ($address->state ?? '') . ', ' .
+                ($address->country ?? '') . ', ' .
+                ($address->pincode ?? ''),
+                ', '
+            ),
+
+            'phone' => $customer->phone_no ?? '',
+
+            'email' => $customer->email ?? '',
+
+            'gst' => '27AAECS1234F1Z5'
+        ),
+
+        'summary' => array(
+
+            'sub_total' => '₹' . number_format(
+                $order->subtotal ?? 0,
+                2
+            ),
+
+            'discount' => '₹' . number_format(
+                $order->discount_value ?? 0,
+                2
+            ),
+
+            'tax' => '₹' . number_format(
+                $order->gst ?? 0,
+                2
+            ),
+
+            'shipping' => '₹' . number_format(
+                $order->shipping ?? 0,
+                2
+            ),
+
+            'grand_total' => '₹' . number_format(
+                $order->total_amount ?? 0,
+                2
+            )
+        ),
+
+        'items' => $invoice_items
+    );
+
+    $this->render('invoice', $data);
+}
 
     public function customers()
     {

@@ -127,13 +127,21 @@
             <h2 class="panel-title mb-1">Invoice Generator</h2>
             <p class="page-subtitle mb-0"><?php echo html_escape($subtitle ?? 'Design-only invoice preview for admin use.'); ?></p>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="d-flex gap-2 flex-wrap no-print">
             <button class="btn btn-outline-secondary">
                 <i class="bi bi-printer me-1"></i>Print Invoice
             </button>
-            <button class="btn btn-primary">
+           <!-- <button class="btn btn-primary">
                 <i class="bi bi-file-earmark-arrow-down me-1"></i>Download PDF
             </button>
+            -->
+            <button type="button"
+                class="btn btn-success"
+                onclick="downloadInvoicePdf(<?= $invoice_meta['invoice_id']; ?>)">Download PDF
+            </button>
+            <a href="javascript:void(0);"
+                class="btn btn-success"
+                onclick="saveInvoice(<?= $invoice_meta['invoice_id']; ?>)">Save Invoice</a>
         </div>
     </div>
 
@@ -254,3 +262,124 @@
         </div>
     </div>
 </section>
+
+<!--
+<script>
+
+function saveInvoice(order_id)
+{
+    $.ajax({
+
+        url: "<?= base_url('index.php/Api_handler/insert_invoice'); ?>",
+
+        type: "POST",
+
+      //  headers: {
+        //    Authorization: "Bearer YOUR_TOKEN"
+        //},
+
+        data: {
+            order_id: order_id
+        },
+
+        success: function(response)
+        {
+            let res = JSON.parse(response);
+
+            if (res.status) {
+
+                alert(res.message);
+
+            } else {
+
+                alert(res.message);
+            }
+        }
+    });
+}
+
+</script>
+                        -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+function saveInvoice(order_id)
+{
+    $.ajax({
+
+        url: "<?= base_url('index.php/Api_handler/insert_invoice'); ?>",
+
+        type: "POST",
+
+        data: {
+            order_id: order_id
+        },
+
+        success: function(response)
+        {
+            let res = JSON.parse(response);
+
+            if (res.status) {
+
+                Swal.fire({
+
+                    icon: 'success',
+
+                    title: 'Success',
+
+                    text: 'Invoice insert successfully',
+
+                    confirmButtonText: 'OK'
+
+                }).then(() => {
+
+                    window.location.href =
+                        "<?= base_url('admin/orders'); ?>";
+                });
+
+            } else {
+
+                Swal.fire({
+
+                    icon: 'error',
+
+                    title: 'Error',
+
+                    text: res.message
+                });
+            }
+        }
+    });
+}
+
+</script>
+
+
+<script>
+
+function downloadInvoicePdf(order_id)
+{
+    Swal.fire({
+
+        icon: 'success',
+
+        title: 'Success',
+
+        text: 'PDF generated successfully',
+
+        confirmButtonText: 'Download'
+
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            window.location.href =
+                "<?= base_url('index.php/Api_handler/download_invoice_pdf/'); ?>" +
+                order_id;
+        }
+    });
+}
+
+</script>

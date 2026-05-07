@@ -343,4 +343,156 @@ public function get_order_items_for_admin($order_id)
 
     return $this->db->get()->result_array();
 }
+
+//invoice 
+
+//insert
+
+public function insert_invoice($order_id)
+{
+    // ✅ Get Order
+    $order = $this->db
+        ->where('id', $order_id)
+        ->get('order_tbl')
+        ->row();
+
+    if (!$order) {
+
+        return array(
+
+            'status' => false,
+
+            'message' => 'Order not found'
+        );
+    }
+
+    // ✅ Check Existing Invoice
+    $already_exists = $this->db
+        ->where('fk_order_id', $order_id)
+        ->get('invoice_tbl')
+        ->num_rows();
+
+    if ($already_exists > 0) {
+
+        return array(
+
+            'status' => false,
+
+            'message' => 'Invoice already generated'
+        );
+    }
+
+    // ✅ Get Customer
+    $customer = $this->db
+        ->where('id', $order->user_id)
+        ->get('users_tbl')
+        ->row();
+
+    // ✅ Get Order Items + Product Details
+    $items = $this->db
+        ->select('
+            order_items_tbl.*,
+            product_tbl.product_name,
+            product_tbl.sku,
+            product_tbl.price as product_price
+        ')
+        ->from('order_items_tbl')
+        ->join(
+            'product_tbl',
+            'product_tbl.id = order_items_tbl.product_id',
+            'left'
+        )
+        ->where('order_items_tbl.order_id', $order_id)
+        ->get()
+        ->result();
+
+    if (empty($items)) {
+
+        return array(
+
+            'status' => false,
+
+            'message' => 'No order items found'
+        );
+    }
+
+    // ✅ Generate Invoice Number
+    $invoice_no = 'PM-INV-' . str_pad(
+        $order->id,
+        4,
+        '0',
+        STR_PAD_LEFT
+    );
+
+    // ✅ Insert Invoice Items
+    foreach ($items as $item) {
+
+        $qty = $item->quantity ?? 0;
+
+        $rate = $item->product_price ?? 0;
+
+        $amount = $rate * $qty;
+
+        $insert_data = array(
+
+            'fk_user_id' => $order->user_id,
+
+            'fk_product_id' => $item->product_id,
+
+            'fk_order_id' => $order->id,
+
+            'fk_address_id' => $order->address_id,
+
+            'invoice_no' => $invoice_no,
+
+           // 'gstin' => $customer->gstin ?? '',
+          
+           'gstin' => '27AAECS1234F1Z5',
+
+            'sku' => $item->sku ?? '',
+
+            'product_name' => $item->product_name ?? '',
+
+            'quantity' => $qty,
+
+            'rate' => $rate,
+
+            'amount' => $amount,
+
+            'sub_total' => $order->subtotal ?? 0,
+
+            'discount' => $order->discount_value ?? 0,
+
+            'tax' => $order->gst ?? 0,
+
+            'shipping' => $order->shipping ?? 0,
+
+            'grand_total' => $order->total_amount ?? 0,
+
+            'status' => $order->order_status ?? '',
+
+            'invoice_date' => date('Y-m-d'),
+
+            'due_date' => date(
+                'Y-m-d',
+                strtotime('+7 days')
+            )
+        );
+
+        $this->db->insert(
+            'invoice_tbl',
+            $insert_data
+        );
+    }
+
+    // ✅ Success Response
+    return array(
+
+        'status' => true,
+
+        'message' => 'Invoice generated successfully',
+
+        'invoice_no' => $invoice_no
+    );
+}
 }
