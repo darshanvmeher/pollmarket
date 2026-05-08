@@ -829,18 +829,39 @@ public function invoice($invoice_id = 0)
     {
         $data = array(
             'active' => 'reports',
-            'title' => 'Reports',
-            'subtitle' => 'Sales, category and stock performance snapshots.',
-            'table_title' => 'Saved Report Snapshots',
-            'headers' => array('Period', 'Revenue', 'Orders', 'Return Rate', 'Top Category'),
-            'rows' => array(
-                array('Jan 2026', '$42,300', '970', '2.1%', 'Plastic Bags'),
-                array('Feb 2026', '$48,880', '1,108', '1.8%', 'Plastic Bags'),
-                array('Mar 2026 (MTD)', '$58,020', '1,284', '1.9%', 'Stationery')
-            )
+            'title' => 'Sales Report',
+            'subtitle' => 'Sales performance view designed for ecommerce reporting and Excel export.',
+            'kpis' => array(
+                array('title' => 'Gross Sales', 'value' => '₹12.48L', 'trend' => '+18.2%', 'trend_class' => 'kpi-up'),
+                array('title' => 'Net Sales', 'value' => '₹9.86L', 'trend' => '+14.7%', 'trend_class' => 'kpi-up'),
+                array('title' => 'Orders', 'value' => '1,284', 'trend' => '+8.4%', 'trend_class' => 'kpi-up'),
+                array('title' => 'Avg. Order Value', 'value' => '₹971', 'trend' => '+3.1%', 'trend_class' => 'kpi-up')
+            ),
+            'sales_trend' => array(
+                array('label' => 'Mon', 'value' => 36),
+                array('label' => 'Tue', 'value' => 42),
+                array('label' => 'Wed', 'value' => 58),
+                array('label' => 'Thu', 'value' => 48),
+                array('label' => 'Fri', 'value' => 66),
+                array('label' => 'Sat', 'value' => 74),
+                array('label' => 'Sun', 'value' => 51)
+            ),
+            'summary_cards' => array(
+                array('label' => 'Top Channel', 'value' => 'Website', 'note' => '48% of orders'),
+                array('label' => 'Best Category', 'value' => 'Plastic Bags', 'note' => 'Highest revenue'),
+                array('label' => 'Highest Day', 'value' => 'Saturday', 'note' => 'Peak order volume'),
+                array('label' => 'Refund Rate', 'value' => '2.3%', 'note' => 'Rolling 30 days')
+            ),
+            'sales_rows' => array(
+                array('date' => '06 May 2026', 'orders' => 128, 'items' => 420, 'gross' => '₹1.48L', 'discount' => '₹4,800', 'net' => '₹1.43L', 'channel' => 'Website'),
+                array('date' => '05 May 2026', 'orders' => 116, 'items' => 388, 'gross' => '₹1.36L', 'discount' => '₹3,900', 'net' => '₹1.32L', 'channel' => 'WhatsApp'),
+                array('date' => '04 May 2026', 'orders' => 103, 'items' => 352, 'gross' => '₹1.21L', 'discount' => '₹2,700', 'net' => '₹1.18L', 'channel' => 'Website'),
+                array('date' => '03 May 2026', 'orders' => 97, 'items' => 311, 'gross' => '₹1.08L', 'discount' => '₹2,200', 'net' => '₹1.06L', 'channel' => 'Marketplace'),
+                array('date' => '02 May 2026', 'orders' => 88, 'items' => 295, 'gross' => '₹98K', 'discount' => '₹1,900', 'net' => '₹96K', 'channel' => 'Sales Team')
+            ),
         );
 
-        $this->render('master_table', $data);
+        $this->render('reports', $data);
     }
 
     public function settings()
