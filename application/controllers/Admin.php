@@ -15,7 +15,7 @@ class Admin extends CI_Controller
         'categories' => array('label' => 'Categories', 'icon' => 'bi bi-tags', 'url' => 'admin/categories'),
         'subcategories' => array('label' => 'Subcategories', 'icon' => 'bi bi-diagram-3', 'url' => 'admin/subcategories'),
         'orders' => array('label' => 'Orders', 'icon' => 'bi bi-receipt', 'url' => 'admin/orders'),
-        'invoice' => array('label' => 'Invoice', 'icon' => 'bi bi-file-earmark-text', 'url' => 'admin/invoice'),
+      //  'invoice' => array('label' => 'Invoice', 'icon' => 'bi bi-file-earmark-text', 'url' => 'admin/invoice'),
         'customers' => array('label' => 'Customers', 'icon' => 'bi bi-people', 'url' => 'admin/customers'),
         'inventory' => array('label' => 'Inventory', 'icon' => 'bi bi-boxes', 'url' => 'admin/inventory'),
         'suppliers' => array('label' => 'Suppliers', 'icon' => 'bi bi-truck', 'url' => 'admin/suppliers'),
