@@ -495,4 +495,819 @@ public function insert_invoice($order_id)
         'invoice_no' => $invoice_no
     );
 }
+
+//Report by data range & status today
+/*
+public function get_sales_report_by_today($today, $status){
+    $this->db->select('*');
+    $this->db->from('order_tbl');
+    $this->db->where('DATE(created_at)', $today);
+    if($status != 'all'){
+        $this->db->where('order_status', $status);
+    }elseif($status == 'pending'){
+        $this->db->where('order_status', $status);
+    }elseif($status == 'delievered'){
+        $this->db->where('order_status', $status);
+}else{
+    $this->db->where('order_status', $status);
+}
+
+    return $this->db->get()->result_array();
+}
+*/
+/*
+public function get_sales_report_by_today($today, $status = 'all')
+{
+    $this->db->select('*');
+    $this->db->from('order_tbl');
+
+    $this->db->where('DATE(created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    return $this->db->get()->result_array();
+}
+    */
+
+
+/*
+public function get_by_kpis()
+{
+    $this->db->select('
+        o.created_at as date,
+    SUM(o.total_amount) as gross,
+        SUM(o.subtotal) as net,
+        COUNT(o.id) as orders,
+        SUM(oi.quantity) as items,
+        SUM(o.discount_value) as discount,
+       AVG(o.total_amount) as avg_order_value
+    ');
+    $this->db->from('order_tbl as o');
+    $this->db->join('order_items_tbl as oi', 'oi.order_id = o.id', 'left');
+    $this->db->where('date(o.created_at)', date('Y-m-d'));
+    //return $this->db->get()->row_array();
+    return $this->db->get()->result_array();
+
+}*/
+
+// corrected code for report by date range & status today
+/*public function get_by_kpis($today, $status = 'all')
+{
+    $status = trim($status);
+
+    // Orders KPI
+    $this->db->select('
+        COUNT(id) as orders,
+        SUM(subtotal) as gross,
+        SUM(total_amount) as net,
+        SUM(discount_value) as discount
+    ');
+
+    $this->db->from('order_tbl');
+
+    $this->db->where('DATE(created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    $order_data = $this->db->get()->row_array();
+
+
+    // Items KPI
+    $this->db->select('SUM(oi.quantity) as items');
+
+    $this->db->from('order_items_tbl oi');
+
+    $this->db->join('order_tbl o', 'o.id = oi.order_id', 'left');
+
+    $this->db->where('DATE(o.created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+
+    $item_data = $this->db->get()->row_array();
+
+
+    return [
+
+        'date' => $today,
+
+        'orders' => $order_data['orders'] ?? 0,
+
+        'gross' => $order_data['gross'] ?? 0,
+
+        'net' => $order_data['net'] ?? 0,
+
+        'discount' => $order_data['discount'] ?? 0,
+
+        'items' => $item_data['items'] ?? 0,
+
+        'channel' => 'Website'
+    ];
+}
+
+*/
+
+
+//correctt code for report by date range & status last 7 days kpis
+
+public function get_by_kpis($start_date,$end_date,$status = 'all')
+{
+    $status = trim($status);
+
+    // Orders KPI
+    $this->db->select('
+        COUNT(DISTINCT id) as orders,
+        SUM(subtotal) as gross,
+        SUM(total_amount) as net,
+        SUM(discount_value) as discount
+    ');
+
+    $this->db->from('order_tbl');
+
+    if (!empty($start_date)) {
+        $this->db->where('DATE(created_at) >=', $start_date);
+    }
+
+    if (!empty($end_date)) {
+        $this->db->where('DATE(created_at) <=', $end_date);
+    }
+
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    $order_data = $this->db->get()->row_array();
+
+    // Items KPI
+    $this->db->select('SUM(oi.quantity) as items');
+
+    $this->db->from('order_items_tbl oi');
+
+    $this->db->join('order_tbl o', 'o.id = oi.order_id', 'left');
+
+    if (!empty($start_date)) {
+        $this->db->where('DATE(o.created_at) >=', $start_date);
+    }
+
+    if (!empty($end_date)) {
+        $this->db->where('DATE(o.created_at) <=', $end_date);
+    }
+
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+
+    $item_data = $this->db->get()->row_array();
+
+    return [
+        'date' => $start_date . ' to ' . $end_date,
+        'orders' => $order_data['orders'] ?? 0,
+        'gross' => $order_data['gross'] ?? 0,
+        'net' => $order_data['net'] ?? 0,
+        'discount' => $order_data['discount'] ?? 0,
+        'items' => $item_data['items'] ?? 0,
+        'channel' => 'Website'
+    ];
+}
+
+/*public function get_by_kpis($start_date,$end_date,$status = 'all')
+{
+    $status = trim($status);
+
+    // Orders KPI
+    $this->db->select('
+        COUNT(id) as orders,
+        SUM(subtotal) as gross,
+        SUM(total_amount) as net,
+        SUM(discount_value) as discount
+    ');
+
+    $this->db->from('order_tbl');
+
+   // $this->db->where('DATE(created_at)', $day_ago);
+   // $this->db->where('DATE(created_at) >=', $start_date);
+    //$this->db->where('DATE(created_at) <=', $end_date);
+
+if (!empty($start_date)) {
+    $this->db->where('DATE(created_at) >=', $start_date);
+}
+
+if (!empty($end_date)) {
+    $this->db->where('DATE(created_at) <=', $end_date);
+}
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    $order_data = $this->db->get()->row_array();
+
+    // Items KPI
+    $this->db->select('SUM(oi.quantity) as items');
+    $this->db->from('order_items_tbl oi');
+    $this->db->join('order_tbl o', 'o.id = oi.order_id', 'left');                 
+    $this->db->where('DATE(o.created_at) >=', $start_date);
+    $this->db->where('DATE(o.created_at) <=', $end_date);
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+    $item_data = $this->db->get()->row_array();
+
+    return [
+        'date' => $start_date . ' to ' . $end_date,
+        'orders' => $order_data['orders'] ?? 0,
+        'gross' => $order_data['gross'] ?? 0,
+        'net' => $order_data['net'] ?? 0,
+        'discount' => $order_data['discount'] ?? 0,
+        'items' => $item_data['items'] ?? 0,
+        'channel' => 'Website'
+    ];
+}*/
+
+/*
+
+public function get_by_kpis($today, $status = 'all')
+{
+    $status = trim($status);
+
+    // Orders KPI
+    $this->db->select('
+        COUNT(id) as orders,
+        SUM(subtotal) as gross,
+        SUM(total_amount) as net,
+        SUM(discount_value) as discount
+    ');
+
+    $this->db->from('order_tbl');
+
+    $this->db->where('DATE(created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    $order_data = $this->db->get()->row_array();
+
+
+    // Items KPI
+    $this->db->select('SUM(oi.quantity) as items');
+
+    $this->db->from('order_items_tbl oi');
+
+    $this->db->join('order_tbl o', 'o.id = oi.order_id', 'left');
+
+    $this->db->where('DATE(o.created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+
+    $item_data = $this->db->get()->row_array();
+
+
+    return [
+
+        'date' => $today,
+
+        'orders' => $order_data['orders'] ?? 0,
+
+        'gross' => $order_data['gross'] ?? 0,
+
+        'net' => $order_data['net'] ?? 0,
+
+        'discount' => $order_data['discount'] ?? 0,
+
+        'items' => $item_data['items'] ?? 0,
+
+        'channel' => 'Website'
+    ];
+}public function get_by_kpis($today, $status = 'all')
+{
+    $status = trim($status);
+
+    // Orders KPI
+    $this->db->select('
+        COUNT(id) as orders,
+        SUM(subtotal) as gross,
+        SUM(total_amount) as net,
+        SUM(discount_value) as discount
+    ');
+
+    $this->db->from('order_tbl');
+
+    $this->db->where('DATE(created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    $order_data = $this->db->get()->row_array();
+
+
+    // Items KPI
+    $this->db->select('SUM(oi.quantity) as items');
+
+    $this->db->from('order_items_tbl oi');
+
+    $this->db->join('order_tbl o', 'o.id = oi.order_id', 'left');
+
+    $this->db->where('DATE(o.created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+
+    $item_data = $this->db->get()->row_array();
+
+
+    return [
+
+        'date' => $today,
+
+        'orders' => $order_data['orders'] ?? 0,
+
+        'gross' => $order_data['gross'] ?? 0,
+
+        'net' => $order_data['net'] ?? 0,
+
+        'discount' => $order_data['discount'] ?? 0,
+
+        'items' => $item_data['items'] ?? 0,
+
+        'channel' => 'Website'
+    ];
+}
+/*
+public function get_by_kpis($today, $status = 'all')
+{
+    $status = trim($status);
+
+    // Orders KPI
+    $this->db->select('
+        COUNT(id) as orders,
+        SUM(subtotal) as gross,
+        SUM(total_amount) as net,
+        SUM(discount_value) as discount
+    ');
+
+    $this->db->from('order_tbl');
+
+    $this->db->where('DATE(created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    $order_data = $this->db->get()->row_array();
+
+
+    // Items KPI
+    $this->db->select('SUM(oi.quantity) as items');
+
+    $this->db->from('order_items_tbl oi');
+
+    $this->db->join('order_tbl o', 'o.id = oi.order_id', 'left');
+
+    $this->db->where('DATE(o.created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+
+    $item_data = $this->db->get()->row_array();
+
+
+    return [
+
+        'date' => $today,
+
+        'orders' => $order_data['orders'] ?? 0,
+
+        'gross' => $order_data['gross'] ?? 0,
+
+        'net' => $order_data['net'] ?? 0,
+
+        'discount' => $order_data['discount'] ?? 0,
+
+        'items' => $item_data['items'] ?? 0,
+
+        'channel' => 'Website'
+    ];
+}
+/*
+public function get_by_kpis($today, $status = 'all')
+{
+
+    $status = trim($status);
+
+   $this->db->select('
+    COUNT(id) as orders,
+    SUM(subtotal) as gross,
+    SUM(total_amount) as net,
+    SUM(discount_value) as discount
+');
+
+    $this->db->from('order_tbl');
+
+    $this->db->where('DATE(created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    $order_data = $this->db->get()->row_array();
+
+    $this->db->select('SUM(quantity) as items');
+
+    $this->db->from('order_items_tbl');
+
+    $this->db->where('DATE(created_at)', $today);
+
+    $item_data = $this->db->get()->row_array();
+
+    return [
+
+        'date' => $today,
+
+        'orders' => $order_data['orders'] ?? 0,
+
+        'gross' => $order_data['gross'] ?? 0,
+
+        'net' => $order_data['net'] ?? 0,
+
+        'discount' => $order_data['discount'] ?? 0,
+
+        'items' => $item_data['items'] ?? 0,
+
+        'channel' => 'Website'
+    ];
+}
+/*
+/*
+public function get_sales_report_by_today($today, $status = 'all')
+{
+    $this->db->select("
+        DATE(created_at) as date,
+        COUNT(id) as orders,
+        SUM(quantity) as items,
+        SUM(total_amount) as gross,
+        SUM(discount_amount) as discount,
+        (SUM(total_amount) - SUM(discount_amount)) as net,
+        'Website' as channel
+    ");
+
+    $this->db->from('order_tbl');
+
+    $this->db->where('DATE(created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('order_status', $status);
+    }
+
+    $this->db->group_by('DATE(created_at)');
+
+    return $this->db->get()->result_array();
+}
+*/
+
+//corrected code for report by date range & status today
+/*public function get_sales_report_by_today($today, $status = 'all')
+{
+    $status = trim($status);
+
+    $this->db->select("
+        DATE(o.created_at) as date,
+        COUNT(DISTINCT o.id) as orders,
+        SUM(oi.quantity) as items,
+        SUM(o.subtotal) as gross,
+        SUM(o.discount_value) as discount,
+        SUM(o.total_amount) as net
+    ");
+
+    $this->db->from('order_tbl o');
+
+    $this->db->join('order_items_tbl oi', 'oi.order_id = o.id', 'left');
+
+    $this->db->where('DATE(o.created_at)', $today);
+
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+
+    $this->db->group_by('DATE(o.created_at)');
+
+    $query = $this->db->get();
+
+    $result = $query->result_array();
+
+    foreach ($result as &$row) {
+        $row['channel'] = ucfirst($status == 'all' ? 'Website' : $status);
+    }
+
+    return $result;
+}
+*/
+
+//correctt code for report by date range & status last 7 days
+/*
+public function get_sales_report_by_custom_date_range($start_date, $end_date,$status = 'all')
+{
+    $status = trim($status);
+
+    $this->db->select("
+        DATE(o.created_at) as date,
+        COUNT(DISTINCT o.id) as orders,
+        SUM(oi.quantity) as items,
+        SUM(DISTINCT o.subtotal) as gross,
+        SUM(DISTINCT o.discount_value) as discount,
+        SUM(DISTINCT o.total_amount) as net
+    ");
+
+    $this->db->from('order_tbl o');
+
+    $this->db->join('order_items_tbl oi', 'oi.order_id = o.id', 'left');
+
+    // Date filter
+    //$this->db->where('DATE(o.created_at) >=', $start_date);
+    //$this->db->where('DATE(o.created_at) <=', $end_date);
+
+    if (!empty($start_date)) {
+    $this->db->where('DATE(o.created_at) >=', $start_date);
+    }
+
+    if (!empty($end_date)) {
+    $this->db->where('DATE(o.created_at) <=', $end_date);
+    }
+
+    // Status filter
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+
+    $this->db->group_by('DATE(o.created_at)');
+
+    $query = $this->db->get();
+
+    $result = $query->result_array();
+
+    foreach ($result as &$row) {
+        $row['channel'] = ucfirst($status == 'all' ? 'Website' : $status);
+    }
+
+    return $result;
+}
+
+/*
+public function get_sales_report_by_custom_date_range($start_date, $end_date, $status = 'all')
+{
+    $status = trim($status);
+
+    $this->db->select("
+        DATE(o.created_at) as date,
+        COUNT(DISTINCT o.id) as orders,
+        SUM(oi.quantity) as items,
+        SUM(o.subtotal) as gross,
+        SUM(o.discount_value) as discount,
+        SUM(o.total_amount) as net
+    ");
+
+    $this->db->from('order_tbl o');
+
+    $this->db->join('order_items_tbl oi', 'oi.order_id = o.id', 'left');
+
+   // $this->db->where('DATE(o.created_at)', $days_ago);
+   // $this->db->where('DATE(o.created_at) >=', $start_date);
+    //$this->db->where('DATE(o.created_at) <=', $end_date);
+  //  $this->db->where('DATE(o.created_at) >=', $start_date);
+   // $this->db->where('DATE(o.created_at) <=', $end_date);
+
+    $this->db->where('DATE(o.created_at) >=', $start_date);
+    $this->db->where('DATE(o.created_at) <=', $end_date);
+
+    if ($status != 'all') {
+        $this->db->where('o.order_status', $status);
+    }
+
+    $this->db->group_by('DATE(o.created_at)');
+
+    $query = $this->db->get();
+
+    $result = $query->result_array();
+
+    foreach ($result as &$row) {
+        $row['channel'] = ucfirst($status == 'all' ? 'Website' : $status);
+    }
+
+    return $result;
+}
+
+
+public function get_sales_report($start_date, $end_date, $status = 'all')
+{
+    $status = trim($status);
+
+    $this->db->select("
+        DATE(o.created_at) as date,
+
+        COUNT(DISTINCT o.id) as orders,
+
+        SUM(oi.quantity) as items,
+
+        SUM(o.subtotal) as gross,
+
+        SUM(o.discount_value) as discount,
+
+        SUM(o.total_amount) as net
+    ");
+
+    $this->db->from('order_tbl o');
+
+    $this->db->join(
+        'order_items_tbl oi',
+        'oi.order_id = o.id',
+        'left'
+    );
+
+    // Date filter
+    if (!empty($start_date)) {
+
+        $this->db->where(
+            'DATE(o.created_at) >=',
+            $start_date
+        );
+    }
+
+    if (!empty($end_date)) {
+
+        $this->db->where(
+            'DATE(o.created_at) <=',
+            $end_date
+        );
+    }
+
+    // Status filter
+    if ($status != 'all') {
+
+        $this->db->where(
+            'o.order_status',
+            $status
+        );
+    }
+
+    /*
+    IMPORTANT FIX
+    Group by ORDER ID first
+    to prevent duplicate totals
+    */
+/*
+    $this->db->group_by('o.id');
+
+    $query = $this->db->get();
+
+    $result = $query->result_array();
+
+    // Final date-wise merge
+    $final = [];
+
+    foreach ($result as $row) {
+
+        $date = $row['date'];
+
+        if (!isset($final[$date])) {
+
+            $final[$date] = [
+
+                'date' => $date,
+
+                'orders' => 0,
+
+                'items' => 0,
+
+                'gross' => 0,
+
+                'discount' => 0,
+
+                'net' => 0,
+
+                'channel' => 'Website'
+            ];
+        }
+
+        $final[$date]['orders'] += $row['orders'];
+
+        $final[$date]['items'] += $row['items'];
+
+        $final[$date]['gross'] += $row['gross'];
+
+        $final[$date]['discount'] += $row['discount'];
+
+        $final[$date]['net'] += $row['net'];
+    }
+
+    return array_values($final);
+*/
+
+
+
+public function get_sales_report($start_date, $end_date, $status = 'all')
+{
+    $status = trim($status);
+
+    // =====================================
+    // MAIN SALES REPORT QUERY
+    // =====================================
+
+    $this->db->select("
+        DATE(o.created_at) as date,
+
+        COUNT(DISTINCT o.id) as orders,
+
+        SUM(o.subtotal) as gross,
+
+        SUM(o.discount_value) as discount,
+
+        SUM(o.total_amount) as net
+    ");
+
+    $this->db->from('order_tbl o');
+
+    // Date Filters
+    if (!empty($start_date)) {
+
+        $this->db->where(
+            'DATE(o.created_at) >=',
+            $start_date
+        );
+    }
+
+    if (!empty($end_date)) {
+
+        $this->db->where(
+            'DATE(o.created_at) <=',
+            $end_date
+        );
+    }
+
+    // Status Filter
+    if ($status != 'all') {
+
+        $this->db->where(
+            'o.order_status',
+            $status
+        );
+    }
+
+    // Group by Date
+    $this->db->group_by('DATE(o.created_at)');
+
+    // Latest First
+    $this->db->order_by('DATE(o.created_at)', 'DESC');
+
+    $query = $this->db->get();
+
+    $result = $query->result_array();
+
+    // =====================================
+    // GET ITEMS COUNT SEPARATELY
+    // =====================================
+
+    foreach ($result as &$row) {
+
+        $this->db->select('SUM(oi.quantity) as items');
+
+        $this->db->from('order_items_tbl oi');
+
+        $this->db->join(
+            'order_tbl o',
+            'o.id = oi.order_id',
+            'left'
+        );
+
+        $this->db->where(
+            'DATE(o.created_at)',
+            $row['date']
+        );
+
+        // Status Filter
+        if ($status != 'all') {
+
+            $this->db->where(
+                'o.order_status',
+                $status
+            );
+        }
+
+        $items_data = $this->db->get()->row_array();
+
+        $row['items'] = $items_data['items'] ?? 0;
+
+        $row['channel'] = 'Website';
+    }
+
+    return $result;
+}
 }

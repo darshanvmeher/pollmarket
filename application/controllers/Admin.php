@@ -823,21 +823,30 @@ public function invoice($invoice_id = 0)
         $this->render('promotions', $data);
     }*/
 
-    
+    /*
 
     public function reports()
     {
+            $this->load->model('Order_model');
+           // $date_range = $this->input->get('date_range') ?? 'today';
+            //$order_status_filter = $this->input->get('order_status') ?? 'all';
+
         $data = array(
             'active' => 'reports',
             'title' => 'Sales Report',
             'subtitle' => 'Sales performance view designed for ecommerce reporting and Excel export.',
-            'kpis' => array(
+            'kpis'=>$this->Order_model->get_by_kpis(),
+              //  'sales_trend'=>$this->Order_model->get_sales_trend(),
+                //'summary_cards'=>$this->Order_model->get_summary_cards(),
+                //'sales_rows'=>$this->Order_model->get_sales_rows(),
+        
+         /*  'kpis' => array(
                 array('title' => 'Gross Sales', 'value' => '₹12.48L', 'trend' => '+18.2%', 'trend_class' => 'kpi-up'),
                 array('title' => 'Net Sales', 'value' => '₹9.86L', 'trend' => '+14.7%', 'trend_class' => 'kpi-up'),
                 array('title' => 'Orders', 'value' => '1,284', 'trend' => '+8.4%', 'trend_class' => 'kpi-up'),
                 array('title' => 'Avg. Order Value', 'value' => '₹971', 'trend' => '+3.1%', 'trend_class' => 'kpi-up')
-            ),
-            'sales_trend' => array(
+            ),*/
+         /*   'sales_trend' => array(
                 array('label' => 'Mon', 'value' => 36),
                 array('label' => 'Tue', 'value' => 42),
                 array('label' => 'Wed', 'value' => 58),
@@ -845,25 +854,314 @@ public function invoice($invoice_id = 0)
                 array('label' => 'Fri', 'value' => 66),
                 array('label' => 'Sat', 'value' => 74),
                 array('label' => 'Sun', 'value' => 51)
-            ),
-            'summary_cards' => array(
+            ),*/
+         /*   'summary_cards' => array(
                 array('label' => 'Top Channel', 'value' => 'Website', 'note' => '48% of orders'),
                 array('label' => 'Best Category', 'value' => 'Plastic Bags', 'note' => 'Highest revenue'),
                 array('label' => 'Highest Day', 'value' => 'Saturday', 'note' => 'Peak order volume'),
                 array('label' => 'Refund Rate', 'value' => '2.3%', 'note' => 'Rolling 30 days')
-            ),
-            'sales_rows' => array(
+            ),*/
+           /*'sales_rows' => array(
                 array('date' => '06 May 2026', 'orders' => 128, 'items' => 420, 'gross' => '₹1.48L', 'discount' => '₹4,800', 'net' => '₹1.43L', 'channel' => 'Website'),
                 array('date' => '05 May 2026', 'orders' => 116, 'items' => 388, 'gross' => '₹1.36L', 'discount' => '₹3,900', 'net' => '₹1.32L', 'channel' => 'WhatsApp'),
                 array('date' => '04 May 2026', 'orders' => 103, 'items' => 352, 'gross' => '₹1.21L', 'discount' => '₹2,700', 'net' => '₹1.18L', 'channel' => 'Website'),
                 array('date' => '03 May 2026', 'orders' => 97, 'items' => 311, 'gross' => '₹1.08L', 'discount' => '₹2,200', 'net' => '₹1.06L', 'channel' => 'Marketplace'),
                 array('date' => '02 May 2026', 'orders' => 88, 'items' => 295, 'gross' => '₹98K', 'discount' => '₹1,900', 'net' => '₹96K', 'channel' => 'Sales Team')
-            ),
+            ),*/
+         /*   'sales_rows' => $this->Order_model->get_sales_report_by_today(date('Y-m-d'), 'all'),
         );
 
         $this->render('reports', $data);
     }
 
+
+    */
+
+    //report admin
+
+    // =========================================
+// REPORTS PAGE
+// =========================================
+
+public function reports()
+{
+    $this->load->model('Order_model');
+
+    // Get Filters
+    $date_range = $this->input->get('date_range');
+
+    $status = $this->input->get('order_status');
+
+    // Default Filters
+    if (empty($date_range)) {
+
+        $date_range = 'last_7_days';
+    }
+
+    if (empty($status)) {
+
+        $status = 'all';
+    }
+
+    // =====================================
+    // DATE RANGE LOGIC
+    // =====================================
+
+    $start_date = '';
+
+    $end_date = '';
+
+    // Today
+    if ($date_range == 'today') {
+
+        $start_date = date('Y-m-d');
+
+        $end_date = date('Y-m-d');
+    }
+
+    // Last 7 Days
+    else if ($date_range == 'week') {
+
+    // Today included
+    $start_date = date(
+        'Y-m-d',
+        strtotime('-6 days')
+    );
+
+    $end_date = date('Y-m-d');
+}
+
+    // This Month
+    else if ($date_range == 'month') {
+
+        $start_date = date('Y-m-01');
+
+        $end_date = date('Y-m-t');
+    }
+
+    // Custom Range
+    else if ($date_range == 'custom') {
+
+        $start_date = $this->input->get('start_date');
+
+        $end_date = $this->input->get('end_date');
+
+        // Safety fallback
+        if (empty($start_date)) {
+
+            $start_date = date(
+                'Y-m-d',
+                strtotime('-7 days')
+            );
+        }
+
+        if (empty($end_date)) {
+
+            $end_date = date('Y-m-d');
+        }
+    }
+
+    // =====================================
+    // VIEW DATA
+    // =====================================
+
+    $data = array(
+
+        'active' => 'reports',
+
+        'title' => 'Sales Report',
+
+        'subtitle' =>
+            'Sales performance view designed for ecommerce reporting and Excel export.',
+
+        // KPI Cards
+        'kpi' => $this->Order_model->get_by_kpis(
+            $start_date,
+            $end_date,
+            $status
+        ),
+
+        // Table Data
+        'sales_rows' => $this->Order_model->get_sales_report(
+            $start_date,
+            $end_date,
+            $status
+        ),
+
+        // Selected Filters
+        'selected_status' => $status,
+
+        'date_range' => $date_range,
+
+        'start_date' => $start_date,
+
+        'end_date' => $end_date
+    );
+
+    $this->render('reports', $data);
+}
+
+    /*
+    public function reports()
+{
+    $this->load->model('Order_model');
+
+    $date_range = $this->input->get('date_range');
+
+    $start_date = $this->input->get('start_date');
+    $end_date   = $this->input->get('end_date');
+
+    $status     = $this->input->get('order_status');
+
+    // Default date range
+    if (empty($date_range)) {
+        $date_range = 'last_7_days';
+    }
+
+    // Default dates
+    if (empty($start_date)) {
+        $start_date = date('Y-m-d', strtotime('-7 days'));
+    }
+
+    if (empty($end_date)) {
+        $end_date = date('Y-m-d');
+    }
+
+    // Default status
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    $data = array(
+
+        'active'   => 'reports',
+
+        'title'    => 'Sales Report',
+
+        'subtitle' => 'Sales performance view designed for ecommerce reporting and Excel export.',
+
+        'kpi' => $this->Order_model->get_by_kpis(
+            $start_date,
+            $end_date,
+            $status
+        ),
+
+        'sales_rows' => $this->Order_model->get_sales_report(
+            $start_date,
+            $end_date,
+            $status
+        ),
+
+        'selected_status' => $status,
+
+        'date_range' => $date_range,
+
+        'start_date' => $start_date,
+
+        'end_date'   => $end_date
+
+    );
+
+    $this->render('reports', $data);
+}
+
+/*
+    public function reports()
+{
+    $this->load->model('Order_model');
+
+    $start_date = $this->input->get('start_date');
+    $end_date   = $this->input->get('end_date');
+    $status     = $this->input->get('order_status');
+
+    // Default dates
+    if (empty($start_date)) {
+        $start_date = date('Y-m-d', strtotime('-7 days'));
+    }
+
+    if (empty($end_date)) {
+        $end_date = date('Y-m-d');
+    }
+
+    // Default status
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    $data = array(
+
+        'active'   => 'reports',
+        'title'    => 'Sales Report',
+        'subtitle' => 'Sales performance view designed for ecommerce reporting and Excel export.',
+
+        'kpi' => $this->Order_model->get_by_kpis(
+            $start_date,
+            $end_date,
+            $status
+        ),
+
+        'sales_rows' => $this->Order_model->get_sales_report_by_custom_date_range(
+            $start_date,
+            $end_date,
+            $status
+        ),
+
+        'selected_status' => $status,
+
+         'start_date' => $start_date,
+         'end_date'   => $end_date
+
+           
+
+    );
+
+    $this->render('reports', $data);
+}*/
+/*
+public function reports()
+{
+    $this->load->model('Order_model');
+
+  //  $day_ago = date('Y-m-d', strtotime('-8 days'));
+   // $start_date = date('Y-m-d', strtotime('-7 days'));
+   // $days_ago = date('Y-m-d', strtotime('-7 days'));
+   // $start_date = date('Y-m-d', strtotime('-7 days'));
+     //$days_ago = date('Y-m-d', strtotime('-7 days'));
+    //$end_date = date('Y-m-d');
+   // $end_date = date('Y-m-d');
+   //$start_date = date('Y-m-01'); // Returns the 1st day of the current month
+    //$end_date   = date('Y-m-t');  // Returns the last day of the current month
+
+    $start_date = $this->input->get('start_date');
+    $end_date = $this->input->get('end_date');
+    $status = $this->input->get('order_status');
+
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    $data = array(
+
+        'active'   => 'reports',
+        'title'    => 'Sales Report',
+        'subtitle' => 'Sales performance view designed for ecommerce reporting and Excel export.',
+
+       // 'kpis' => $this->Order_model->get_by_kpis($today, $status),
+       'kpi' => $this->Order_model->get_by_kpis($start_date,$end_date, $status),
+
+        
+       // 'sales_rows' => $this->Order_model->get_sales_report_by_today($today, $status),
+
+       'sales_rows' => $this->Order_model->get_sales_report_by_custom_date_range($start_date,$end_date, $status),
+
+
+        'selected_status' => $status
+      //  'selected_dates'=> $start_date .' to '. $end_date
+    );
+
+    $this->render('reports', $data);
+}
+*/
     public function settings()
     {
         $data = array(

@@ -3417,5 +3417,373 @@ public function download_invoice_pdf($order_id = 0)
         'D'
     );
 }
+//report api filter by date range and order status today
+/*
+public function sales_report()
+{
+    header('Content-Type: application/json');
+
+    $start_date = $this->input->post('start_date');
+    $end_date   = $this->input->post('end_date');
+    $status     = $this->input->post('status');
+
+    // ✅ Validate dates
+    if (empty($start_date) || empty($end_date)) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Start date and end date are required'
+        ]);
+        return;
+    }
+
+    // ✅ Build query
+    $this->db->select('*');
+    $this->db->from('order_tbl');
+    $this->db->where('DATE(created_at) >=', $start_date);
+    $this->db->where('DATE(created_at) <=', $end_date);
+
+    if (!empty($status)) {
+        $this->db->where('order_status', $status);
+    }
+
+    $report_data = $this->db->get()->result();
+
+    echo json_encode([
+        'status' => true,
+        'data' => $report_data
+    ]);
+}
+
+
+
+public function sales_report_today()
+{
+    header('Content-Type: application/json');
+
+    $today = date('Y-m-d');
+
+    $this->db->select('*');
+    $this->db->from('order_tbl');
+    $this->db->where('DATE(created_at)', $today);
+
+    $report_data = $this->db->get()->result();
+
+    $count = count($report_data);
+
+    echo json_encode([
+        'status' => true,
+        'data' => $report_data,
+        'count' => $count
+    ]);
+}
+
+//report api filter by date range and order status today
+
+public function sales_report_by_status()
+{
+    header('Content-Type: application/json');
+
+    $status = $this->input->post('status');
+
+    if (empty($status)) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Order status is required'
+        ]);
+        return;
+    }
+
+    $this->db->select('*');
+    $this->db->from('order_tbl');
+    $this->db->where('order_status', $status);
+
+    $report_data = $this->db->get()->result();
+
+    echo json_encode([
+        'status' => true,
+        'data' => $report_data
+    ]);
+
+}
+*/
+/*
+public function sales_report_by_today()
+{
+    header('Content-Type: application/json');
+
+    $today = date('Y-m-d');
+    $status = $this->input->post('status');
+
+ 
+   /* $this->db->select('*');
+    $this->db->from('order_tbl');
+    $this->db->where('DATE(created_at)', $today);
+    $this->db->where('order_status', $status);*/
+
+    //$report_data = $this->db->get()->result();
+
+  /*  $report_data=$this->input->Order_model->get_sales_report_by_today($today,$status);
+
+    if(empty($report_data)){
+        echo json_encode([
+            'status' => false,
+            'message' => 'No orders found for today with status: '.$status
+        ]);
+    }else{
+        echo json_encode([
+            'status' => true,
+            'data' => $report_data
+        ]);
+
+    }
+}
+*/
+/*
+public function sales_report_by_today()
+{
+    header('Content-Type: application/json');
+
+    $today = date('Y-m-d');
+
+    $status = $this->input->post('order_status');
+
+
+
+  //  echo $status; exit;
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+   
+    $report_data = $this->Order_model->get_by_kpis($today, $status);
+
+    echo json_encode([
+        'status' => true,
+        'data' => $report_data
+    ]);
+}
+*/
+/*
+public function sales_report_by_today()
+{
+    header('Content-Type: application/json');
+
+    $today = date('Y-m-d');
+
+    $status = $this->input->post('order_status');
+
+   // echo $status;
+    //exit;
+
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    $report_data = $this->Order_model->get_by_kpis($today, $status);
+
+    $table_data = $this->Order_model->get_sales_report_by_today($today, $status);
+
+    echo json_encode([
+        'status' => true,
+        'data' => $report_data
+    ]);
+}
+*/
+
+public function sales_report_by_today()
+{
+    header('Content-Type: application/json');
+
+    $today = date('Y-m-d');
+
+    $status = $this->input->post('order_status');
+
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    // KPI Cards Data
+    $report_data = $this->Order_model->get_by_kpis($today, $status);
+
+    // Table Data
+    $table_data = $this->Order_model->get_sales_report_by_today($today, $status);
+
+    echo json_encode([
+        'status'     => true,
+        'kpis'       => $report_data,
+        'table_data' => $table_data
+    ]);
+}
+
+
+// sales report by last 7 days
+
+public function sales_report_by_last_7_days()
+{
+    header('Content-Type: application/json');
+
+    $status = $this->input->post('order_status');
+
+   // $days_ago = date('Y-m-d', strtotime('-7 days'));
+
+    $start_date = date('Y-m-d', strtotime('-7 days'));
+    $end_date = date('Y-m-d');
+
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    // KPI Cards Data
+    $report_data = $this->Order_model->get_by_kpis($start_date,$end_date, $status);
+
+    // Table Data
+    $table_data = $this->Order_model->get_sales_report_by_last_7_days($start_date, $end_date, $status);
+
+    echo json_encode([
+        'status'     => true,
+        'kpis'       => $report_data,
+        'table_data' => $table_data
+    ]);
+    
+
+}
+
+//sales report by this month
+
+
+public function sales_report_by_this_month()
+{
+    header('Content-Type: application/json');
+
+    $status = $this->input->post('order_status');
+
+    $start_date = date('Y-m-01'); // Returns the 1st day of the current month
+    $end_date   = date('Y-m-t');  // Returns the last day of the current month
+
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    // KPI Cards Data
+    $report_data = $this->Order_model->get_by_kpis($start_date,$end_date, $status);
+
+    // Table Data
+    $table_data = $this->Order_model->get_sales_report_by_this_month($start_date, $end_date, $status);
+
+    echo json_encode([
+        'status'     => true,
+        'kpis'       => $report_data,
+        'table_data' => $table_data
+    ]);
+}
+
+//sales report by custom date range
+
+public function sales_report_by_custom_date_range()
+{
+    header('Content-Type: application/json');
+
+    $status = $this->input->post('order_status');
+    $start_date = $this->input->post('start_date');
+    $end_date = $this->input->post('end_date');
+
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    // KPI Cards Data
+    $report_data = $this->Order_model->get_by_kpis($start_date,$end_date, $status);
+
+    // Table Data
+    $table_data = $this->Order_model->get_sales_report_by_custom_date_range($start_date, $end_date, $status);
+
+    echo json_encode([
+        'status'     => true,
+        'kpis'       => $report_data,
+        'table_data' => $table_data
+    ]);
+
+
+
+}
+
+public function sales_report()
+{
+    header('Content-Type: application/json');
+
+    $status      = $this->input->post('order_status');
+    $date_range  = $this->input->post('date_range');
+
+    if (empty($status)) {
+        $status = 'all';
+    }
+
+    // Default dates
+    $start_date = '';
+    $end_date   = '';
+
+    // Today
+    if ($date_range == 'today') {
+
+        $start_date = date('Y-m-d');
+        $end_date   = date('Y-m-d');
+
+    }
+
+
+    // Last 7 Days
+else if ($date_range == 'week') {
+
+    // Today 
+    $start_date = date(
+        'Y-m-d',
+        strtotime('-6 days')
+    );
+  //  echo $start_date;
+
+    //echo '<br>';
+
+    $end_date = date('Y-m-d');
+
+//    echo $end_date;
+
+}
+
+    // This Month
+    else if ($date_range == 'month') {
+
+        $start_date = date('Y-m-01');
+        $end_date   = date('Y-m-t');
+
+    }
+
+    // Custom Range
+    else if ($date_range == 'custom') {
+
+        $start_date = $this->input->post('start_date');
+        $end_date   = $this->input->post('end_date');
+
+    }
+
+    // KPI Cards Data
+    $report_data = $this->Order_model->get_by_kpis(
+        $start_date,
+        $end_date,
+        $status
+    );
+
+    // Table Data
+    $table_data = $this->Order_model->get_sales_report(
+        $start_date,
+        $end_date,
+        $status
+    );
+
+    echo json_encode([
+        'status'     => true,
+        'kpis'       => $report_data,
+        'table_data' => $table_data
+    ]);
+}
 
 }

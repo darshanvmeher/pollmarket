@@ -193,38 +193,96 @@
                 <div class="col-md-9">
                     <label class="form-label">Date Range</label>
                     <select class="form-select" id="salesDateRange">
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="30days">Last 30 Days</option>
+                        <option name="today" value="today">Today</option>
+                        <option name="week" value="week">Last 7 Days</option>
+                        <option name="month" value="month">This Month</option>
+                        <option name="custom" value="custom">Custom Range</option>
+                    </select>
+                </div>
+                 <div class="col-md-3 d-grid">
+                    <button class="btn btn-primary">Apply Filters</button>
+                </div>
+                
+                
+                <div class="col-md-9">
+                <label class="form-label">Order Status</label>
+
+                <select class="form-select" id="orderStatus" name="order_status">
+                    <option value="all">All Orders</option>
+                    <option value="pending">Pending</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+            </div>
+             <!--   <div class="col-md-3 d-grid">
+                    <button class="btn btn-primary">Apply Filters</button>
+                </div>-->
+            </div>
+           <!-- <div class="row g-3 mt-1 d-none" id="customRangeFields">
+               <!-- <div class="col-md-6">
+                    <label class="form-label">From Date</label>
                         <option value="custom">Custom Range</option>
                     </select>
                 </div>
                 <div class="col-md-3 d-grid">
                     <button class="btn btn-primary">Apply Filters</button>
                 </div>
-            </div>
-            <div class="row g-3 mt-1 d-none" id="customRangeFields">
+            </div>-->
+           <div class="row g-3 mt-1 d-none" id="customRangeFields">
                 <div class="col-md-6">
                     <label class="form-label">From Date</label>
-                    <input type="date" class="form-control" id="fromDate">
+                    <input type="date" class="form-control" id="fromDate"
+                        value="<?php echo $start_date; ?>">
                 </div>
+
                 <div class="col-md-6">
                     <label class="form-label">To Date</label>
-                    <input type="date" class="form-control" id="toDate">
+                    <input type="date" class="form-control" id="toDate"
+                        value="<?php echo $end_date; ?>">
                 </div>
             </div>
         </div>
 
-        <div class="sales-report-summary mb-4">
-            <?php foreach ($summary_cards as $card): ?>
+      <!--  <div class="sales-report-summary mb-4">
+           <?php foreach ($summary_cards as $card): ?>
                 <div class="sales-report-summary-card">
                     <div class="sales-report-summary-card__label"><?php echo html_escape($card['label']); ?></div>
                     <div class="sales-report-summary-card__value"><?php echo html_escape($card['value']); ?></div>
                     <p class="sales-report-summary-card__note"><?php echo html_escape($card['note']); ?></p>
                 </div>
             <?php endforeach; ?>
+        </div>-->
+
+        <div class="sales-report-summary mb-4">
+
+    <div class="sales-report-summary-card">
+        <div class="sales-report-summary-card__label">Orders</div>
+        <div class="sales-report-summary-card__value" id="ordersCount">
+            <?php echo $kpis['orders'] ?? 0; ?>
         </div>
+    </div>
+
+    <div class="sales-report-summary-card">
+        <div class="sales-report-summary-card__label">Items</div>
+        <div class="sales-report-summary-card__value" id="itemsCount">
+            <?php echo $kpis['items'] ?? 0; ?>
+        </div>
+    </div>
+
+    <div class="sales-report-summary-card">
+        <div class="sales-report-summary-card__label">Gross Sales</div>
+        <div class="sales-report-summary-card__value" id="grossSales">
+            ₹<?php echo $kpis['gross'] ?? 0; ?>
+        </div>
+    </div>
+
+    <div class="sales-report-summary-card">
+        <div class="sales-report-summary-card__label">Net Sales</div>
+        <div class="sales-report-summary-card__value" id="netSales">
+            ₹<?php echo $kpis['net'] ?? 0; ?>
+        </div>
+    </div>
+
+</div>
 
         <div class="sales-report-panel">
             <div class="sales-report-panel__head">
@@ -237,7 +295,7 @@
                         <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
                     </a>
                     <a class="btn btn-outline-secondary btn-sm" href="#">
-                        <i class="bi bi-download me-1"></i>Download CSV
+                        <i class="bi bi-download me-1"></i>Download PDF
                     </a>
                 </div>
             </div>
@@ -254,18 +312,31 @@
                             <th>Channel</th>
                         </tr>
                     </thead>
+                 
                     <tbody>
+                        
+                        <?php if (!empty($sales_rows) && is_array($sales_rows)): ?>
+
                         <?php foreach ($sales_rows as $row): ?>
                             <tr>
-                                <td class="fw-semibold"><?php echo html_escape($row['date']); ?></td>
-                                <td><?php echo (int) $row['orders']; ?></td>
-                                <td><?php echo (int) $row['items']; ?></td>
-                                <td><?php echo html_escape($row['gross']); ?></td>
-                                <td><?php echo html_escape($row['discount']); ?></td>
-                                <td class="fw-semibold"><?php echo html_escape($row['net']); ?></td>
-                                <td><span class="status-pill status-live"><?php echo html_escape($row['channel']); ?></span></td>
+                                <td><?php echo html_escape($row['date'] ?? '-'); ?></td>
+                                <td><?php echo (int)($row['orders'] ?? 0); ?></td>
+                                <td><?php echo (int)($row['items'] ?? 0); ?></td>
+                                <td><?php echo html_escape($row['gross'] ?? 0); ?></td>
+                                <td><?php echo html_escape($row['discount'] ?? 0); ?></td>
+                                <td><?php echo html_escape($row['net'] ?? 0); ?></td>
+                                <td><?php echo html_escape($row['channel'] ?? 'website'); ?></td>
                             </tr>
                         <?php endforeach; ?>
+
+                        <?php else: ?>
+
+                        <tr>
+                            <td colspan="7" class="text-center">No sales data found</td>
+                        </tr>
+
+                        <?php endif; ?>
+
                     </tbody>
                 </table>
             </div>
@@ -302,3 +373,681 @@ document.addEventListener('DOMContentLoaded', function () {
     toggleCustomFields();
 });
 </script>
+
+<!--js date range and order status-->
+<!--
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+
+
+<!--
+<script>
+
+    $(document).ready(function () {
+
+    $('.btn-primary').on('click', function () {
+
+        let dateRange   = $('#salesDateRange').val();
+        let orderStatus = $('#orderStatus').val();
+
+        $.ajax({
+            url: "<?=base_url('index.php/Api_handler/sales_report_by_today')?>",
+            type: 'POST',
+            dataType:'json',
+            data: {
+                date_range: dateRange,
+                order_status: orderStatus
+            },
+            success: function (response) {
+                $('#order_table').html(response);
+            }
+        });
+
+    });
+
+});
+
+</script>
+
+                        -->
+                        
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+
+<script>
+
+let table;
+
+$(document).ready(function () {
+
+    // Initialize DataTable only once
+    table = $('#myTable').DataTable({
+
+        pageLength: 5,
+
+        lengthMenu: [5, 10, 12, 50, 100],
+
+        ordering: true,
+
+        searching: true,
+
+        dom: 'Bfrtip',
+
+      /*  buttons: [
+            'copy',
+            'csv',
+            'excel',
+            'pdf',
+            'print'
+        ]*/
+    });
+
+    // Apply Filters Button
+    $('.btn-primary').on('click', function () {
+
+        let dateRange = $('#salesDateRange').val();
+
+        let orderStatus = $('#orderStatus').val();
+
+        let startDate = $('#fromDate').val();
+
+        let endDate = $('#toDate').val();
+
+        // Request Object
+        let requestData = {
+
+            date_range: dateRange,
+
+            order_status: orderStatus
+        };
+
+        // Custom Range
+        if (dateRange == 'custom') {
+
+            requestData.start_date = startDate;
+
+            requestData.end_date = endDate;
+        }
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/sales_report') ?>",
+
+            type: 'POST',
+
+            dataType: 'json',
+
+            data: requestData,
+
+            success: function (response) {
+
+                console.log(response);
+
+                // KPI Cards
+                $('#ordersCount').text(
+                    response.kpis.orders ?? 0
+                );
+
+                $('#itemsCount').text(
+                    response.kpis.items ?? 0
+                );
+
+                $('#grossSales').text(
+                    '₹' + (response.kpis.gross ?? 0)
+                );
+
+                $('#netSales').text(
+                    '₹' + (response.kpis.net ?? 0)
+                );
+
+                // Clear old rows
+                table.clear();
+
+                // Add rows dynamically
+                if (response.table_data && response.table_data.length > 0) {
+
+                    response.table_data.forEach(function (row) {
+
+                        table.row.add([
+
+                            row.date ?? '-',
+
+                            row.orders ?? 0,
+
+                            row.items ?? 0,
+
+                            row.gross ?? 0,
+
+                            row.discount ?? 0,
+
+                            row.net ?? 0,
+
+                            row.channel ?? 'Website'
+                        ]);
+                    });
+
+                } else {
+
+                    table.row.add([
+
+                        'No sales data found',
+
+                        '',
+
+                        '',
+
+                        '',
+
+                        '',
+
+                        '',
+
+                        ''
+                    ]);
+                }
+
+                // Redraw table
+                table.draw();
+
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+            }
+
+        });
+
+    });
+
+});
+
+</script>
+
+<!--
+<script>
+
+   
+$(document).ready(function () {
+
+    $('.btn-primary').on('click', function () {
+
+        let dateRange   = $('#salesDateRange').val();
+        let orderStatus = $('#orderStatus').val();
+
+        $.ajax({
+            url: "<?= base_url('index.php/Api_handler/sales_report_by_today') ?>",
+            type: 'POST',
+            dataType: 'json',
+
+            data: {
+                date_range: dateRange,
+                order_status: orderStatus
+            },
+
+            success: function (response) {
+
+                console.log(response);
+
+                // ✅ Update KPI Cards
+                $('#ordersCount').text(response.data.orders);
+                $('#itemsCount').text(response.data.items);
+                $('#grossSales').text('₹' + response.data.gross);
+                $('#netSales').text('₹' + response.data.net);
+
+            },
+
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+
+        });
+
+    });
+
+});
+
+                        </script>
+                        -->
+
+
+ <!--                       <script>
+
+$(document).ready(function () {
+
+    // Initialize DataTable first time
+  //  $('#myTable').DataTable();
+
+    $('.btn-primary').on('click', function () {
+
+        let dateRange = $('#salesDateRange').val();
+
+        let orderStatus = $('#orderStatus').val();
+
+        let startDate = $('#fromDate').val();
+
+        let endDate = $('#toDate').val();
+
+        // Request Object
+        let requestData = {
+
+            date_range: dateRange,
+
+            order_status: orderStatus
+        };
+
+        // Only for custom range
+        if (dateRange == 'custom') {
+
+            requestData.start_date = startDate;
+
+            requestData.end_date = endDate;
+        }
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/sales_report') ?>",
+
+            type: 'POST',
+
+            dataType: 'json',
+
+            data: requestData,
+
+            success: function (response) {
+
+                console.log(response);
+
+                // KPI Cards
+
+                $('#ordersCount').text(
+                    response.kpis.orders ?? 0
+                );
+
+                $('#itemsCount').text(
+                    response.kpis.items ?? 0
+                );
+
+                $('#grossSales').text(
+                    '₹' + (response.kpis.gross ?? 0)
+                );
+
+                $('#netSales').text(
+                    '₹' + (response.kpis.net ?? 0)
+                );
+
+                // Table Rows
+
+                let tbody = '';
+
+              //  if (response.table_data.length > 0) 
+              if (response.table_data && response.table_data.length > 0){
+
+                    response.table_data.forEach(function (row) {
+
+                        tbody += `
+                            <tr>
+                                <td>${row.date}</td>
+                                <td>${row.orders}</td>
+                                <td>${row.items}</td>
+                                <td>${row.gross}</td>
+                                <td>${row.discount}</td>
+                                <td>${row.net}</td>
+                                <td>${row.channel}</td>
+                            </tr>
+                        `;
+                    });
+
+                } else {
+
+                    tbody = `
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                No sales data found
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                // Destroy Old DataTable
+               
+
+//                if ($.fn.DataTable.isDataTable('#myTable')) {
+
+  //                  $('#myTable').DataTable().destroy();
+    //            }
+
+                // Replace Table Body
+
+
+      //          $('#myTable tbody').empty();
+
+        //        $('#myTable tbody').html(tbody);
+
+                // Reinitialize DataTable
+
+          //      $('#myTable').DataTable({
+                 if ($.fn.DataTable.isDataTable('#myTable')) {
+
+                    $('#myTable').DataTable().clear().destroy();
+                }
+
+                $('#myTable tbody').empty();
+
+                $('#myTable tbody').append(tbody);
+
+                $('#myTable').DataTable({  
+                
+                destroy: true,
+                pageLength: 5,
+               lengthMenu: [5, 10, 12, 50, 100],
+                 //lengthMenu:[2, 5, 10, 25, 50],
+                ordering: true,
+                searching: true,
+
+                dom: 'Bfrtip',
+
+                buttons: [
+                    'copy',
+                    'csv',
+                    'excel',
+                    'pdf',
+                    'print'
+                ]
+            });
+
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+            }
+
+        });
+
+    });
+
+});
+
+</script>-->
+<!--
+                        <script>
+
+$(document).ready(function () {
+
+    $('.btn-primary').on('click', function () {
+
+        let dateRange   = $('#salesDateRange').val();
+
+        let orderStatus = $('#orderStatus').val();
+
+        let startDate = $('#fromDate').val();
+
+        let endDate   = $('#toDate').val();
+
+        // Request object
+        let requestData = {
+
+            date_range: dateRange,
+
+            order_status: orderStatus
+        };
+
+        // Only custom range sends dates
+        if (dateRange == 'custom') {
+
+            requestData.start_date = startDate;
+
+            requestData.end_date = endDate;
+        }
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/sales_report') ?>",
+
+            type: 'POST',
+
+            dataType: 'json',
+
+            data: requestData,
+
+            success: function (response) {
+
+                console.log(response);
+
+                $('#ordersCount').text(response.kpis.orders ?? 0);
+
+                $('#itemsCount').text(response.kpis.items ?? 0);
+
+                $('#grossSales').text('₹' + (response.kpis.gross ?? 0));
+
+                $('#netSales').text('₹' + (response.kpis.net ?? 0));
+
+                let tbody = '';
+
+                if (response.table_data.length > 0) {
+
+                    response.table_data.forEach(function (row) {
+
+                        tbody += `
+                            <tr>
+                                <td>${row.date}</td>
+                                <td>${row.orders}</td>
+                                <td>${row.items}</td>
+                                <td>${row.gross}</td>
+                                <td>${row.discount}</td>
+                                <td>${row.net}</td>
+                                <td>${row.channel}</td>
+                            </tr>
+                        `;
+                    });
+
+                } else {
+
+                    tbody = `
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                No sales data found
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                $('#myTable tbody').html(tbody);
+
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+            }
+
+        });
+
+    });
+
+});
+
+</script>
+                        -->
+
+<!--
+                        <script>
+
+$(document).ready(function () {
+
+    $('.btn-primary').on('click', function () {
+
+        let dateRange   = $('#salesDateRange').val();
+        let orderStatus = $('#orderStatus').val();
+
+        // ADD THESE
+        let startDate = $('#fromDate').val();
+        let endDate   = $('#toDate').val();
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/sales_report') ?>",
+            type: 'POST',
+            dataType: 'json',
+
+            data: {
+                date_range: dateRange,
+                order_status: orderStatus,
+                start_date: startDate,
+                end_date: endDate
+            },
+
+            success: function (response) {
+
+                console.log(response);
+
+                $('#ordersCount').text(response.kpis.orders ?? 0);
+
+                $('#itemsCount').text(response.kpis.items ?? 0);
+
+                $('#grossSales').text('₹' + (response.kpis.gross ?? 0));
+
+                $('#netSales').text('₹' + (response.kpis.net ?? 0));
+
+                let tbody = '';
+
+                if (response.table_data.length > 0) {
+
+                    response.table_data.forEach(function (row) {
+
+                        tbody += `
+                            <tr>
+                                <td>${row.date}</td>
+                                <td>${row.orders}</td>
+                                <td>${row.items}</td>
+                                <td>${row.gross}</td>
+                                <td>${row.discount}</td>
+                                <td>${row.net}</td>
+                                <td>${row.channel}</td>
+                            </tr>
+                        `;
+
+                    });
+
+                } else {
+
+                    tbody = `
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                No sales data found
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                $('#myTable tbody').html(tbody);
+
+            },
+
+            error: function (xhr, status, error) {
+
+                console.log(xhr.responseText);
+
+            }
+
+        });
+
+    });
+
+});
+
+</script>
+                        -->
+                        <!--
+<script>
+
+$(document).ready(function () {
+
+    $('.btn-primary').on('click', function () {
+
+        let dateRange   = $('#salesDateRange').val();
+        let orderStatus = $('#orderStatus').val();
+        
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/sales_report_by_custom_date_range') ?>",
+            type: 'POST',
+            dataType: 'json',
+
+            data: {
+                date_range: dateRange,
+                order_status: orderStatus
+            },
+
+            success: function (response) {
+
+                console.log(response);
+
+                // ✅ KPI Cards
+                $('#ordersCount').text(response.kpis.orders ?? 0);
+
+                $('#itemsCount').text(response.kpis.items ?? 0);
+
+                $('#grossSales').text('₹' + (response.kpis.gross ?? 0));
+
+                $('#netSales').text('₹' + (response.kpis.net ?? 0));
+
+                // ✅ Update Table
+                let tbody = '';
+
+                if (response.table_data.length > 0) {
+
+                    response.table_data.forEach(function (row) {
+
+                        tbody += `
+                            <tr>
+                                <td>${row.date}</td>
+                                <td>${row.orders}</td>
+                                <td>${row.items}</td>
+                                <td>${row.gross}</td>
+                                <td>${row.discount}</td>
+                                <td>${row.net}</td>
+                                <td>${row.channel}</td>
+                            </tr>
+                        `;
+
+                    });
+
+                } else {
+
+                    tbody = `
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                No sales data found
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                // ✅ Replace table body
+                $('#myTable tbody').html(tbody);
+
+            },
+
+            error: function (xhr, status, error) {
+
+                console.log(error);
+
+            }
+
+        });
+
+    });
+
+});
+
+
+</script>
+                        -->
+
+
+
