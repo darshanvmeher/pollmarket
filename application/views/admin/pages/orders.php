@@ -80,3 +80,27 @@
         </table>
     </div>
 </section>
+
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<script>
+$(document).ready(function () {
+
+    $('#myTable').DataTable({
+        pageLength: 5,
+        lengthMenu: [10, 25, 50, 100],
+        ordering: true,
+        searching: true,
+
+        dom: 'Bfrtip',
+
+     
+        columnDefs: [
+            { orderable: false, targets: -1 }
+        ]
+    });
+
+});
+</script>

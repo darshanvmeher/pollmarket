@@ -1310,4 +1310,114 @@ public function get_sales_report($start_date, $end_date, $status = 'all')
 
     return $result;
 }
+
+/*
+public function get_sales_report_excel()
+{
+    $this->db->select("
+        DATE(o.created_at) as date,
+        COUNT(DISTINCT o.id) as orders,
+        SUM(oi.quantity) as items,
+        SUM(o.subtotal) as gross_sales,
+        SUM(o.discount_value) as discount,
+        SUM(o.total_amount) as net_sales
+    ");
+
+    $this->db->from('order_tbl o');
+
+    $this->db->join(
+        'order_items_tbl oi',
+        'oi.order_id = o.id',
+        'left'
+    );
+
+    $this->db->where('o.delete_status',0);
+
+    $this->db->group_by('DATE(o.created_at)');
+
+    return $this->db->get()->result_array();
+}*/
+public function get_sales_report_excel($date_range = '', $order_status = '')
+{
+    $this->db->select("
+        DATE(o.created_at) as date,
+        COUNT(DISTINCT o.id) as orders,
+        SUM(oi.quantity) as items,
+        SUM(o.subtotal) as gross_sales,
+        SUM(o.discount_value) as discount,
+        SUM(o.total_amount) as net_sales
+    ");
+
+    $this->db->from('order_tbl o');
+
+    $this->db->join(
+        'order_items_tbl oi',
+        'oi.order_id = o.id',
+        'left'
+    );
+
+    $this->db->where('o.delete_status',0);
+
+    // Order status filter
+    if (!empty($order_status) && $order_status != 'all') {
+
+        $this->db->where(
+            'o.order_status',
+            $order_status
+        );
+    }
+
+    // Today
+    if ($date_range == 'today') {
+
+        $start_date = date('Y-m-d');
+        $end_date   = date('Y-m-d');
+
+    }
+
+    // Last 7 Days
+    else if ($date_range == 'week') {
+
+        $start_date = date(
+            'Y-m-d',
+            strtotime('-6 days')
+        );
+
+        $end_date = date('Y-m-d');
+
+    }
+
+    // This Month
+    else if ($date_range == 'month') {
+
+        $start_date = date('Y-m-01');
+        $end_date   = date('Y-m-t');
+
+    }
+
+    // Custom Range
+    else if ($date_range == 'custom') {
+
+        $start_date = $this->input->get('start_date');
+        $end_date   = $this->input->get('end_date');
+    }
+
+    // APPLY DATE FILTER
+    if (!empty($start_date) && !empty($end_date)) {
+
+        $this->db->where(
+            'DATE(o.created_at) >=',
+            $start_date
+        );
+
+        $this->db->where(
+            'DATE(o.created_at) <=',
+            $end_date
+        );
+    }
+
+    $this->db->group_by('DATE(o.created_at)');
+
+    return $this->db->get()->result_array();
+}
 }

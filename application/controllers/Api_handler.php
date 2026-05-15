@@ -3786,4 +3786,610 @@ else if ($date_range == 'week') {
     ]);
 }
 
+
+
+//test
+/*
+public function test_excel()
+{
+    require_once APPPATH . 'third_party/PHPExcel/Classes/PHPExcel.php';
+
+    $excel = new PHPExcel();
+
+    $excel->setActiveSheetIndex(0);
+    $excel->getActiveSheet()->setCellValue('A1', 'Excel Working');
+
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="test.xls"');
+    header('Cache-Control: max-age=0');
+
+    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+    $writer->save('php://output');
+
+    exit;
+}*/
+  /*public function test_excel()
+    {
+        echo "working";
+    }*/
+
+        public function test_excel()
+{
+    require_once APPPATH . 'third_party/PHPExcel/Classes/PHPExcel.php';
+
+    $excel = new PHPExcel();
+
+    $excel->setActiveSheetIndex(0);
+    $excel->getActiveSheet()->setCellValue('A1', 'Excel Working');
+
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="test.xls"');
+    header('Cache-Control: max-age=0');
+
+    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+    $writer->save('php://output');
+
+    exit;
+}
+/*
+public function export_excel()
+{
+    require_once APPPATH . 'third_party/PHPExcel/Classes/PHPExcel.php';
+
+    require_once APPPATH . 'third_party/PHPExcel/Classes/PHPExcel/Cell/DataType.php';
+
+    $excel = new PHPExcel();
+
+    $sheet = $excel->setActiveSheetIndex(0);
+
+    // Header
+   $sheet->setCellValue('A1', 'DATE');
+    $sheet->setCellValue('B1', 'ORDERS');
+    $sheet->setCellValue('C1', 'ITEMS');
+    $sheet->setCellValue('D1', 'GROSS SALES');
+    $sheet->setCellValue('E1', 'DISCOUNT');
+    $sheet->setCellValue('F1', 'NET SALES');
+    $sheet->setCellValue('G1', 'Website');
+    // Bold header
+    $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+
+    // Dynamic database data
+   //$report = $this->db->get('sales_report')->result_array();
+
+   $report = $this->Order_model->get_sales_report_excel();
+  // $report = $this->db->get('order_tbl')->result_array();
+    $row = 2;
+
+    // Total variables
+    $total_orders = 0;
+    $total_items = 0;
+    $total_gross = 0;
+    $total_discount = 0;
+    $total_net = 0;
+
+//    foreach ($report as $data) {
+
+      /*  $sheet->setCellValue('A'.$row, $data['date']);
+        $sheet->setCellValue('B'.$row, $data['orders']);
+        $sheet->setCellValue('C'.$row, $data['items']);
+        $sheet->setCellValue('D'.$row, $data['gross_sales']);
+        $sheet->setCellValue('E'.$row, $data['discount']);
+        $sheet->setCellValue('F'.$row, $data['net_sales']);
+        $sheet->setCellValue('G'.$row, $data['channel']);*/
+
+     /*   $sheet->setCellValue('A'.$row, $data['date']);
+        $sheet->setCellValue('B'.$row, (string)$data['orders']);
+        $sheet->setCellValue('C'.$row, (string)$data['items']);
+        $sheet->setCellValue('D'.$row, (string)$data['gross_sales']);
+        $sheet->setCellValue('E'.$row, (string)$data['discount']);
+        $sheet->setCellValue('F'.$row, (string)$data['net_sales']);
+        $sheet->setCellValue('G'.$row, 'Website');
+
+        // Add totals
+        $total_orders += $data['orders'];
+        $total_items += $data['items'];
+        $total_gross += $data['gross_sales'];
+        $total_discount += $data['discount'];
+        $total_net += $data['net_sales'];
+
+        $row++;
+    }*/
+
+    /*    foreach ($report as $data) {
+
+    $sheet->setCellValueExplicit(
+        'A'.$row,
+        (string)$data['date'],
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'B'.$row,
+        (string)$data['orders'],
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'C'.$row,
+        (string)$data['items'],
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'D'.$row,
+        (string)$data['gross_sales'],
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'E'.$row,
+        (string)$data['discount'],
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'F'.$row,
+        (string)$data['net_sales'],
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'G'.$row,
+        'Website',
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    // totals
+    $total_orders += (int)$data['orders'];
+    $total_items += (int)$data['items'];
+    $total_gross += (float)$data['gross_sales'];
+    $total_discount += (float)$data['discount'];
+    $total_net += (float)$data['net_sales'];
+
+    $row++;
+}
+
+    // Totals row
+    $sheet->setCellValue('A'.$row, 'TOTAL');
+    $sheet->setCellValue('B'.$row, $total_orders);
+    $sheet->setCellValue('C'.$row, $total_items);
+    $sheet->setCellValue('D'.$row, $total_gross);
+    $sheet->setCellValue('E'.$row, $total_discount);
+    $sheet->setCellValue('F'.$row, $total_net);
+
+    // Bold totals row
+    $sheet->getStyle('A'.$row.':F'.$row)->getFont()->setBold(true);
+
+    // Auto width
+    foreach(range('A','G') as $column) {
+        $sheet->getColumnDimension($column)->setAutoSize(true);
+    }
+
+    // Download
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="sales_report.xls"');
+    header('Cache-Control: max-age=0');
+
+    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+    $writer->save('php://output');
+
+    exit;
+}
+*/
+
+public function export_excel()
+{
+    require_once APPPATH . 'third_party/PHPExcel/Classes/PHPExcel.php';
+    require_once APPPATH . 'third_party/PHPExcel/Classes/PHPExcel/Cell/DataType.php';
+
+    $excel = new PHPExcel();
+
+    $sheet = $excel->setActiveSheetIndex(0);
+
+    $date_range = $this->input->get('date_range');
+    $order_status = $this->input->get('order_status');
+
+    // Header
+    $sheet->setCellValue('A1', 'DATE');
+    $sheet->setCellValue('B1', 'ORDERS');
+    $sheet->setCellValue('C1', 'ITEMS');
+    $sheet->setCellValue('D1', 'GROSS SALES');
+    $sheet->setCellValue('E1', 'DISCOUNT');
+    $sheet->setCellValue('F1', 'NET SALES');
+    $sheet->setCellValue('G1', 'CHANNEL');
+
+    // Header bold
+    $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+
+    // Dynamic data
+    $report = $this->Order_model->get_sales_report_excel( $date_range,$order_status);
+
+    // Starting row
+    $row = 2;
+
+    // Totals
+    $total_orders = 0;
+    $total_items = 0;
+    $total_gross = 0;
+    $total_discount = 0;
+    $total_net = 0;
+
+    foreach ($report as $data) {
+
+        $sheet->setCellValueExplicit(
+            'A'.$row,
+            (string)$data['date'],
+            PHPExcel_Cell_DataType::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'B'.$row,
+            (string)$data['orders'],
+            PHPExcel_Cell_DataType::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'C'.$row,
+            (string)$data['items'],
+            PHPExcel_Cell_DataType::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'D'.$row,
+            (string)$data['gross_sales'],
+            PHPExcel_Cell_DataType::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'E'.$row,
+            (string)$data['discount'],
+            PHPExcel_Cell_DataType::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'F'.$row,
+            (string)$data['net_sales'],
+            PHPExcel_Cell_DataType::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'G'.$row,
+            'Website',
+            PHPExcel_Cell_DataType::TYPE_STRING
+        );
+
+        // Totals
+        $total_orders += (int)$data['orders'];
+        $total_items += (int)$data['items'];
+        $total_gross += (float)$data['gross_sales'];
+        $total_discount += (float)$data['discount'];
+        $total_net += (float)$data['net_sales'];
+
+        $row++;
+    }
+
+    // Totals row
+    $sheet->setCellValueExplicit(
+        'A'.$row,
+        'TOTAL',
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'B'.$row,
+        (string)$total_orders,
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'C'.$row,
+        (string)$total_items,
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'D'.$row,
+        (string)$total_gross,
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'E'.$row,
+        (string)$total_discount,
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'F'.$row,
+        (string)$total_net,
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    // Bold totals row
+    $sheet->getStyle('A'.$row.':F'.$row)->getFont()->setBold(true);
+
+    // Auto width
+    foreach (range('A', 'G') as $column) {
+        $sheet->getColumnDimension($column)->setAutoSize(true);
+    }
+
+    // File download
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="sales_report.xls"');
+    header('Cache-Control: max-age=0');
+
+    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+    $writer->save('php://output');
+
+    exit;
+}
+/*
+
+public function download_pdf()
+{
+    // Load mPDF
+    require_once APPPATH . 'third_party/mpdf/vendor/autoload.php';
+
+    // Filters
+    $date_range = $this->input->get('date_range');
+    $order_status = $this->input->get('order_status');
+
+    // Get filtered report data
+    $report = $this->Order_model->get_sales_report_excel(
+        $date_range,
+        $order_status
+    );
+
+    // Totals
+    $total_orders = 0;
+    $total_items = 0;
+    $total_gross = 0;
+    $total_discount = 0;
+    $total_net = 0;
+
+    // HTML
+    $html = '
+    <h2 style="text-align:center;">
+        Sales Report
+    </h2>
+
+    <table border="1" cellpadding="8" width="100%">
+        <thead>
+            <tr style="background:#f2f2f2;">
+                <th>DATE</th>
+                <th>ORDERS</th>
+                <th>ITEMS</th>
+                <th>GROSS SALES</th>
+                <th>DISCOUNT</th>
+                <th>NET SALES</th>
+                <th>CHANNEL</th>
+            </tr>
+        </thead>
+        <tbody>
+    ';
+
+    foreach ($report as $row) {
+
+        $html .= '
+        <tr>
+            <td>'.$row['date'].'</td>
+            <td>'.$row['orders'].'</td>
+            <td>'.$row['items'].'</td>
+            <td>₹'.$row['gross_sales'].'</td>
+            <td>₹'.$row['discount'].'</td>
+            <td>₹'.$row['net_sales'].'</td>
+            <td>Website</td>
+        </tr>
+        ';
+
+        // Totals
+        $total_orders += (int)$row['orders'];
+        $total_items += (int)$row['items'];
+        $total_gross += (float)$row['gross_sales'];
+        $total_discount += (float)$row['discount'];
+        $total_net += (float)$row['net_sales'];
+    }
+
+    // Totals row
+    $html .= '
+        <tr style="font-weight:bold;background:#f2f2f2;">
+            <td>TOTAL</td>
+            <td>'.$total_orders.'</td>
+            <td>'.$total_items.'</td>
+            <td>₹'.$total_gross.'</td>
+            <td>₹'.$total_discount.'</td>
+            <td>₹'.$total_net.'</td>
+            <td></td>
+        </tr>
+    ';
+
+    $html .= '
+        </tbody>
+    </table>
+    ';
+
+    // Generate PDF
+    $mpdf = new \Mpdf\Mpdf();
+
+    $mpdf->WriteHTML($html);
+
+    // Download PDF
+    $mpdf->Output(
+        'sales_report.pdf',
+        'D'
+    );
+}
+    */
+
+public function download_pdf()
+{
+    // Filters
+    $date_range = $this->input->get('date_range');
+
+    $order_status = $this->input->get('order_status');
+
+    // Report Data
+    $data['report'] = $this->Order_model->get_sales_report_excel(
+        $date_range,
+        $order_status
+    );
+
+    // Totals
+    $data['total_orders'] = 0;
+    $data['total_items'] = 0;
+    $data['total_gross'] = 0;
+    $data['total_discount'] = 0;
+    $data['total_net'] = 0;
+
+    foreach ($data['report'] as $row) {
+
+        $data['total_orders'] += (int)$row['orders'];
+
+        $data['total_items'] += (int)$row['items'];
+
+        $data['total_gross'] += (float)$row['gross_sales'];
+
+        $data['total_discount'] += (float)$row['discount'];
+
+        $data['total_net'] += (float)$row['net_sales'];
+    }
+
+    
+                // Report Heading
+
+            $report_heading = 'Sales Report';
+
+            if ($date_range == 'today') {
+
+                $report_heading =
+                    'Today Sales Report - ' .
+                    date('d M Y');
+
+            }
+
+            else if ($date_range == 'week') {
+
+                $report_heading =
+                    'Last 7 Days Sales Report';
+
+            }
+
+            else if ($date_range == 'month') {
+
+                $report_heading =
+                    'This Month Sales Report - ' .
+                    date('F Y');
+
+            }
+
+            else if ($date_range == 'custom') {
+
+                $start_date = $this->input->get('start_date');
+
+                $end_date = $this->input->get('end_date');
+
+                $report_heading =
+                    'Custom Sales Report (' .
+                    date('d M Y', strtotime($start_date))
+                    . ' to ' .
+                    date('d M Y', strtotime($end_date))
+                    . ')';
+            }
+
+    // PDF HTML View
+    $html = '
+
+    <h2 style="text-align:center;">
+         '.$report_heading.'
+    </h2>
+
+    <table border="1" width="100%" cellpadding="8" cellspacing="0">
+
+        <thead>
+
+            <tr style="background:#f2f2f2;">
+
+                <th>DATE</th>
+
+                <th>ORDERS</th>
+
+                <th>ITEMS</th>
+
+                <th>GROSS SALES</th>
+
+                <th>DISCOUNT</th>
+
+                <th>NET SALES</th>
+
+                <th>CHANNEL</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+    ';
+
+    foreach ($data['report'] as $row) {
+
+        $html .= '
+
+        <tr>
+
+            <td>'.$row['date'].'</td>
+
+            <td>'.$row['orders'].'</td>
+
+            <td>'.$row['items'].'</td>
+
+            <td>₹'.$row['gross_sales'].'</td>
+
+            <td>₹'.$row['discount'].'</td>
+
+            <td>₹'.$row['net_sales'].'</td>
+
+            <td>Website</td>
+
+        </tr>
+        ';
+    }
+
+
+    // Totals Row
+    $html .= '
+
+        <tr style="font-weight:bold;background:#f2f2f2;">
+
+            <td>TOTAL</td>
+
+            <td>'.$data['total_orders'].'</td>
+
+            <td>'.$data['total_items'].'</td>
+
+            <td>₹'.$data['total_gross'].'</td>
+
+            <td>₹'.$data['total_discount'].'</td>
+
+            <td>₹'.$data['total_net'].'</td>
+
+            <td></td>
+
+        </tr>
+
+        </tbody>
+
+    </table>
+    ';
+
+    // mPDF
+    $mpdf = new \Mpdf\Mpdf();
+
+    $mpdf->WriteHTML($html);
+
+    // Download PDF
+    $mpdf->Output(
+        'sales_report.pdf',
+        'D'
+    );
+}
 }

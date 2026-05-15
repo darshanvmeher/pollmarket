@@ -192,7 +192,7 @@
             <div class="row g-3 align-items-end">
                 <div class="col-md-9">
                     <label class="form-label">Date Range</label>
-                    <select class="form-select" id="salesDateRange">
+                    <select class="form-select" id="salesDateRange" name="date_range">
                         <option name="today" value="today">Today</option>
                         <option name="week" value="week">Last 7 Days</option>
                         <option name="month" value="month">This Month</option>
@@ -202,6 +202,9 @@
                  <div class="col-md-3 d-grid">
                     <button class="btn btn-primary">Apply Filters</button>
                 </div>
+
+
+                
                 
                 
                 <div class="col-md-9">
@@ -218,7 +221,7 @@
                 </div>-->
             </div>
            <!-- <div class="row g-3 mt-1 d-none" id="customRangeFields">
-               <!-- <div class="col-md-6">
+                <div class="col-md-6">
                     <label class="form-label">From Date</label>
                         <option value="custom">Custom Range</option>
                     </select>
@@ -290,12 +293,28 @@
                     <div class="sales-report-panel__title">Daily Sales Datatable</div>
                     <p class="sales-report-panel__copy">A wider table layout with pagination enabled for reviewing sales rows.</p>
                 </div>
+                <?php
+                $order_status = isset($order_status) ? $order_status : '';
+                $date_range = isset($date_range) ? $date_range : '';
+                ?>
                 <div class="d-flex flex-wrap gap-2 justify-content-end">
-                    <a class="btn btn-outline-primary btn-sm" href="#">
+                  <!--  <a class="btn btn-outline-primary btn-sm" href="#">
                         <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
+                    </a>-->
+
+                <!--   <a href="<?= base_url('Api_handler/export_excel?date_range='.$date_range.'&order_status='.$order_status) ?>" 
+                    class="btn btn-success">  Export to Excel
                     </a>
-                    <a class="btn btn-outline-secondary btn-sm" href="#">
+           -->
+                    <a id="exportExcelBtn" href="<?= base_url('Api_handler/export_excel') ?>"
+                         class="btn btn-success">Export to Excel
+                    </a>
+                  <!--  <a class="btn btn-outline-secondary btn-sm" href="#">
                         <i class="bi bi-download me-1"></i>Download PDF
+                    </a>-->
+
+                    <a id="downloadPdfBtn" href="<?= base_url('index.php/Api_handler/download_pdf') ?>"
+                    class="btn btn-secondary">Download PDF
                     </a>
                 </div>
             </div>
@@ -545,8 +564,68 @@ $(document).ready(function () {
                     ]);
                 }
 
+                // Update PDF URL dynamically
+              /*  let pdfUrl =
+                "<?= base_url('index.php/Api_handler/download_pdf') ?>" +
+                '?date_range=' + dateRange +
+                '&order_status=' + orderStatus;
+                '&start_date=' + startDate +
+                '&end_date=' + endDate;
+
+
+                $('#downloadPdfBtn').attr('href', pdfUrl);
+
+                // Update Export Excel URL dynamically
+                let exportUrl =
+                "<?= base_url('index.php/Api_handler/export_excel') ?>" +
+                '?date_range=' + dateRange +
+                '&order_status=' + orderStatus;
+                '&start_date=' + startDate +
+                '&end_date=' + endDate;
+
+
+                $('#exportExcelBtn').attr('href', exportUrl);
+
+*/
+                
+
+                //new
+
+                // Export Excel URL
+                let exportUrl =
+                "<?= base_url('index.php/Api_handler/export_excel') ?>" +
+                '?date_range=' + dateRange +
+                '&order_status=' + orderStatus;
+
+                // PDF URL
+                let pdfUrl =
+                "<?= base_url('index.php/Api_handler/download_pdf') ?>" +
+                '?date_range=' + dateRange +
+                '&order_status=' + orderStatus;
+
+
+                // ADD CUSTOM DATES
+                if (dateRange == 'custom') {
+
+                    exportUrl +=
+                    '&start_date=' + startDate +
+                    '&end_date=' + endDate;
+
+                    pdfUrl +=
+                    '&start_date=' + startDate +
+                    '&end_date=' + endDate;
+                }
+
+
+                // SET BUTTON LINKS
+                $('#exportExcelBtn').attr('href', exportUrl);
+
+                $('#downloadPdfBtn').attr('href', pdfUrl);
+
                 // Redraw table
                 table.draw();
+                // Redraw table
+              //  table.draw();
 
             },
 

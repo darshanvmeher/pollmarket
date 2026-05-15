@@ -895,7 +895,7 @@ public function reports()
     // Default Filters
     if (empty($date_range)) {
 
-        $date_range = 'last_7_days';
+        $date_range = 'month';
     }
 
     if (empty($status)) {
