@@ -565,6 +565,7 @@ $(document).ready(function () {
                 }
 
                 // Update PDF URL dynamically
+                
               /*  let pdfUrl =
                 "<?= base_url('index.php/Api_handler/download_pdf') ?>" +
                 '?date_range=' + dateRange +
@@ -1037,93 +1038,6 @@ $(document).ready(function () {
     });
 
 });
-
-</script>
-                        -->
-                        <!--
-<script>
-
-$(document).ready(function () {
-
-    $('.btn-primary').on('click', function () {
-
-        let dateRange   = $('#salesDateRange').val();
-        let orderStatus = $('#orderStatus').val();
-        
-
-        $.ajax({
-
-            url: "<?= base_url('index.php/Api_handler/sales_report_by_custom_date_range') ?>",
-            type: 'POST',
-            dataType: 'json',
-
-            data: {
-                date_range: dateRange,
-                order_status: orderStatus
-            },
-
-            success: function (response) {
-
-                console.log(response);
-
-                // ✅ KPI Cards
-                $('#ordersCount').text(response.kpis.orders ?? 0);
-
-                $('#itemsCount').text(response.kpis.items ?? 0);
-
-                $('#grossSales').text('₹' + (response.kpis.gross ?? 0));
-
-                $('#netSales').text('₹' + (response.kpis.net ?? 0));
-
-                // ✅ Update Table
-                let tbody = '';
-
-                if (response.table_data.length > 0) {
-
-                    response.table_data.forEach(function (row) {
-
-                        tbody += `
-                            <tr>
-                                <td>${row.date}</td>
-                                <td>${row.orders}</td>
-                                <td>${row.items}</td>
-                                <td>${row.gross}</td>
-                                <td>${row.discount}</td>
-                                <td>${row.net}</td>
-                                <td>${row.channel}</td>
-                            </tr>
-                        `;
-
-                    });
-
-                } else {
-
-                    tbody = `
-                        <tr>
-                            <td colspan="7" class="text-center">
-                                No sales data found
-                            </td>
-                        </tr>
-                    `;
-                }
-
-                // ✅ Replace table body
-                $('#myTable tbody').html(tbody);
-
-            },
-
-            error: function (xhr, status, error) {
-
-                console.log(error);
-
-            }
-
-        });
-
-    });
-
-});
-
 
 </script>
                         -->
