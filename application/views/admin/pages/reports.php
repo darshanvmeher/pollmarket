@@ -72,32 +72,32 @@
     margin-bottom: 0;
 }
 
-.sales-report-summary {
+.sales-summary-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
 }
 
-.sales-report-summary-card {
+.sales-summary-card {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     padding: 16px;
 }
 
-.sales-report-summary-card__label {
+.sales-summary-card__label {
     color: #64748b;
     font-size: 0.82rem;
     font-weight: 700;
 }
 
-.sales-report-summary-card__value {
+.sales-summary-card__value {
     margin: 6px 0 4px;
     font-size: 1.35rem;
     font-weight: 800;
 }
 
-.sales-report-summary-card__note {
+.sales-summary-card__note {
     color: #94a3b8;
     font-size: 0.82rem;
     margin: 0;
@@ -116,34 +116,8 @@
     vertical-align: middle;
 }
 
-.report-bar {
-    height: 10px;
-    background: #e2e8f0;
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-.report-bar span {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #0f172a 0%, #3b82f6 100%);
-}
-
-.sales-report-channel {
-    display: grid;
-    gap: 12px;
-}
-
-.sales-report-channel__row {
-    display: grid;
-    grid-template-columns: 90px 1fr 48px;
-    gap: 12px;
-    align-items: center;
-}
-
 @media (max-width: 1200px) {
-    .sales-report-summary {
+    .sales-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
@@ -157,12 +131,8 @@
         padding: 20px;
     }
 
-    .sales-report-summary {
+    .sales-summary-grid {
         grid-template-columns: 1fr;
-    }
-
-    .sales-report-channel__row {
-        grid-template-columns: 72px 1fr 44px;
     }
 }
 </style>
@@ -171,9 +141,9 @@
     <div class="sales-report-shell">
         <div class="sales-report-hero mb-4">
             <div class="sales-report-hero__eyebrow">Sales Report</div>
-            <h2 class="sales-report-hero__title mb-0">See sales performance and export it to Excel</h2>
+            <h2 class="sales-report-hero__title mb-0">Sales Report</h2>
             <p class="sales-report-hero__copy mt-3 mb-4">
-                A focused ecommerce sales report design with date filters, channel breakdown, and detailed rows ready for export.
+                Design-only sales reporting screen for ecommerce review, filtering, and future Excel export.
             </p>
             <div class="d-flex flex-wrap gap-2">
                 <a class="btn btn-light btn-sm" href="#">
@@ -182,139 +152,72 @@
                 <button class="btn btn-outline-light btn-sm" type="button">
                     <i class="bi bi-printer me-1"></i>Print
                 </button>
-                <button class="btn btn-outline-light btn-sm" type="button">
-                    <i class="bi bi-funnel me-1"></i>Filters
-                </button>
             </div>
         </div>
 
         <div class="sales-report-panel mb-4">
             <div class="row g-3 align-items-end">
-                <div class="col-md-9">
+                <div class="col-md-7">
                     <label class="form-label">Date Range</label>
                     <select class="form-select" id="salesDateRange" name="date_range">
-                        <option name="today" value="today">Today</option>
-                        <option name="week" value="week">Last 7 Days</option>
-                        <option name="month" value="month">This Month</option>
-                        <option name="custom" value="custom">Custom Range</option>
+                        <option value="today" <?php echo (($date_range ?? '') === 'today') ? 'selected' : ''; ?>>Today</option>
+                        <option value="week" <?php echo (($date_range ?? '') === 'week') ? 'selected' : ''; ?>>Last 7 Days</option>
+                        <option value="month" <?php echo (($date_range ?? '') === 'month') ? 'selected' : ''; ?>>This Month</option>
+                        <option value="custom" <?php echo (($date_range ?? '') === 'custom') ? 'selected' : ''; ?>>Custom Range</option>
                     </select>
                 </div>
-                 <div class="col-md-3 d-grid">
+                <div class="col-md-5 d-grid">
                     <button class="btn btn-primary">Apply Filters</button>
                 </div>
-
-
-                
-                
-                
-                <div class="col-md-9">
-                <label class="form-label">Order Status</label>
-
-                <select class="form-select" id="orderStatus" name="order_status">
-                    <option value="all">All Orders</option>
-                    <option value="pending">Pending</option>
-                    <option value="delivered">Delivered</option>
-                </select>
             </div>
-             <!--   <div class="col-md-3 d-grid">
-                    <button class="btn btn-primary">Apply Filters</button>
-                </div>-->
-            </div>
-           <!-- <div class="row g-3 mt-1 d-none" id="customRangeFields">
+
+            <div class="row g-3 mt-1 d-none" id="customRangeFields">
                 <div class="col-md-6">
                     <label class="form-label">From Date</label>
-                        <option value="custom">Custom Range</option>
-                    </select>
+                    <input type="date" class="form-control" id="fromDate" value="<?php echo html_escape($start_date ?? ''); ?>">
                 </div>
-                <div class="col-md-3 d-grid">
-                    <button class="btn btn-primary">Apply Filters</button>
-                </div>
-            </div>-->
-           <div class="row g-3 mt-1 d-none" id="customRangeFields">
-                <div class="col-md-6">
-                    <label class="form-label">From Date</label>
-                    <input type="date" class="form-control" id="fromDate"
-                        value="<?php echo $start_date; ?>">
-                </div>
-
                 <div class="col-md-6">
                     <label class="form-label">To Date</label>
-                    <input type="date" class="form-control" id="toDate"
-                        value="<?php echo $end_date; ?>">
+                    <input type="date" class="form-control" id="toDate" value="<?php echo html_escape($end_date ?? ''); ?>">
                 </div>
             </div>
         </div>
 
-      <!--  <div class="sales-report-summary mb-4">
-           <?php foreach ($summary_cards as $card): ?>
-                <div class="sales-report-summary-card">
-                    <div class="sales-report-summary-card__label"><?php echo html_escape($card['label']); ?></div>
-                    <div class="sales-report-summary-card__value"><?php echo html_escape($card['value']); ?></div>
-                    <p class="sales-report-summary-card__note"><?php echo html_escape($card['note']); ?></p>
-                </div>
-            <?php endforeach; ?>
-        </div>-->
-
-        <div class="sales-report-summary mb-4">
-
-    <div class="sales-report-summary-card">
-        <div class="sales-report-summary-card__label">Orders</div>
-        <div class="sales-report-summary-card__value" id="ordersCount">
-            <?php echo $kpis['orders'] ?? 0; ?>
+        <div class="sales-summary-grid mb-4">
+            <div class="sales-summary-card">
+                <div class="sales-summary-card__label">Orders</div>
+                <div class="sales-summary-card__value"><?php echo html_escape($kpi['orders'] ?? 0); ?></div>
+                <p class="sales-summary-card__note">Total orders in selected period</p>
+            </div>
+            <div class="sales-summary-card">
+                <div class="sales-summary-card__label">Items</div>
+                <div class="sales-summary-card__value"><?php echo html_escape($kpi['items'] ?? 0); ?></div>
+                <p class="sales-summary-card__note">Units sold</p>
+            </div>
+            <div class="sales-summary-card">
+                <div class="sales-summary-card__label">Gross Sales</div>
+                <div class="sales-summary-card__value">₹<?php echo html_escape($kpi['gross'] ?? 0); ?></div>
+                <p class="sales-summary-card__note">Before discounts and tax</p>
+            </div>
+            <div class="sales-summary-card">
+                <div class="sales-summary-card__label">Net Sales</div>
+                <div class="sales-summary-card__value">₹<?php echo html_escape($kpi['net'] ?? 0); ?></div>
+                <p class="sales-summary-card__note">After adjustments</p>
+            </div>
         </div>
-    </div>
-
-    <div class="sales-report-summary-card">
-        <div class="sales-report-summary-card__label">Items</div>
-        <div class="sales-report-summary-card__value" id="itemsCount">
-            <?php echo $kpis['items'] ?? 0; ?>
-        </div>
-    </div>
-
-    <div class="sales-report-summary-card">
-        <div class="sales-report-summary-card__label">Gross Sales</div>
-        <div class="sales-report-summary-card__value" id="grossSales">
-            ₹<?php echo $kpis['gross'] ?? 0; ?>
-        </div>
-    </div>
-
-    <div class="sales-report-summary-card">
-        <div class="sales-report-summary-card__label">Net Sales</div>
-        <div class="sales-report-summary-card__value" id="netSales">
-            ₹<?php echo $kpis['net'] ?? 0; ?>
-        </div>
-    </div>
-
-</div>
 
         <div class="sales-report-panel">
             <div class="sales-report-panel__head">
                 <div>
-                    <div class="sales-report-panel__title">Daily Sales Datatable</div>
-                    <p class="sales-report-panel__copy">A wider table layout with pagination enabled for reviewing sales rows.</p>
+                    <div class="sales-report-panel__title">Sales Datatable</div>
+                    <p class="sales-report-panel__copy">Large review table with pagination for daily sales analysis.</p>
                 </div>
-                <?php
-                $order_status = isset($order_status) ? $order_status : '';
-                $date_range = isset($date_range) ? $date_range : '';
-                ?>
                 <div class="d-flex flex-wrap gap-2 justify-content-end">
-                  <!--  <a class="btn btn-outline-primary btn-sm" href="#">
+                    <a class="btn btn-outline-primary btn-sm" href="#">
                         <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
-                    </a>-->
-
-                <!--   <a href="<?= base_url('Api_handler/export_excel?date_range='.$date_range.'&order_status='.$order_status) ?>" 
-                    class="btn btn-success">  Export to Excel
                     </a>
-           -->
-                    <a id="exportExcelBtn" href="<?= base_url('Api_handler/export_excel') ?>"
-                         class="btn btn-success">Export to Excel
-                    </a>
-                  <!--  <a class="btn btn-outline-secondary btn-sm" href="#">
-                        <i class="bi bi-download me-1"></i>Download PDF
-                    </a>-->
-
-                    <a id="downloadPdfBtn" href="<?= base_url('index.php/Api_handler/download_pdf') ?>"
-                    class="btn btn-secondary">Download PDF
+                    <a class="btn btn-outline-secondary btn-sm" href="#">
+                        <i class="bi bi-download me-1"></i>Download CSV
                     </a>
                 </div>
             </div>
@@ -331,41 +234,26 @@
                             <th>Channel</th>
                         </tr>
                     </thead>
-                 
                     <tbody>
-                        
                         <?php if (!empty($sales_rows) && is_array($sales_rows)): ?>
-
-                        <?php foreach ($sales_rows as $row): ?>
-                            <tr>
-                                <td><?php echo html_escape($row['date'] ?? '-'); ?></td>
-                                <td><?php echo (int)($row['orders'] ?? 0); ?></td>
-                                <td><?php echo (int)($row['items'] ?? 0); ?></td>
-                                <td><?php echo html_escape($row['gross'] ?? 0); ?></td>
-                                <td><?php echo html_escape($row['discount'] ?? 0); ?></td>
-                                <td><?php echo html_escape($row['net'] ?? 0); ?></td>
-                                <td><?php echo html_escape($row['channel'] ?? 'website'); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-
+                            <?php foreach ($sales_rows as $row): ?>
+                                <tr>
+                                    <td><?php echo html_escape($row['date'] ?? '-'); ?></td>
+                                    <td><?php echo (int) ($row['orders'] ?? 0); ?></td>
+                                    <td><?php echo (int) ($row['items'] ?? 0); ?></td>
+                                    <td><?php echo html_escape($row['gross'] ?? 0); ?></td>
+                                    <td><?php echo html_escape($row['discount'] ?? 0); ?></td>
+                                    <td class="fw-semibold"><?php echo html_escape($row['net'] ?? 0); ?></td>
+                                    <td><span class="status-pill status-live"><?php echo html_escape($row['channel'] ?? 'website'); ?></span></td>
+                                </tr>
+                            <?php endforeach; ?>
                         <?php else: ?>
-
-                        <tr>
-                            <td colspan="7" class="text-center">No sales data found</td>
-                        </tr>
-
+                            <tr>
+                                <td colspan="7" class="text-center py-4">No sales data found.</td>
+                            </tr>
                         <?php endif; ?>
-
                     </tbody>
                 </table>
-            </div>
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3 pt-3 border-top">
-                <div class="text-muted small">
-                    Showing 1 to <?php echo count($sales_rows); ?> of <?php echo count($sales_rows); ?> entries
-                </div>
-                <div class="quick-chip">
-                    <i class="bi bi-layers me-1"></i>Pagination enabled
-                </div>
             </div>
         </div>
     </div>
@@ -381,17 +269,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const toggleCustomFields = function () {
-        if (rangeSelect.value === 'custom') {
-            customFields.classList.remove('d-none');
-        } else {
-            customFields.classList.add('d-none');
-        }
+        customFields.classList.toggle('d-none', rangeSelect.value !== 'custom');
     };
 
     rangeSelect.addEventListener('change', toggleCustomFields);
     toggleCustomFields();
 });
 </script>
+<<<<<<< HEAD
 
 <!--js date range and order status-->
 <!--
@@ -1044,3 +929,5 @@ $(document).ready(function () {
 
 
 
+=======
+>>>>>>> fe2edb770f5ec48267711671e2673e90710643f1

@@ -20,7 +20,25 @@ class Admin extends CI_Controller
         'inventory' => array('label' => 'Inventory', 'icon' => 'bi bi-boxes', 'url' => 'admin/inventory'),
         'suppliers' => array('label' => 'Suppliers', 'icon' => 'bi bi-truck', 'url' => 'admin/suppliers'),
         'promotions' => array('label' => 'Promotions', 'icon' => 'bi bi-megaphone', 'url' => 'admin/promotions'),
-        'reports' => array('label' => 'Reports', 'icon' => 'bi bi-bar-chart', 'url' => 'admin/reports'),
+        'reports' => array(
+            'label' => 'Reports',
+            'icon' => 'bi bi-bar-chart',
+            'url' => 'admin/reports',
+            'children' => array(
+                'reports_sales' => array(
+                    'label' => 'Sales Report',
+                    'url' => 'admin/reports'
+                ),
+                'reports_gst' => array(
+                    'label' => 'GST Sales Summary',
+                    'url' => 'admin/reports/gst-sales-summary'
+                ),
+                'reports_statewise' => array(
+                    'label' => 'Statewise GST',
+                    'url' => 'admin/reports/statewise-gst'
+                )
+            )
+        ),
         'settings' => array('label' => 'Settings', 'icon' => 'bi bi-gear', 'url' => 'admin/settings')
     );
 
@@ -879,127 +897,127 @@ public function invoice($invoice_id = 0)
 
     //report admin
 
-    // =========================================
-// REPORTS PAGE
-// =========================================
+    public function reports()
+    {
+        $this->load->model('Order_model');
 
-public function reports()
-{
-    $this->load->model('Order_model');
-
-    // Get Filters
-    $date_range = $this->input->get('date_range');
-
-    $status = $this->input->get('order_status');
-
-    // Default Filters
-    if (empty($date_range)) {
-
-        $date_range = 'month';
-    }
-
-    if (empty($status)) {
-
-        $status = 'all';
-    }
-
-    // =====================================
-    // DATE RANGE LOGIC
-    // =====================================
-
-    $start_date = '';
-
-    $end_date = '';
-
-    // Today
-    if ($date_range == 'today') {
-
-        $start_date = date('Y-m-d');
-
-        $end_date = date('Y-m-d');
-    }
-
-    // Last 7 Days
-    else if ($date_range == 'week') {
-
-    // Today included
-    $start_date = date(
-        'Y-m-d',
-        strtotime('-6 days')
-    );
-
-    $end_date = date('Y-m-d');
-}
-
-    // This Month
-    else if ($date_range == 'month') {
-
-        $start_date = date('Y-m-01');
-
-        $end_date = date('Y-m-t');
-    }
-
-    // Custom Range
-    else if ($date_range == 'custom') {
-
+        $date_range = $this->input->get('date_range');
         $start_date = $this->input->get('start_date');
-
         $end_date = $this->input->get('end_date');
+        $status = $this->input->get('order_status');
 
-        // Safety fallback
+        if (empty($date_range)) {
+            $date_range = 'month';
+        }
+
+        if (empty($status)) {
+            $status = 'all';
+        }
+
         if (empty($start_date)) {
-
-            $start_date = date(
-                'Y-m-d',
-                strtotime('-7 days')
-            );
+            $start_date = date('Y-m-01');
         }
 
         if (empty($end_date)) {
-
-            $end_date = date('Y-m-d');
+            $end_date = date('Y-m-t');
         }
+
+        $data = array(
+            'active' => 'reports_sales',
+            'title' => 'Sales Report',
+            'subtitle' => 'Sales performance view designed for ecommerce reporting and Excel export.',
+            'kpi' => $this->Order_model->get_by_kpis($start_date, $end_date, $status),
+            'sales_rows' => $this->Order_model->get_sales_report($start_date, $end_date, $status),
+            'selected_status' => $status,
+            'date_range' => $date_range,
+            'start_date' => $start_date,
+            'end_date' => $end_date
+        );
+
+        $this->render('reports', $data);
     }
 
-    // =====================================
-    // VIEW DATA
-    // =====================================
+    public function gst_sales_summary()
+    {
+        $data = array(
+            'active' => 'reports_gst',
+            'title' => 'GST Sales Summary',
+            'subtitle' => 'Design-only GST summary report for ecommerce sales, tax breakup, and export review.',
+            'kpis' => array(
+                array('title' => 'Taxable Value', 'value' => '₹9.86L', 'trend' => '+14.7%', 'trend_class' => 'kpi-up'),
+                array('title' => 'CGST', 'value' => '₹88.4K', 'trend' => '+12.1%', 'trend_class' => 'kpi-up'),
+                array('title' => 'SGST', 'value' => '₹88.4K', 'trend' => '+12.1%', 'trend_class' => 'kpi-up'),
+                array('title' => 'IGST', 'value' => '₹24.7K', 'trend' => '+8.4%', 'trend_class' => 'kpi-up')
+            ),
+            'summary_cards' => array(
+                array('label' => 'Invoices Issued', 'value' => '1,284', 'note' => 'B2B + retail'),
+                array('label' => 'B2B Share', 'value' => '68%', 'note' => 'Business orders'),
+                array('label' => 'B2C Share', 'value' => '32%', 'note' => 'Retail orders'),
+                array('label' => 'Zero Rated', 'value' => '24', 'note' => 'No tax applied')
+            ),
+            'gst_rate_rows' => array(
+                array('rate' => '0%', 'taxable' => '₹1.24L', 'invoices' => '24', 'cgst' => '₹0', 'sgst' => '₹0', 'igst' => '₹0'),
+                array('rate' => '5%', 'taxable' => '₹2.06L', 'invoices' => '318', 'cgst' => '₹5.15K', 'sgst' => '₹5.15K', 'igst' => '₹0'),
+                array('rate' => '12%', 'taxable' => '₹3.42L', 'invoices' => '412', 'cgst' => '₹20.52K', 'sgst' => '₹20.52K', 'igst' => '₹9.31K'),
+                array('rate' => '18%', 'taxable' => '₹3.14L', 'invoices' => '460', 'cgst' => '₹28.26K', 'sgst' => '₹28.26K', 'igst' => '₹15.40K')
+            ),
+            'gst_invoice_rows' => array(
+                array('invoice' => 'PM-INV-2026-001', 'date' => '06 May 2026', 'customer' => 'Shakti Traders', 'state' => 'Maharashtra', 'taxable' => '₹48,000', 'gst' => '₹8,640', 'total' => '₹56,640'),
+                array('invoice' => 'PM-INV-2026-002', 'date' => '05 May 2026', 'customer' => 'Prime Supplies', 'state' => 'Gujarat', 'taxable' => '₹22,500', 'gst' => '₹2,700', 'total' => '₹25,200'),
+                array('invoice' => 'PM-INV-2026-003', 'date' => '04 May 2026', 'customer' => 'Retail Mart', 'state' => 'Maharashtra', 'taxable' => '₹31,200', 'gst' => '₹5,616', 'total' => '₹36,816'),
+                array('invoice' => 'PM-INV-2026-004', 'date' => '03 May 2026', 'customer' => 'Westline Stores', 'state' => 'Delhi', 'taxable' => '₹18,750', 'gst' => '₹3,375', 'total' => '₹22,125'),
+                array('invoice' => 'PM-INV-2026-005', 'date' => '02 May 2026', 'customer' => 'City Wholesale', 'state' => 'Karnataka', 'taxable' => '₹42,000', 'gst' => '₹7,560', 'total' => '₹49,560'),
+                array('invoice' => 'PM-INV-2026-006', 'date' => '01 May 2026', 'customer' => 'Northline Retail', 'state' => 'Tamil Nadu', 'taxable' => '₹27,800', 'gst' => '₹5,004', 'total' => '₹32,804')
+            ),
+            'state_wise_rows' => array(
+                array('state' => 'Maharashtra', 'taxable' => '₹1.24L', 'gst' => '₹22.32K', 'invoices' => '412'),
+                array('state' => 'Gujarat', 'taxable' => '₹86K', 'gst' => '₹10.32K', 'invoices' => '164'),
+                array('state' => 'Delhi', 'taxable' => '₹74K', 'gst' => '₹13.32K', 'invoices' => '98'),
+                array('state' => 'Karnataka', 'taxable' => '₹66K', 'gst' => '₹11.88K', 'invoices' => '84'),
+                array('state' => 'Tamil Nadu', 'taxable' => '₹58K', 'gst' => '₹10.44K', 'invoices' => '71')
+            ),
+            'start_date' => date('Y-m-01'),
+            'end_date' => date('Y-m-t')
+        );
 
-    $data = array(
+        $this->render('gst_sales_summary', $data);
+    }
 
-        'active' => 'reports',
+    public function statewise_gst_report()
+    {
+        $data = array(
+            'active' => 'reports_statewise',
+            'title' => 'Statewise GST',
+            'subtitle' => 'Design-only statewise GST report for ecommerce sales review and export.',
+            'date_range' => 'month',
+            'start_date' => date('Y-m-01'),
+            'end_date' => date('Y-m-t'),
+            'state_wise_rows' => array(
+                array('state' => 'Maharashtra', 'taxable' => '₹1.24L', 'gst' => '₹22.32K', 'invoices' => '412'),
+                array('state' => 'Gujarat', 'taxable' => '₹86K', 'gst' => '₹10.32K', 'invoices' => '164'),
+                array('state' => 'Delhi', 'taxable' => '₹74K', 'gst' => '₹13.32K', 'invoices' => '98'),
+                array('state' => 'Karnataka', 'taxable' => '₹66K', 'gst' => '₹11.88K', 'invoices' => '84'),
+                array('state' => 'Tamil Nadu', 'taxable' => '₹58K', 'gst' => '₹10.44K', 'invoices' => '71'),
+                array('state' => 'Telangana', 'taxable' => '₹41K', 'gst' => '₹7.38K', 'invoices' => '52')
+            ),
+            'summary_cards' => array(
+                array('label' => 'Total States', 'value' => '6', 'note' => 'Active tax regions'),
+                array('label' => 'Highest State', 'value' => 'Maharashtra', 'note' => 'Top taxable value'),
+                array('label' => 'IGST States', 'value' => '3', 'note' => 'Inter-state supply'),
+                array('label' => 'GST Collected', 'value' => '₹75.98K', 'note' => 'All states combined')
+            ),
+            'tax_buckets' => array(
+                array('label' => 'Maharashtra', 'bar' => 100),
+                array('label' => 'Gujarat', 'bar' => 72),
+                array('label' => 'Delhi', 'bar' => 61),
+                array('label' => 'Karnataka', 'bar' => 54),
+                array('label' => 'Tamil Nadu', 'bar' => 46),
+                array('label' => 'Telangana', 'bar' => 33)
+            )
+        );
 
-        'title' => 'Sales Report',
-
-        'subtitle' =>
-            'Sales performance view designed for ecommerce reporting and Excel export.',
-
-        // KPI Cards
-        'kpi' => $this->Order_model->get_by_kpis(
-            $start_date,
-            $end_date,
-            $status
-        ),
-
-        // Table Data
-        'sales_rows' => $this->Order_model->get_sales_report(
-            $start_date,
-            $end_date,
-            $status
-        ),
-
-        // Selected Filters
-        'selected_status' => $status,
-
-        'date_range' => $date_range,
-
-        'start_date' => $start_date,
-
-        'end_date' => $end_date
-    );
-
-    $this->render('reports', $data);
-}
+        $this->render('statewise_gst_report', $data);
+    }
 
     /*
     public function reports()
