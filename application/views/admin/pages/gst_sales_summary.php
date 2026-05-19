@@ -1,12 +1,12 @@
 <style>
-.sales-report-shell {
+.gst-report-shell {
     background: linear-gradient(135deg, #f8fafc 0%, #eef4fb 100%);
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 24px;
     padding: 24px;
 }
 
-.sales-report-hero {
+.gst-report-hero {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #334155 100%);
     color: #fff;
     border-radius: 22px;
@@ -15,7 +15,7 @@
     overflow: hidden;
 }
 
-.sales-report-hero::after {
+.gst-report-hero::after {
     content: '';
     position: absolute;
     inset: auto -50px -50px auto;
@@ -25,7 +25,7 @@
     background: rgba(255, 255, 255, 0.08);
 }
 
-.sales-report-hero__eyebrow {
+.gst-report-hero__eyebrow {
     text-transform: uppercase;
     letter-spacing: 0.14em;
     font-size: 0.74rem;
@@ -33,19 +33,19 @@
     color: rgba(255, 255, 255, 0.72);
 }
 
-.sales-report-hero__title {
+.gst-report-hero__title {
     font-size: clamp(1.8rem, 2vw, 2.5rem);
     font-weight: 800;
     letter-spacing: -0.04em;
     margin: 0.4rem 0 0.75rem;
 }
 
-.sales-report-hero__copy {
+.gst-report-hero__copy {
     max-width: 60rem;
     color: rgba(255, 255, 255, 0.74);
 }
 
-.sales-report-panel {
+.gst-report-panel {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 18px;
@@ -53,7 +53,7 @@
     box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
 }
 
-.sales-report-panel__head {
+.gst-report-panel__head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -61,49 +61,49 @@
     margin-bottom: 14px;
 }
 
-.sales-report-panel__title {
+.gst-report-panel__title {
     font-size: 1.05rem;
     font-weight: 800;
     margin-bottom: 0.15rem;
 }
 
-.sales-report-panel__copy {
+.gst-report-panel__copy {
     color: #64748b;
     margin-bottom: 0;
 }
 
-.sales-summary-grid {
+.gst-summary-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
 }
 
-.sales-summary-card {
+.gst-summary-card {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     padding: 16px;
 }
 
-.sales-summary-card__label {
+.gst-summary-card__label {
     color: #64748b;
     font-size: 0.82rem;
     font-weight: 700;
 }
 
-.sales-summary-card__value {
+.gst-summary-card__value {
     margin: 6px 0 4px;
     font-size: 1.35rem;
     font-weight: 800;
 }
 
-.sales-summary-card__note {
+.gst-summary-card__note {
     color: #94a3b8;
     font-size: 0.82rem;
     margin: 0;
 }
 
-.sales-report-table th {
+.gst-report-table th {
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -111,39 +111,65 @@
     border-bottom: 1px solid #e5e7eb !important;
 }
 
-.sales-report-table td {
+.gst-report-table td {
     border-color: #eef2f7;
     vertical-align: middle;
 }
 
+.gst-statewise-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.gst-statewise-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 70px;
+    gap: 12px;
+    align-items: center;
+}
+
+.gst-statewise-bar {
+    height: 10px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.gst-statewise-bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #0f172a 0%, #0d9488 100%);
+}
+
 @media (max-width: 1200px) {
-    .sales-summary-grid {
+    .gst-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 768px) {
-    .sales-report-shell {
+    .gst-report-shell {
         padding: 16px;
     }
 
-    .sales-report-hero {
+    .gst-report-hero {
         padding: 20px;
     }
 
-    .sales-summary-grid {
+    .gst-summary-grid {
         grid-template-columns: 1fr;
     }
 }
 </style>
 
 <section class="panel-card mt-3">
-    <div class="sales-report-shell">
-        <div class="sales-report-hero mb-4">
-            <div class="sales-report-hero__eyebrow">Sales Report</div>
-            <h2 class="sales-report-hero__title mb-0">Sales Report</h2>
-            <p class="sales-report-hero__copy mt-3 mb-4">
-                Design-only sales reporting screen for ecommerce review, filtering, and future Excel export.
+    <div class="gst-report-shell">
+        <div class="gst-report-hero mb-4">
+            <div class="gst-report-hero__eyebrow">GST Report</div>
+            <h2 class="gst-report-hero__title mb-0">GST Sales Summary</h2>
+            <p class="gst-report-hero__copy mt-3 mb-4">
+                Design-only GST summary report for ecommerce sales showing tax breakup, invoice totals, and state-wise performance.
             </p>
             <div class="d-flex flex-wrap gap-2">
                 <a class="btn btn-light btn-sm" href="#">
@@ -155,7 +181,7 @@
             </div>
         </div>
 
-        <div class="sales-report-panel mb-4">
+        <div class="gst-report-panel mb-4">
             <div class="row g-3 align-items-end">
                 <div class="col-md-7">
                     <label class="form-label">Date Range</label>
@@ -183,34 +209,26 @@
             </div>
         </div>
 
-        <div class="sales-summary-grid mb-4">
-            <div class="sales-summary-card">
-                <div class="sales-summary-card__label">Orders</div>
-                <div class="sales-summary-card__value"><?php echo html_escape($kpi['orders'] ?? 0); ?></div>
-                <p class="sales-summary-card__note">Total orders in selected period</p>
-            </div>
-            <div class="sales-summary-card">
-                <div class="sales-summary-card__label">Items</div>
-                <div class="sales-summary-card__value"><?php echo html_escape($kpi['items'] ?? 0); ?></div>
-                <p class="sales-summary-card__note">Units sold</p>
-            </div>
-            <div class="sales-summary-card">
-                <div class="sales-summary-card__label">Gross Sales</div>
-                <div class="sales-summary-card__value">₹<?php echo html_escape($kpi['gross'] ?? 0); ?></div>
-                <p class="sales-summary-card__note">Before discounts and tax</p>
-            </div>
-            <div class="sales-summary-card">
-                <div class="sales-summary-card__label">Net Sales</div>
-                <div class="sales-summary-card__value">₹<?php echo html_escape($kpi['net'] ?? 0); ?></div>
-                <p class="sales-summary-card__note">After adjustments</p>
-            </div>
+        <div class="gst-summary-grid mb-4">
+            <?php foreach ($kpis as $card): ?>
+                <div class="gst-summary-card">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                            <div class="gst-summary-card__label"><?php echo html_escape($card['title']); ?></div>
+                            <div class="gst-summary-card__value"><?php echo html_escape($card['value']); ?></div>
+                        </div>
+                        <span class="kpi-badge <?php echo html_escape($card['trend_class']); ?>"><?php echo html_escape($card['trend']); ?></span>
+                    </div>
+                    <p class="gst-summary-card__note">GST summary metric</p>
+                </div>
+            <?php endforeach; ?>
         </div>
 
-        <div class="sales-report-panel">
-            <div class="sales-report-panel__head">
+        <div class="gst-report-panel">
+            <div class="gst-report-panel__head">
                 <div>
-                    <div class="sales-report-panel__title">Sales Datatable</div>
-                    <p class="sales-report-panel__copy">Large review table with pagination for daily sales analysis.</p>
+                    <div class="gst-report-panel__title">GST Invoice Register</div>
+                    <p class="gst-report-panel__copy">Large, export-ready datatable for GST review and reconciliation.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2 justify-content-end">
                     <a class="btn btn-outline-primary btn-sm" href="#">
@@ -222,36 +240,30 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table id="myTable" class="table sales-report-table align-middle mb-0">
+                <table id="myTable" class="table gst-report-table align-middle mb-0">
                     <thead>
                         <tr>
+                            <th>Invoice</th>
                             <th>Date</th>
-                            <th>Orders</th>
-                            <th>Items</th>
-                            <th>Gross Sales</th>
-                            <th>Discount</th>
-                            <th>Net Sales</th>
-                            <th>Channel</th>
+                            <th>Customer</th>
+                            <th>State</th>
+                            <th>Taxable Value</th>
+                            <th>GST</th>
+                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (!empty($sales_rows) && is_array($sales_rows)): ?>
-                            <?php foreach ($sales_rows as $row): ?>
-                                <tr>
-                                    <td><?php echo html_escape($row['date'] ?? '-'); ?></td>
-                                    <td><?php echo (int) ($row['orders'] ?? 0); ?></td>
-                                    <td><?php echo (int) ($row['items'] ?? 0); ?></td>
-                                    <td><?php echo html_escape($row['gross'] ?? 0); ?></td>
-                                    <td><?php echo html_escape($row['discount'] ?? 0); ?></td>
-                                    <td class="fw-semibold"><?php echo html_escape($row['net'] ?? 0); ?></td>
-                                    <td><span class="status-pill status-live"><?php echo html_escape($row['channel'] ?? 'website'); ?></span></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
+                        <?php foreach ($gst_invoice_rows as $row): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-4">No sales data found.</td>
+                                <td class="fw-semibold"><?php echo html_escape($row['invoice']); ?></td>
+                                <td><?php echo html_escape($row['date']); ?></td>
+                                <td><?php echo html_escape($row['customer']); ?></td>
+                                <td><?php echo html_escape($row['state']); ?></td>
+                                <td><?php echo html_escape($row['taxable']); ?></td>
+                                <td><?php echo html_escape($row['gst']); ?></td>
+                                <td class="fw-semibold"><?php echo html_escape($row['total']); ?></td>
                             </tr>
-                        <?php endif; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
