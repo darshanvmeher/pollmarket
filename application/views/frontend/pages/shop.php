@@ -155,6 +155,7 @@
                     </div>
 
                     <div class="p-3">
+                        <!--
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <span class="price">₹<?= html_escape($product['price']); ?></span>
@@ -168,6 +169,11 @@
                                View
                             </a>
                         </div>
+                        -->
+                        <a class="btn btn-sm btn-primary w-100"
+                           href="<?= site_url('frontend/contact'); ?>">
+                           Enquire Now
+                        </a>
                     </div>
                 </div>
             </div>
@@ -350,6 +356,7 @@ function loadProducts(id) {
         </div>
 
         <div class="p-3">
+            <!--
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <span class="price">₹${product.price}</span>
@@ -361,6 +368,11 @@ function loadProducts(id) {
                    View
                 </a>
             </div>
+            -->
+            <a class="btn btn-sm btn-primary w-100"
+               href="<?= site_url('frontend/contact'); ?>">
+               Enquire Now
+            </a>
         </div>
 
     </div>
@@ -455,6 +467,7 @@ function loadProducts(id = 'all') {
                             </div>
 
                             <div class="p-3">
+                                <!--
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <span class="price">₹${product.price ?? 0}</span>
@@ -466,6 +479,11 @@ function loadProducts(id = 'all') {
                                        View
                                     </a>
                                 </div>
+                                -->
+                                <a class="btn btn-sm btn-primary w-100"
+                                   href="<?= site_url('frontend/contact'); ?>">
+                                   Enquire Now
+                                </a>
                             </div>
 
                         </div>
@@ -605,13 +623,20 @@ function loadProducts(id = 'all') {
 
                             </div>
 
-                            <div class="p-3 d-flex justify-content-between">
-                                <div>
-                                    ₹${product.price ?? 0}
-                                    <span class="price-old">${product.strike_price ?? ''}</span>
+                            <div class="p-3">
+                                <!--
+                                <div class="p-3 d-flex justify-content-between">
+                                    <div>
+                                        ₹${product.price ?? 0}
+                                        <span class="price-old">${product.strike_price ?? ''}</span>
+                                    </div>
+                                    <a href="<?= site_url('frontend/product/') ?>${product.id}" class="btn btn-sm btn-primary">
+                                        View
+                                    </a>
                                 </div>
-                                <a href="<?= site_url('frontend/product/') ?>${product.id}" class="btn btn-sm btn-primary">
-                                    View
+                                -->
+                                <a href="<?= site_url('frontend/contact'); ?>" class="btn btn-sm btn-primary w-100">
+                                    Enquire Now
                                 </a>
                             </div>
 

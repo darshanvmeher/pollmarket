@@ -199,12 +199,18 @@ $hero_collage = array(
                         </div>
                     </div>
                     <div class="p-3">
+                        <!--
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <span class="price">₹<?php echo html_escape($product['price']); ?></span>
                                 <span class="price-old ms-2">₹<?php echo html_escape($product['strike_price']); ?></span>
                             </div>
                             <a class="btn btn-sm btn-primary" href="<?php echo site_url('frontend/product/' . $product['id']); ?>">View</a>
+                        </div>
+                        -->
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-primary flex-fill" href="<?php echo site_url('frontend/product/' . $product['id']); ?>">View</a>
+                            <a class="btn btn-sm btn-outline-dark flex-fill" href="<?php echo site_url('frontend/contact'); ?>">Enquire Now</a>
                         </div>
                     </div>
                 </div>

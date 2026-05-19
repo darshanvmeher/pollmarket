@@ -47,38 +47,22 @@
             <div class="eyebrow"><i class="bi bi-bag-check"></i> Product detail</div>
             <h1 class="section-title"><?php echo html_escape($product['product_name']); ?></h1>
             <p class="text-muted"><?php echo html_escape($product['description']); ?></p>
+            <!--
             <div class="d-flex align-items-center gap-3 mb-3">
                 <span class="price">₹<?php echo html_escape($product['price']); ?></span>
                 <span class="price-old">₹<?php echo html_escape($product['strike_price']); ?></span>
+                <span class="rating"><i class="bi bi-star-fill"></i> <?php echo html_escape($product['rating']); ?></span>
+            </div>
+            -->
+            <div class="d-flex align-items-center gap-3 mb-3">
                 <span class="rating"><i class="bi bi-star-fill"></i> <?php echo html_escape($product['rating']); ?></span>
             </div>
             <div class="d-flex flex-wrap gap-2 mb-3">
                 <span class="soft-badge"><i class="bi bi-truck"></i> Dispatch 24 hrs</span>
                 <span class="soft-badge"><i class="bi bi-shield-check"></i> Quality checked</span>
             </div>
-            <div class="input-group mb-3" style="max-width: 220px;">
-                <button class="btn btn-outline-dark" type="button" name="quantity" data-qty-action="decrease" data-qty-target="#qty">-</button>
-                <input id="qty" class="form-control text-center" value="1">
-                <button class="btn btn-outline-dark" type="button" name="quantity" data-qty-action="increase" data-qty-target="#qty">+</button>
-            </div>
             <div class="d-flex gap-2 flex-wrap">
-                <button 
-                    class="btn btn-primary btn-lg"
-                    data-add-cart="<?= $product['id']; ?>">
-                    Add to Cart
-                </button>
-                <button
-                    class="btn btn-outline-dark btn-lg"
-                    type="button"
-                    data-wishlist-add
-                    data-product-id="<?php echo html_escape($product['id']); ?>"
-                    data-product-name="<?php echo html_escape($product['product_name']); ?>"
-                    data-product-category="<?php echo html_escape($product['category_name']); ?>"
-                    data-product-price="<?php echo html_escape($product['price']); ?>"
-                    data-product-image="<?= base_url($product['media'][0]['media_path'] ?? 'assets/no-image.png') ?>"
-                    title="Add to wishlist">
-                    <i class="bi bi-suit-heart"></i>
-                </button>
+                <a class="btn btn-primary btn-lg" href="<?php echo site_url('frontend/contact'); ?>">Enquire Now</a>
             </div>
         </div>
     </div>
@@ -110,23 +94,8 @@
                             <h3 class="h5 mt-1 mb-0"><?php echo html_escape($product_item['product_name']); ?></h3>
                         </div>
                     </div>
-                    <div class="p-3 d-flex justify-content-between align-items-center gap-2">
-                        <span class="price">₹<?php echo html_escape($product_item['price']); ?></span>
-                        <div class="d-flex gap-2">
-                            <button
-                                class="btn btn-sm btn-outline-dark"
-                                type="button"
-                                data-wishlist-add
-                                data-product-id="<?= $product_item['id']; ?>"
-                                data-product-name="<?php echo html_escape($product_item['product_name']); ?>"
-                                data-product-category="<?php echo html_escape($product_item['category_name']); ?>"
-                                data-product-price="<?php echo html_escape($product_item['price']); ?>"
-                                data-product-image="<?= base_url($product_item['media'][0]['media_path'] ?? 'assets/no-image.png') ?>"
-                                title="Add to wishlist">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                            <a class="btn btn-sm btn-primary" href="<?php echo site_url('frontend/product/' . $product_item['id']); ?>">View</a>
-                        </div>
+                    <div class="p-3">
+                        <a class="btn btn-sm btn-primary w-100" href="<?php echo site_url('frontend/contact'); ?>">Enquire Now</a>
                     </div>
                 </div>
             </div>
@@ -190,146 +159,4 @@ $(document).on("click", "[data-wishlist-add]", function (e) {
 });
 </script>
 
-<script>
-    $(document).ready(function () {
-        $('[data-qty-action]').on('click', function () {
-            const action = $(this).data('qty-action');
-            const targetInput = $($(this).data('qty-target'));
-            let currentValue = parseInt(targetInput.val()) || 1;
-
-            if (action === 'increase') {
-                currentValue++;
-            } else if (action === 'decrease' && currentValue > 1) {
-                currentValue--;
-            }
-
-            targetInput.val(currentValue);
-        });
-    });
-    </script>
-
-
-//add to cart ajax
-<!--
-<script>
-$(document).ready(function () {
-    $('[data-add-cart]').on('click', function () {
-        const productId = $(this).data('add-cart');
-        const qty = parseInt($('#qty').val()) || 1;
-        let token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("Please login first");
-            return;
-        }
-
-        $.ajax({
-            url: "<?=base_url('index.php/Api_handler/add_to_cart')?>",
-            type: "POST",
-            dataType: "json",
-            headers: {
-                "Authorization": "Bearer " + token
-            },
-            data: { product_id: productId, quantity: qty },
-
-            success: function (res) {
-                alert("Product added to cart");
-
-                // 🔥 INSTANT CART COUNT UPDATE
-                let badge = document.querySelector('[data-cart-badge]');
-                if (badge) {
-                    let count = parseInt(badge.textContent) || 0;
-                    badge.textContent = count + qty; // ✔ add qty
-                    badge.classList.remove('d-none');
-                }
-
-                // 🔁 Sync with backend (optional but recommended)
-                setTimeout(function () {
-                    if (typeof loadCartCount === "function") {
-                        loadCartCount();
-                    }
-                }, 500);
-            },
-
-            error: function () {
-                alert("Something went wrong");
-            }
-        });
-    });
-});
-</script>
-    
-
-        -->
-
-
-        <script>
-$(document).ready(function () {
-
-    $(document).on('click', '[data-add-cart]', function () {
-
-        const btn = $(this);
-        const productId = btn.data('add-cart');
-
-        // 🔥 get qty (if exists, else default = 1)
-        let qty = 1;
-        if ($('#qty').length) {
-            qty = parseInt($('#qty').val()) || 1;
-        }
-
-        let token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("Please login first");
-            return;
-        }
-
-        // 🔥 disable button to prevent multiple clicks
-        btn.prop('disabled', true).text('Adding...');
-
-        $.ajax({
-            url: "<?=base_url('index.php/Api_handler/add_to_cart')?>",
-            type: "POST",
-            dataType: "json",
-            headers: {
-                "Authorization": "Bearer " + token
-            },
-            data: {
-                product_id: productId,
-                quantity: qty
-            },
-
-            success: function (res) {
-
-                if (res.status) {
-
-                    // ✅ success message
-                    alert(res.message);
-
-                    // ✅ update cart count
-                    if (typeof loadCartCount === "function") {
-                        loadCartCount();
-                    }
-
-                    // ✅ OPTIONAL: change button text
-                    btn.text('Added ✔');
-
-                    // ✅ OPTIONAL: redirect
-                    // window.location.href = "<?= base_url('index.php/frontend/cart') ?>";
-
-                } else {
-                    alert(res.message);
-                    btn.prop('disabled', false).text('Add to Cart');
-                }
-            },
-
-            error: function () {
-                alert("Something went wrong");
-                btn.prop('disabled', false).text('Add to Cart');
-            }
-        });
-
-    });
-
-});
-</script>
+<!-- add-to-cart and quantity handlers intentionally disabled while enquiry-only flow is active -->
