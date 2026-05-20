@@ -937,6 +937,9 @@ public function invoice($invoice_id = 0)
         $this->render('reports', $data);
     }
 
+
+
+/*
     public function gst_sales_summary()
     {
         $data = array(
@@ -982,8 +985,348 @@ public function invoice($invoice_id = 0)
 
         $this->render('gst_sales_summary', $data);
     }
+*/
 
-    public function statewise_gst_report()
+public function gst_sales_summary()
+{
+    // Filters
+    $date_range = $this->input->get('date_range');
+
+    $start_date = $this->input->get('start_date');
+
+    $end_date = $this->input->get('end_date');
+
+    // Load model
+    $this->load->model('Order_model');
+
+    // Fetch data
+    $report = $this->Order_model
+        ->get_gst_sales_summary(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // KPI Variables
+    $taxable_value = 0;
+    $cgst = 0;
+    $sgst = 0;
+    $igst = 0;
+
+    // Invoice rows
+    $gst_invoice_rows = [];
+
+    foreach ($report as $row) {
+
+        $taxable_value += $row['sub_total'];
+
+        // Maharashtra = CGST + SGST
+        if (
+            strtolower(trim($row['state']))
+            == 'maharashtra'
+        ) {
+
+            $cgst += ($row['tax'] / 2);
+
+            $sgst += ($row['tax'] / 2);
+
+        } else {
+
+            $igst += $row['tax'];
+        }
+
+        // Dynamic table rows
+        $gst_invoice_rows[] = [
+
+            'invoice' => $row['invoice_no'],
+
+            'date' => date(
+                'd M Y',
+                strtotime($row['invoice_date'])
+            ),
+
+            'customer' => $row['customer_name'],
+
+            'state' => $row['state'],
+
+            'taxable' => '₹' .
+                number_format(
+                    $row['sub_total'],
+                    2
+                ),
+
+            'gst' => '₹' .
+                number_format(
+                    $row['tax'],
+                    2
+                ),
+
+            'total' => '₹' .
+                number_format(
+                    $row['grand_total'],
+                    2
+                )
+        ];
+    }
+
+    // Final view data
+    $data = [
+
+        'active' => 'reports_gst',
+
+        'title' => 'GST Sales Summary',
+
+        'subtitle' =>
+            'Dynamic GST summary report',
+
+        // Dynamic KPI cards
+        'kpis' => [
+
+            [
+                'title' => 'Taxable Value',
+
+                'value' => '₹' .
+                    number_format(
+                        $taxable_value,
+                        2
+                    ),
+
+                'trend' => '',
+
+                'trend_class' => 'kpi-up'
+            ],
+
+            [
+                'title' => 'CGST',
+
+                'value' => '₹' .
+                    number_format(
+                        $cgst,
+                        2
+                    ),
+
+                'trend' => '',
+
+                'trend_class' => 'kpi-up'
+            ],
+
+            [
+                'title' => 'SGST',
+
+                'value' => '₹' .
+                    number_format(
+                        $sgst,
+                        2
+                    ),
+
+                'trend' => '',
+
+                'trend_class' => 'kpi-up'
+            ],
+
+            [
+                'title' => 'IGST',
+
+                'value' => '₹' .
+                    number_format(
+                        $igst,
+                        2
+                    ),
+
+                'trend' => '',
+
+                'trend_class' => 'kpi-up'
+            ]
+        ],
+
+        // Dynamic table
+        'gst_invoice_rows' => $gst_invoice_rows,
+
+        'start_date' => date('Y-m-01'),
+
+        'end_date' => date('Y-m-t')
+    ];
+
+    $this->render('gst_sales_summary', $data);
+    
+}
+  
+public function statewise_gst_report()
+{
+
+    // FILTERS
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // DEFAULT
+    if (empty($date_range)) {
+
+        $date_range = 'month';
+    }
+
+    // LOAD MODEL
+    $this->load->model('Order_model');
+
+    // STATEWISE REPORT
+    $state_wise_rows =
+        $this->Order_model
+            ->get_statewise_gst_report(
+                $date_range,
+                $start_date,
+                $end_date
+            );
+
+    // SUMMARY VARIABLES
+    $total_states = 0;
+
+    $highest_state = '-';
+
+    $highest_value = 0;
+
+    $igst_states = 0;
+
+    $total_gst = 0;
+
+    $tax_buckets = array();
+
+    // PROCESS DATA
+    if (!empty($state_wise_rows)) {
+
+        $total_states =
+            count($state_wise_rows);
+
+        // FIRST FIND HIGHEST VALUE
+        foreach ($state_wise_rows as $row) {
+
+            if (
+                $row['sub_total']
+                > $highest_value
+            ) {
+
+                $highest_value =
+                    $row['sub_total'];
+
+                $highest_state =
+                    $row['state'];
+            }
+        }
+
+        // MAIN LOOP
+        foreach ($state_wise_rows as $row) {
+
+            // TOTAL GST
+            $total_gst +=
+                (float)$row['tax'];
+
+            // IGST STATES
+            if (
+                strtolower($row['state'])
+                != 'maharashtra'
+            ) {
+
+                $igst_states++;
+            }
+
+            // BAR %
+            $bar =
+                $highest_value > 0
+                ? (
+                    $row['sub_total']
+                    / $highest_value
+                ) * 100
+                : 0;
+
+            $tax_buckets[] = array(
+
+                'label' =>
+                    $row['state'],
+
+                'bar' =>
+                    round($bar)
+            );
+        }
+    }
+
+    // SUMMARY CARDS
+    $summary_cards = array(
+
+        array(
+            'label' => 'Total States',
+            'value' => $total_states,
+            'note' => 'Active tax regions'
+        ),
+
+        array(
+            'label' => 'Highest State',
+            'value' => $highest_state,
+            'note' => 'Top taxable value'
+        ),
+
+        array(
+            'label' => 'IGST States',
+            'value' => $igst_states,
+            'note' => 'Inter-state supply'
+        ),
+
+        array(
+            'label' => 'GST Collected',
+            'value' => '₹' .
+                number_format(
+                    $total_gst,
+                    2
+                ),
+            'note' => 'All states combined'
+        )
+    );
+
+    // VIEW DATA
+    $data = array(
+
+        'active' =>
+            'reports_statewise',
+
+        'title' =>
+            'Statewise GST',
+
+        'subtitle' =>
+            'Dynamic statewise GST report for ecommerce sales review and export.',
+
+        'date_range' =>
+            $date_range,
+
+        'start_date' =>
+            !empty($start_date)
+            ? $start_date
+            : date('Y-m-01'),
+
+        'end_date' =>
+            !empty($end_date)
+            ? $end_date
+            : date('Y-m-t'),
+
+        'state_wise_rows' =>
+            $state_wise_rows,
+
+        'summary_cards' =>
+            $summary_cards,
+
+        'tax_buckets' =>
+            $tax_buckets
+    );
+
+    $this->render(
+        'statewise_gst_report',
+        $data
+    );
+}
+/*
+public function statewise_gst_report()
     {
         $data = array(
             'active' => 'reports_statewise',
@@ -1018,7 +1361,7 @@ public function invoice($invoice_id = 0)
 
         $this->render('statewise_gst_report', $data);
     }
-
+*/
     /*
     public function reports()
 {
@@ -1213,3 +1556,45 @@ public function reports()
         $this->load->view('admin/partials/footer', $data);
     }
 }
+
+
+/*
+encountered
+Severity: Warning
+
+Message: Undefined array key "gst"
+
+Filename: controllers/Admin.php
+
+Line Number: 1209
+
+Backtrace:
+
+File: C:\xampp_new\htdocs\pollmarket\application\controllers\Admin.php
+Line: 1209
+Function: _error_handler
+
+File: C:\xampp_new\htdocs\pollmarket\index.php
+Line: 326
+Function: require_once
+
+A PHP Error was encountered
+Severity: Warning
+
+Message: Undefined array key "taxable"
+
+Filename: controllers/Admin.php
+
+Line Number: 1213
+
+Backtrace:
+
+File: C:\xampp_new\htdocs\pollmarket\application\controllers\Admin.php
+Line: 1213
+Function: _error_handler
+
+File: C:\xampp_new\htdocs\pollmarket\index.php
+Line: 326
+Function: require_once
+
+*/

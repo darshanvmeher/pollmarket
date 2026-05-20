@@ -175,7 +175,7 @@
                 <a class="btn btn-light btn-sm" href="#">
                     <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
                 </a>
-                <button class="btn btn-outline-light btn-sm" type="button">
+               <button class="btn btn-outline-light btn-sm" type="button">
                     <i class="bi bi-printer me-1"></i>Print
                 </button>
             </div>
@@ -193,7 +193,7 @@
                     </select>
                 </div>
                 <div class="col-md-5 d-grid">
-                    <button class="btn btn-primary">Apply Filters</button>
+                    <button class="btn btn-primary" id="applyFilter">Apply Filters</button>
                 </div>
             </div>
 
@@ -231,12 +231,47 @@
                     <p class="gst-report-panel__copy">Large, export-ready datatable for GST review and reconciliation.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2 justify-content-end">
-                    <a class="btn btn-outline-primary btn-sm" href="#">
+                   <!-- <a class="btn btn-outline-primary btn-sm" href="#">
                         <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
-                    </a>
-                    <a class="btn btn-outline-secondary btn-sm" href="#">
+                    </a>-->
+                   
+
+
+                     <a
+                    href="javascript:void(0)"
+                    id="exportExcel"
+                    class="btn btn-outline-secondary btn-sm">
+
+                    <i class="bi bi-download me-1"></i>
+
+                  Export to Excel
+
+                </a>
+                  <!--  <a class="btn btn-outline-secondary btn-sm" href="#">
                         <i class="bi bi-download me-1"></i>Download CSV
-                    </a>
+                    </a>-->
+                <!--    <a
+                    href="<?= base_url('index.php/Api_handler/download_gst_pdf'); ?>"
+
+                    class="btn btn-outline-secondary btn-sm">
+
+                    <i class="bi bi-download me-1"></i>
+
+                    Download PDF
+
+                </a>-->
+
+                <a
+                    href="javascript:void(0)"
+                    id="downloadPdf"
+                    class="btn btn-outline-secondary btn-sm">
+
+                    <i class="bi bi-download me-1"></i>
+
+                    Download PDF
+
+                </a>
+
                 </div>
             </div>
             <div class="table-responsive">
@@ -262,6 +297,8 @@
                                 <td><?php echo html_escape($row['taxable']); ?></td>
                                 <td><?php echo html_escape($row['gst']); ?></td>
                                 <td class="fw-semibold"><?php echo html_escape($row['total']); ?></td>
+
+                                
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -287,4 +324,323 @@ document.addEventListener('DOMContentLoaded', function () {
     rangeSelect.addEventListener('change', toggleCustomFields);
     toggleCustomFields();
 });
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<!--
+<script>
+    $(document).ready(function () {
+
+    $('#applyFilter').click(function () {
+
+        let date_range = $('#salesDateRange').val();
+
+        let start_date = $('#fromDate').val();
+
+        let end_date = $('#toDate').val();
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/gst_sales_summary') ?>",
+
+            type: 'GET',
+
+            dataType: 'json',
+
+            data: {
+
+                date_range: date_range,
+
+                start_date: start_date,
+
+                end_date: end_date
+            },
+
+            beforeSend: function () {
+
+                $('#myTable tbody').html(`
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            Loading...
+                        </td>
+                    </tr>
+                `);
+            },
+
+            success: function (response) {
+
+                console.log(response);
+
+                let html = '';
+
+                // KPI UPDATE
+            
+
+                $('.kpi-taxable').text(
+                    response.summary.taxable_value
+                    );
+
+                    $('.kpi-cgst').text(
+                        response.summary.cgst
+                    );
+
+                    $('.kpi-sgst').text(
+                        response.summary.sgst
+                    );
+
+                    $('.kpi-igst').text(
+                        response.summary.igst
+                    );
+
+                // TABLE DATA
+                if (response.data.length > 0) {
+
+                    $.each(response.data, function (i, row) {
+
+                            html += `
+                <tr>
+
+                    <td class="fw-semibold">
+                        ${row.invoice_no}
+                    </td>
+
+                    <td>
+                        ${row.invoice_date}
+                    </td>
+
+                    <td>
+                        ${row.customer_name}
+                    </td>
+
+                    <td>
+                        ${row.state}
+                    </td>
+
+                    <td>
+                        ₹${parseFloat(row.sub_total).toFixed(2)}
+                    </td>
+
+                    <td>
+                        ₹${parseFloat(row.tax).toFixed(2)}
+                    </td>
+
+                    <td class="fw-semibold">
+                        ₹${parseFloat(row.grand_total).toFixed(2)}
+                    </td>
+
+                </tr>
+                `;
+                        
+                    });
+
+                } else {
+
+                    html = `
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                No Records Found
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                $('#myTable tbody').html(html);
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+                alert('Something went wrong');
+            }
+        });
+
+    });
+
+});
+</script>
+
+-->
+
+<script>
+
+$(document).ready(function () {
+
+    // APPLY FILTER
+    $('#applyFilter').click(function () {
+
+        let date_range = $('#salesDateRange').val();
+
+        let start_date = $('#fromDate').val();
+
+        let end_date = $('#toDate').val();
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/gst_sales_summary') ?>",
+
+            type: 'GET',
+
+            dataType: 'json',
+
+            data: {
+
+                date_range: date_range,
+
+                start_date: start_date,
+
+                end_date: end_date
+            },
+
+            beforeSend: function () {
+
+                $('#myTable tbody').html(`
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            Loading...
+                        </td>
+                    </tr>
+                `);
+            },
+
+            success: function (response) {
+
+                console.log(response);
+
+                let html = '';
+
+                // KPI UPDATE
+                $('.kpi-taxable').text(
+                    response.summary.taxable_value
+                );
+
+                $('.kpi-cgst').text(
+                    response.summary.cgst
+                );
+
+                $('.kpi-sgst').text(
+                    response.summary.sgst
+                );
+
+                $('.kpi-igst').text(
+                    response.summary.igst
+                );
+
+                // TABLE DATA
+                if (response.data.length > 0) {
+
+                    $.each(response.data, function (i, row) {
+
+                        html += `
+                            <tr>
+
+                                <td class="fw-semibold">
+                                    ${row.invoice_no}
+                                </td>
+
+                                <td>
+                                    ${row.invoice_date}
+                                </td>
+
+                                <td>
+                                    ${row.customer_name}
+                                </td>
+
+                                <td>
+                                    ${row.state}
+                                </td>
+
+                                <td>
+                                    ₹${parseFloat(row.sub_total).toFixed(2)}
+                                </td>
+
+                                <td>
+                                    ₹${parseFloat(row.tax).toFixed(2)}
+                                </td>
+
+                                <td class="fw-semibold">
+                                    ₹${parseFloat(row.grand_total).toFixed(2)}
+                                </td>
+
+                            </tr>
+                        `;
+                    });
+
+                } else {
+
+                    html = `
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                No Records Found
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                $('#myTable tbody').html(html);
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+                alert('Something went wrong');
+            }
+        });
+
+    });
+
+
+
+    // PDF DOWNLOAD
+    $('#downloadPdf').click(function () {
+
+        let date_range =
+            $('#salesDateRange').val();
+
+        let start_date =
+            $('#fromDate').val();
+
+        let end_date =
+            $('#toDate').val();
+
+        window.location.href =
+            "<?= base_url(
+                'index.php/Api_handler/download_gst_pdf'
+            ); ?>"
+
+            + "?date_range=" + date_range
+
+            + "&start_date=" + start_date
+
+            + "&end_date=" + end_date;
+    });
+
+
+    // EXCEL DOWNLOAD
+$('#exportExcel').click(function () {
+
+    let date_range =
+        $('#salesDateRange').val();
+
+    let start_date =
+        $('#fromDate').val();
+
+    let end_date =
+        $('#toDate').val();
+
+    window.location.href =
+        "<?= base_url('index.php/Api_handler/export_gst_excel'); ?>"
+
+        + "?date_range=" + date_range
+
+        + "&start_date=" + start_date
+
+        + "&end_date=" + end_date;
+});
+
+});
+
 </script>

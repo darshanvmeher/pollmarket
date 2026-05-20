@@ -4392,4 +4392,2352 @@ public function download_pdf()
         'D'
     );
 }
+
+//gst sales summary by date range
+
+
+public function gst_sales_summary()
+{
+    header('Content-Type: application/json');
+
+    $date_range = $this->input->get('date_range');
+
+    $start_date = $this->input->get('start_date');
+
+    $end_date = $this->input->get('end_date');
+
+
+
+    // Get data from model
+    $report = $this->Order_model->get_gst_sales_summary( $date_range, $start_date, $end_date );
+    
+
+    // Summary
+    $taxable = 0;
+    $gst = 0;
+    $grand = 0;
+
+    foreach ($report as $row) {
+
+        $taxable += $row['sub_total'];
+
+        $gst += $row['tax'];
+
+        $grand += $row['grand_total'];
+    }
+
+    echo json_encode([
+
+        'status' => true,
+
+        'summary' => [
+
+            'taxable_value' => round($taxable, 2),
+
+            'total_gst' => round($gst, 2),
+
+            'grand_total' => round($grand, 2),
+        ],
+
+        'data' => $report
+    ]);
+}
+
+
+//pdf download of gst sales summary
+
+/*
+public function download_gst_pdf()
+{
+
+    // FILTERS
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+
+        
+
+    // LOAD MODEL
+    $this->load->model('admin/Order_model');
+
+
+    // DATE RANGE LABEL
+$range_label = '';
+
+if ($date_range == 'today') {
+
+    $range_label = 'Today';
+
+} elseif ($date_range == 'week') {
+
+    $range_label = 'Last 7 Days';
+
+} elseif ($date_range == 'month') {
+
+    $range_label = 'This Month';
+
+} elseif ($date_range == 'custom') {
+
+    $range_label =
+        'Custom Range : ' .
+        date(
+            'd-m-Y',
+            strtotime($start_date)
+        ) .
+        ' To ' .
+        date(
+            'd-m-Y',
+            strtotime($end_date)
+        );
+
+} else {
+
+    $range_label = 'All';
+}
+
+    // REPORT DATA
+    $report = $this->Order_model
+        ->get_gst_sales_summary(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // TOTAL VARIABLES
+    $total_taxable = 0;
+
+    $total_gst = 0;
+
+    $final_total = 0;
+
+    // HTML START
+    $html = '
+
+    <style>
+
+        body{
+            font-family: sans-serif;
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        table th{
+            background:#f2f2f2;
+            font-weight:bold;
+            text-align:center;
+        }
+
+        table th,
+        table td{
+            border:1px solid #000;
+            padding:8px;
+            font-size:12px;
+        }
+
+    </style>
+
+   <h2>
+    GST Sales Summary
+</h2>
+
+<p style="
+    text-align:center;
+    font-size:14px;
+    margin-bottom:20px;">
+
+    <strong>Date Range :</strong>
+
+    ' . $range_label . '
+
+</p>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Invoice</th>
+
+                <th>Date</th>
+
+                <th>Customer</th>
+
+                <th>State</th>
+
+                <th>Taxable</th>
+
+                <th>GST</th>
+
+                <th>Total</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+    ';
+
+    // CHECK DATA
+    if (!empty($report)) {
+
+        foreach ($report as $row) {
+
+            // TOTALS
+            $total_taxable +=
+                (float)$row['sub_total'];
+
+            $total_gst +=
+                (float)$row['tax'];
+
+            $final_total +=
+                (float)$row['grand_total'];
+
+            $html .= '
+
+            <tr>
+
+                <td>
+                    ' . $row['invoice_no'] . '
+                </td>
+
+                <td>
+                    ' . date(
+                        'd-m-Y',
+                        strtotime(
+                            $row['invoice_date']
+                        )
+                    ) . '
+                </td>
+
+                <td>
+                    ' . $row['customer_name'] . '
+                </td>
+
+                <td>
+                    ' . $row['state'] . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['sub_total'],
+                        2
+                    ) . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['tax'],
+                        2
+                    ) . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['grand_total'],
+                        2
+                    ) . '
+                </td>
+
+            </tr>
+            ';
+        }
+
+        // GRAND TOTAL ROW
+        $html .= '
+
+        <tr>
+
+            <td colspan="4"
+                style="
+                font-weight:bold;
+                text-align:right;
+                background:#f2f2f2;">
+
+                GRAND TOTAL
+
+            </td>
+
+            <td style="
+                font-weight:bold;
+                background:#f2f2f2;">
+
+                ₹' . number_format(
+                    $total_taxable,
+                    2
+                ) . '
+
+            </td>
+
+            <td style="
+                font-weight:bold;
+                background:#f2f2f2;">
+
+                ₹' . number_format(
+                    $total_gst,
+                    2
+                ) . '
+
+            </td>
+
+            <td style="
+                font-weight:bold;
+                background:#f2f2f2;">
+
+                ₹' . number_format(
+                    $final_total,
+                    2
+                ) . '
+
+            </td>
+
+        </tr>
+        ';
+
+    } else {
+
+        $html .= '
+
+        <tr>
+
+            <td colspan="7"
+                style="text-align:center;">
+
+                No Records Found
+
+            </td>
+
+        </tr>
+        ';
+    }
+
+    $html .= '
+
+        </tbody>
+
+    </table>
+    ';
+
+    // MPDF
+    require_once APPPATH .
+        '../vendor/autoload.php';
+
+    $mpdf = new \Mpdf\Mpdf([
+
+        'format' => 'A4-L'
+    ]);
+
+    $mpdf->WriteHTML($html);
+
+    // DOWNLOAD PDF
+    $mpdf->Output(
+        'gst_sales_summary.pdf',
+        'D'
+    );
+}
+*/
+
+
+public function download_gst_pdf()
+{
+
+    // FILTERS
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // LOAD MODEL
+    $this->load->model('admin/Order_model');
+
+    // REPORT DATA
+    $report = $this->Order_model
+        ->get_gst_sales_summary(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // REPORT HEADING
+    $report_heading =
+        'GST Sales Summary';
+
+    if ($date_range == 'today') {
+
+        $report_heading =
+            'Today GST Sales Summary - ' .
+            date('d M Y');
+    }
+
+    else if ($date_range == 'week') {
+
+        $report_heading =
+            'Last 7 Days GST Sales Summary';
+    }
+
+    else if ($date_range == 'month') {
+
+        $report_heading =
+            'This Month GST Sales Summary - ' .
+            date('F Y');
+    }
+
+    else if ($date_range == 'custom') {
+
+        $report_heading =
+            'Custom GST Sales Summary (' .
+
+            date(
+                'd M Y',
+                strtotime($start_date)
+            )
+
+            . ' to ' .
+
+            date(
+                'd M Y',
+                strtotime($end_date)
+            )
+
+            . ')';
+    }
+
+    // TOTAL VARIABLES
+    $total_taxable = 0;
+
+    $total_gst = 0;
+
+    $final_total = 0;
+
+    // HTML START
+    $html = '
+
+    <style>
+
+        body{
+            font-family: sans-serif;
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        table th{
+            background:#f2f2f2;
+            font-weight:bold;
+            text-align:center;
+        }
+
+        table th,
+        table td{
+            border:1px solid #000;
+            padding:8px;
+            font-size:12px;
+        }
+
+    </style>
+
+    <h2>
+        ' . $report_heading . '
+    </h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Invoice</th>
+
+                <th>Date</th>
+
+                <th>Customer</th>
+
+                <th>State</th>
+
+                <th>Taxable</th>
+
+                <th>GST</th>
+
+                <th>Total</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+    ';
+
+    // CHECK DATA
+    if (!empty($report)) {
+
+        foreach ($report as $row) {
+
+            // TOTALS
+            $total_taxable +=
+                (float)$row['sub_total'];
+
+            $total_gst +=
+                (float)$row['tax'];
+
+            $final_total +=
+                (float)$row['grand_total'];
+
+            $html .= '
+
+            <tr>
+
+                <td>
+                    ' . $row['invoice_no'] . '
+                </td>
+
+                <td>
+                    ' . date(
+                        'd-m-Y',
+                        strtotime(
+                            $row['invoice_date']
+                        )
+                    ) . '
+                </td>
+
+                <td>
+                    ' . $row['customer_name'] . '
+                </td>
+
+                <td>
+                    ' . $row['state'] . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['sub_total'],
+                        2
+                    ) . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['tax'],
+                        2
+                    ) . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['grand_total'],
+                        2
+                    ) . '
+                </td>
+
+            </tr>
+            ';
+        }
+
+        // GRAND TOTAL ROW
+        $html .= '
+
+        <tr>
+
+            <td colspan="4"
+                style="
+                font-weight:bold;
+                text-align:right;
+                background:#f2f2f2;">
+
+                GRAND TOTAL
+
+            </td>
+
+            <td style="
+                font-weight:bold;
+                background:#f2f2f2;">
+
+                ₹' . number_format(
+                    $total_taxable,
+                    2
+                ) . '
+
+            </td>
+
+            <td style="
+                font-weight:bold;
+                background:#f2f2f2;">
+
+                ₹' . number_format(
+                    $total_gst,
+                    2
+                ) . '
+
+            </td>
+
+            <td style="
+                font-weight:bold;
+                background:#f2f2f2;">
+
+                ₹' . number_format(
+                    $final_total,
+                    2
+                ) . '
+
+            </td>
+
+        </tr>
+        ';
+    }
+
+    else {
+
+        $html .= '
+
+        <tr>
+
+            <td colspan="7"
+                style="text-align:center;">
+
+                No Records Found
+
+            </td>
+
+        </tr>
+        ';
+    }
+
+    $html .= '
+
+        </tbody>
+
+    </table>
+    ';
+
+    // MPDF
+    require_once APPPATH .
+        '../vendor/autoload.php';
+
+    $mpdf = new \Mpdf\Mpdf([
+
+        'format' => 'A4-L'
+    ]);
+
+    $mpdf->WriteHTML($html);
+
+    // DOWNLOAD PDF
+    $mpdf->Output(
+        'gst_sales_summary.pdf',
+        'D'
+    );
+}
+/*
+public function download_gst_pdf()
+{
+
+    // Filters
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // Load Model
+    $this->load->model('admin/Order_model');
+
+    // Filtered Report Data
+    $report = $this->Order_model
+        ->get_gst_sales_summary(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // HTML START
+    $html = '
+
+    <style>
+
+        body{
+            font-family: sans-serif;
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        table th{
+            background:#f2f2f2;
+            font-weight:bold;
+            text-align:center;
+        }
+
+        table th,
+        table td{
+            border:1px solid #000;
+            padding:8px;
+            font-size:12px;
+        }
+
+    </style>
+
+    <h2>
+        GST Sales Summary
+    </h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Invoice</th>
+
+                <th>Date</th>
+
+                <th>Customer</th>
+
+                <th>State</th>
+
+                <th>Taxable</th>
+
+                <th>GST</th>
+
+                <th>Total</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+    ';
+
+    // CHECK DATA
+    if (!empty($report)) {
+
+        foreach ($report as $row) {
+
+            $html .= '
+
+            <tr>
+
+                <td>
+                    ' . $row['invoice_no'] . '
+                </td>
+
+                <td>
+                    ' . date(
+                        'd-m-Y',
+                        strtotime(
+                            $row['invoice_date']
+                        )
+                    ) . '
+                </td>
+
+                <td>
+                    ' . $row['customer_name'] . '
+                </td>
+
+                <td>
+                    ' . $row['state'] . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['sub_total'],
+                        2
+                    ) . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['tax'],
+                        2
+                    ) . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['grand_total'],
+                        2
+                    ) . '
+                </td>
+
+            </tr>
+            ';
+        }
+
+    } else {
+
+        $html .= '
+
+        <tr>
+
+            <td colspan="7"
+                style="text-align:center;">
+
+                No Records Found
+
+            </td>
+
+        </tr>
+        ';
+    }
+
+    $html .= '
+
+        </tbody>
+
+    </table>
+    ';
+
+    // MPDF
+    require_once APPPATH .
+        '../vendor/autoload.php';
+
+    $mpdf = new \Mpdf\Mpdf([
+
+        'format' => 'A4-L'
+    ]);
+
+    $mpdf->WriteHTML($html);
+
+    // DOWNLOAD PDF
+    $mpdf->Output(
+        'gst_sales_summary.pdf',
+        'D'
+    );
+}*/
+/*
+
+public function export_gst_excel()
+{
+
+    // Filters
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // Load Model
+    $this->load->model('admin/Order_model');
+
+    // Report Data
+    $report = $this->Order_model
+        ->get_gst_sales_summary(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // File Name
+    $filename =
+        "gst_sales_summary.xls";
+
+    // Headers
+    header(
+        "Content-Type: application/vnd.ms-excel"
+    );
+
+    header(
+        "Content-Disposition: attachment; filename=$filename"
+    );
+
+    // Grand Total Variable
+    $final_total = 0;
+
+    echo '
+
+    <table border="1">
+
+        <tr>
+
+            <th colspan="7"
+                style="font-size:18px;
+                background:#f2f2f2;">
+
+                GST Sales Summary
+
+            </th>
+
+        </tr>
+
+        <tr>
+
+            <th>Invoice</th>
+
+            <th>Date</th>
+
+            <th>Customer</th>
+
+            <th>State</th>
+
+            <th>Taxable</th>
+
+            <th>GST</th>
+
+            <th>Total</th>
+
+        </tr>
+    ';
+
+    if (!empty($report)) {
+
+        foreach ($report as $row) {
+
+            $final_total +=
+                $row['grand_total'];
+
+            echo '
+
+            <tr>
+
+                <td>
+                    ' . $row['invoice_no'] . '
+                </td>
+
+                <td>
+                    ' . date(
+                        'd-m-Y',
+                        strtotime(
+                            $row['invoice_date']
+                        )
+                    ) . '
+                </td>
+
+                <td>
+                    ' . $row['customer_name'] . '
+                </td>
+
+                <td>
+                    ' . $row['state'] . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['sub_total'],
+                        2
+                    ) . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['tax'],
+                        2
+                    ) . '
+                </td>
+
+                <td>
+                    ₹' . number_format(
+                        $row['grand_total'],
+                        2
+                    ) . '
+                </td>
+
+            </tr>
+            ';
+        }
+
+        // FINAL GRAND TOTAL ROW
+        echo '
+
+        <tr>
+
+            <td colspan="6"
+                style="
+                font-weight:bold;
+                text-align:right;
+                background:#f2f2f2;">
+
+                Final Grand Total
+
+            </td>
+
+            <td
+                style="
+                font-weight:bold;
+                background:#f2f2f2;">
+
+                ₹' . number_format(
+                    $final_total,
+                    2
+                ) . '
+
+            </td>
+
+        </tr>
+        ';
+
+    } else {
+
+        echo '
+
+        <tr>
+
+            <td colspan="7"
+                style="text-align:center;">
+
+                No Records Found
+
+            </td>
+
+        </tr>
+        ';
+    }
+
+    echo '</table>';
+
+    exit;
+}
+
+*/
+
+/*
+public function export_gst_excel()
+{
+
+    require_once APPPATH .
+        'third_party/PHPExcel/Classes/PHPExcel.php';
+
+    require_once APPPATH .
+        'third_party/PHPExcel/Classes/PHPExcel/Cell/DataType.php';
+
+    $excel = new PHPExcel();
+
+    $sheet =
+        $excel->setActiveSheetIndex(0);
+
+    // Filters
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // Report Data
+    $report = $this->Order_model
+        ->get_gst_sales_summary(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // Title
+    $sheet->setCellValue(
+        'A1',
+        'GST Sales Summary'
+    );
+
+    // Merge Title
+    $sheet->mergeCells('A1:G1');
+
+    // Bold Title
+    $sheet->getStyle('A1')
+        ->getFont()
+        ->setBold(true);
+
+    // Center Title
+    $sheet->getStyle('A1')
+        ->getAlignment()
+        ->setHorizontal(
+            PHPExcel_Style_Alignment
+                ::HORIZONTAL_CENTER
+        );
+
+    // Headers
+    $sheet->setCellValue('A3', 'Invoice');
+    $sheet->setCellValue('B3', 'Date');
+    $sheet->setCellValue('C3', 'Customer');
+    $sheet->setCellValue('D3', 'State');
+    $sheet->setCellValue('E3', 'Taxable');
+    $sheet->setCellValue('F3', 'GST');
+    $sheet->setCellValue('G3', 'Total');
+
+    // Header Bold
+    $sheet->getStyle('A3:G3')
+        ->getFont()
+        ->setBold(true);
+
+    // Start Row
+    $row = 4;
+
+    // Final Grand Total
+    $final_total = 0;
+
+    // Data
+    foreach ($report as $data) {
+
+        $sheet->setCellValueExplicit(
+            'A' . $row,
+            (string)$data['invoice_no'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'B' . $row,
+            date(
+                'd-m-Y',
+                strtotime(
+                    $data['invoice_date']
+                )
+            ),
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'C' . $row,
+            (string)$data['customer_name'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'D' . $row,
+            (string)$data['state'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'E' . $row,
+            (string)$data['sub_total'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'F' . $row,
+            (string)$data['tax'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'G' . $row,
+            (string)$data['grand_total'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        // Add Grand Total
+        $final_total +=
+            (float)$data['grand_total'];
+
+        $row++;
+    }
+
+    // FINAL TOTAL ROW
+    $sheet->setCellValue(
+        'F' . $row,
+        'Final Grand Total'
+    );
+
+    $sheet->setCellValue(
+        'G' . $row,
+        $final_total
+    );
+
+    // Bold Final Row
+    $sheet->getStyle(
+        'F' . $row . ':G' . $row
+    )->getFont()->setBold(true);
+
+    // Auto Width
+    foreach (range('A', 'G') as $column) {
+
+        $sheet->getColumnDimension(
+            $column
+        )->setAutoSize(true);
+    }
+
+    // File Download
+    header(
+        'Content-Type: application/vnd.ms-excel'
+    );
+
+    header(
+        'Content-Disposition: attachment;filename="gst_sales_summary.xls"'
+    );
+
+    header(
+        'Cache-Control: max-age=0'
+    );
+
+    $writer =
+        PHPExcel_IOFactory
+            ::createWriter(
+                $excel,
+                'Excel5'
+            );
+
+    $writer->save('php://output');
+
+    exit;
+}
+*/
+
+
+/*
+public function export_gst_excel()
+{
+
+    require_once APPPATH .
+        'third_party/PHPExcel/Classes/PHPExcel.php';
+
+    require_once APPPATH .
+        'third_party/PHPExcel/Classes/PHPExcel/Cell/DataType.php';
+
+    $excel = new PHPExcel();
+
+    $sheet =
+        $excel->setActiveSheetIndex(0);
+
+    // Filters
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // Report Data
+    $report = $this->Order_model
+        ->get_gst_sales_summary(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // Title
+    $sheet->setCellValue(
+        'A1',
+        'GST Sales Summary'
+    );
+
+    // Merge Title
+    $sheet->mergeCells('A1:G1');
+
+    // Bold Title
+    $sheet->getStyle('A1')
+        ->getFont()
+        ->setBold(true);
+
+    // Center Title
+    $sheet->getStyle('A1')
+        ->getAlignment()
+        ->setHorizontal(
+            PHPExcel_Style_Alignment
+                ::HORIZONTAL_CENTER
+        );
+
+    // Headers
+    $sheet->setCellValue('A3', 'Invoice');
+    $sheet->setCellValue('B3', 'Date');
+    $sheet->setCellValue('C3', 'Customer');
+    $sheet->setCellValue('D3', 'State');
+    $sheet->setCellValue('E3', 'Taxable');
+    $sheet->setCellValue('F3', 'GST');
+    $sheet->setCellValue('G3', 'Total');
+
+    // Header Bold
+    $sheet->getStyle('A3:G3')
+        ->getFont()
+        ->setBold(true);
+
+    // Start Row
+    $row = 4;
+
+    // Final Grand Total
+    $final_total = 0;
+
+    // Data
+    foreach ($report as $data) {
+
+        $sheet->setCellValueExplicit(
+            'A' . $row,
+            (string)$data['invoice_no'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'B' . $row,
+            date(
+                'd-m-Y',
+                strtotime(
+                    $data['invoice_date']
+                )
+            ),
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'C' . $row,
+            (string)$data['customer_name'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'D' . $row,
+            (string)$data['state'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        // NUMERIC VALUES
+        $sheet->setCellValue(
+            'E' . $row,
+            $data['sub_total']
+        );
+
+        $sheet->setCellValue(
+            'F' . $row,
+            $data['tax']
+        );
+
+        $sheet->setCellValue(
+            'G' . $row,
+            $data['grand_total']
+        );
+
+        // Add Grand Total
+        $final_total +=
+            (float)$data['grand_total'];
+
+        $row++;
+    }
+
+    // FINAL TOTAL ROW
+    $sheet->setCellValue(
+        'F' . $row,
+        'Final Grand Total'
+    );
+
+    $sheet->setCellValueExplicit(
+        'G' . $row,
+        (string)$final_total,
+        PHPExcel_Cell_DataType
+            ::TYPE_STRING
+    );
+
+    // Bold Final Row
+    $sheet->getStyle(
+        'F' . $row . ':G' . $row
+    )->getFont()->setBold(true);
+
+    // Auto Width
+    foreach (range('A', 'G') as $column) {
+
+        $sheet->getColumnDimension(
+            $column
+        )->setAutoSize(true);
+    }
+
+    // File Download
+    header(
+        'Content-Type: application/vnd.ms-excel'
+    );
+
+    header(
+        'Content-Disposition: attachment;filename="gst_sales_summary.xls"'
+    );
+
+    header(
+        'Cache-Control: max-age=0'
+    );
+
+    $writer =
+        PHPExcel_IOFactory
+            ::createWriter(
+                $excel,
+                'Excel5'
+            );
+
+    $writer->save('php://output');
+
+    exit;
+}
+
+*/
+
+/*
+public function export_gst_excel()
+{
+
+    require_once APPPATH .
+        'third_party/PHPExcel/Classes/PHPExcel.php';
+
+    require_once APPPATH .
+        'third_party/PHPExcel/Classes/PHPExcel/Cell/DataType.php';
+
+    $excel = new PHPExcel();
+
+    $sheet =
+        $excel->setActiveSheetIndex(0);
+
+    // Filters
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // Report Data
+    $report = $this->Order_model
+        ->get_gst_sales_summary(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // TITLE
+    $sheet->setCellValue(
+        'A1',
+        'GST Sales Summary'
+    );
+
+    // MERGE TITLE
+    $sheet->mergeCells('A1:G1');
+
+    // TITLE STYLE
+    $sheet->getStyle('A1')
+        ->getFont()
+        ->setBold(true);
+
+    $sheet->getStyle('A1')
+        ->getFont()
+        ->setSize(16);
+
+    $sheet->getStyle('A1')
+        ->getAlignment()
+        ->setHorizontal(
+            PHPExcel_Style_Alignment
+                ::HORIZONTAL_CENTER
+        );
+
+    // HEADERS
+    $sheet->setCellValue('A3', 'Invoice');
+    $sheet->setCellValue('B3', 'Date');
+    $sheet->setCellValue('C3', 'Customer');
+    $sheet->setCellValue('D3', 'State');
+    $sheet->setCellValue('E3', 'Taxable');
+    $sheet->setCellValue('F3', 'GST');
+    $sheet->setCellValue('G3', 'Total');
+
+    // HEADER BOLD
+    $sheet->getStyle('A3:G3')
+        ->getFont()
+        ->setBold(true);
+
+    // START ROW
+    $row = 4;
+
+    // TOTAL VARIABLES
+    $total_taxable = 0;
+    $total_gst = 0;
+    $final_total = 0;
+
+    // DATA
+    foreach ($report as $data) {
+
+        $sheet->setCellValueExplicit(
+            'A' . $row,
+            (string)$data['invoice_no'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'B' . $row,
+            date(
+                'd-m-Y',
+                strtotime(
+                    $data['invoice_date']
+                )
+            ),
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'C' . $row,
+            (string)$data['customer_name'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValueExplicit(
+            'D' . $row,
+            (string)$data['state'],
+            PHPExcel_Cell_DataType
+                ::TYPE_STRING
+        );
+
+        $sheet->setCellValue(
+            'E' . $row,
+            $data['sub_total']
+        );
+
+        $sheet->setCellValue(
+            'F' . $row,
+            $data['tax']
+        );
+
+        $sheet->setCellValue(
+            'G' . $row,
+            $data['grand_total']
+        );
+
+        // TOTALS
+        $total_taxable +=
+            (float)$data['sub_total'];
+
+        $total_gst +=
+            (float)$data['tax'];
+
+        $final_total +=
+            (float)$data['grand_total'];
+
+        $row++;
+    }
+
+    // FINAL TOTAL ROW
+    $sheet->setCellValue(
+        'D' . $row,
+        'TOTAL'
+    );
+
+    $sheet->setCellValue(
+        'E' . $row,
+        $total_taxable
+    );
+
+    $sheet->setCellValue(
+        'F' . $row,
+        $total_gst
+    );
+
+    $sheet->setCellValue(
+        'G' . $row,
+        $final_total
+    );
+
+    // FINAL ROW STYLE
+    $sheet->getStyle(
+        'D' . $row . ':G' . $row
+    )->getFont()->setBold(true);
+
+    // AUTO WIDTH
+    foreach (range('A', 'G') as $column) {
+
+        $sheet->getColumnDimension(
+            $column
+        )->setAutoSize(true);
+    }
+
+    // FILE NAME
+    $filename =
+        "gst_sales_summary.xls";
+
+    // DOWNLOAD HEADERS
+    header(
+        'Content-Type: application/vnd.ms-excel'
+    );
+
+    header(
+        'Content-Disposition: attachment;filename="' . $filename . '"'
+    );
+
+    header(
+        'Cache-Control: max-age=0'
+    );
+
+    // WRITER
+    $writer =
+        PHPExcel_IOFactory
+            ::createWriter(
+                $excel,
+                'Excel5'
+            );
+
+    $writer->save('php://output');
+
+    exit;
+
+
+}
+*/
+
+public function export_gst_excel()
+{
+    require_once APPPATH . 'third_party/PHPExcel/Classes/PHPExcel.php';
+
+    require_once APPPATH . 'third_party/PHPExcel/Classes/PHPExcel/Cell/DataType.php';
+
+    $excel = new PHPExcel();
+
+    $sheet = $excel->setActiveSheetIndex(0);
+
+    // FILTERS
+    $date_range = $this->input->get('date_range');
+
+    $start_date = $this->input->get('start_date');
+
+    $end_date = $this->input->get('end_date');
+
+    // REPORT DATA
+    $report = $this->Order_model->get_gst_sales_summary(
+        $date_range,
+        $start_date,
+        $end_date
+    );
+
+    // TITLE
+    $sheet->setCellValue('A1', 'GST Sales Summary');
+
+    $sheet->mergeCells('A1:G1');
+
+    $sheet->getStyle('A1')->getFont()->setBold(true);
+
+    $sheet->getStyle('A1')->getFont()->setSize(16);
+
+    $sheet->getStyle('A1')
+        ->getAlignment()
+        ->setHorizontal(
+            PHPExcel_Style_Alignment::HORIZONTAL_CENTER
+        );
+
+    // HEADERS
+    $sheet->setCellValue('A3', 'Invoice');
+    $sheet->setCellValue('B3', 'Date');
+    $sheet->setCellValue('C3', 'Customer');
+    $sheet->setCellValue('D3', 'State');
+    $sheet->setCellValue('E3', 'Taxable');
+    $sheet->setCellValue('F3', 'GST');
+    $sheet->setCellValue('G3', 'Total');
+
+    // HEADER STYLE
+    $sheet->getStyle('A3:G3')
+        ->getFont()
+        ->setBold(true);
+
+    // START ROW
+    $row = 4;
+
+    // TOTALS
+    $total_taxable = 0;
+
+    $total_gst = 0;
+
+    $final_total = 0;
+
+    // DATA
+    if (!empty($report)) {
+
+        foreach ($report as $data) {
+
+            $sheet->setCellValueExplicit(
+                'A' . $row,
+                (string)$data['invoice_no'],
+                PHPExcel_Cell_DataType::TYPE_STRING
+            );
+
+            $sheet->setCellValueExplicit(
+                'B' . $row,
+                date(
+                    'd-m-Y',
+                    strtotime($data['invoice_date'])
+                ),
+                PHPExcel_Cell_DataType::TYPE_STRING
+            );
+
+            $sheet->setCellValueExplicit(
+                'C' . $row,
+                (string)$data['customer_name'],
+                PHPExcel_Cell_DataType::TYPE_STRING
+            );
+
+            $sheet->setCellValueExplicit(
+                'D' . $row,
+                (string)$data['state'],
+                PHPExcel_Cell_DataType::TYPE_STRING
+            );
+
+            // IMPORTANT FIX
+            $sheet->setCellValueExplicit(
+                'E' . $row,
+                (string)$data['sub_total'],
+                PHPExcel_Cell_DataType::TYPE_STRING
+            );
+
+            $sheet->setCellValueExplicit(
+                'F' . $row,
+                (string)$data['tax'],
+                PHPExcel_Cell_DataType::TYPE_STRING
+            );
+
+            $sheet->setCellValueExplicit(
+                'G' . $row,
+                (string)$data['grand_total'],
+                PHPExcel_Cell_DataType::TYPE_STRING
+            );
+
+            // TOTALS
+            $total_taxable += (float)$data['sub_total'];
+
+            $total_gst += (float)$data['tax'];
+
+            $final_total += (float)$data['grand_total'];
+
+            $row++;
+        }
+    }
+
+    // TOTAL ROW
+    $sheet->setCellValue(
+        'D' . $row,
+        'TOTAL'
+    );
+
+    $sheet->setCellValueExplicit(
+        'E' . $row,
+        (string)$total_taxable,
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'F' . $row,
+        (string)$total_gst,
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'G' . $row,
+        (string)$final_total,
+        PHPExcel_Cell_DataType::TYPE_STRING
+    );
+
+    // TOTAL STYLE
+    $sheet->getStyle(
+        'D' . $row . ':G' . $row
+    )->getFont()->setBold(true);
+
+    // AUTO WIDTH
+    foreach (range('A', 'G') as $column) {
+
+        $sheet->getColumnDimension($column)
+            ->setAutoSize(true);
+    }
+
+    // FILE NAME
+    $filename = "gst_sales_summary.xls";
+
+    // HEADERS
+    header('Content-Type: application/vnd.ms-excel');
+
+    header(
+        'Content-Disposition: attachment;filename="' .
+        $filename .
+        '"'
+    );
+
+    header('Cache-Control: max-age=0');
+
+    // WRITER
+    $writer = PHPExcel_IOFactory::createWriter(
+        $excel,
+        'Excel5'
+    );
+
+    $writer->save('php://output');
+
+    exit;
+}
+
+//statewise gst report
+/*
+public function statewise_gst_report()
+{
+
+    // Filters
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // Report Data
+    $report = $this->Order_model
+        ->get_statewise_gst_report(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // Return JSON Response
+    echo json_encode($report);
+}*/
+
+
+public function statewise_gst_report()
+{
+
+    // FILTERS
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // LOAD MODEL
+    $this->load->model('Order_model');
+
+    // REPORT DATA
+    $report =
+        $this->Order_model
+            ->get_statewise_gst_report(
+                $date_range,
+                $start_date,
+                $end_date
+            );
+
+    // SUMMARY VARIABLES
+    $taxable_value = 0;
+
+    $cgst = 0;
+
+    $sgst = 0;
+
+    $igst = 0;
+
+    // CALCULATE SUMMARY
+    foreach ($report as $row) {
+
+        $taxable_value +=
+            (float)$row['sub_total'];
+
+        $cgst +=
+            (float)$row['tax'] / 2;
+
+        $sgst +=
+            (float)$row['tax'] / 2;
+
+        // IGST FOR OTHER STATES
+        if (
+            strtolower(trim($row['state']))
+            != 'maharashtra'
+        ) {
+
+            $igst +=
+                (float)$row['tax'];
+        }
+    }
+
+    // RESPONSE
+    $response = array(
+
+        'summary' => array(
+
+            'taxable_value' =>
+                '₹' . number_format(
+                    $taxable_value,
+                    2
+                ),
+
+            'cgst' =>
+                '₹' . number_format(
+                    $cgst,
+                    2
+                ),
+
+            'sgst' =>
+                '₹' . number_format(
+                    $sgst,
+                    2
+                ),
+
+            'igst' =>
+                '₹' . number_format(
+                    $igst,
+                    2
+                )
+        ),
+
+        'data' => $report
+    );
+
+    // JSON
+    echo json_encode($response);
+}
+
+
+public function download_statewise_gst_pdf()
+{
+
+    // FILTERS
+    $date_range = $this->input->get('date_range');
+
+    $start_date = $this->input->get('start_date');
+
+    $end_date = $this->input->get('end_date');
+
+    // LOAD MODEL
+    $this->load->model('Order_model');
+
+    // REPORT DATA
+    $report = $this->Order_model
+        ->get_statewise_gst_report(
+            $date_range,
+            $start_date,
+            $end_date
+        );
+
+    // TOTALS
+    $total_taxable = 0;
+
+    $total_gst = 0;
+
+    $total_invoices = 0;
+
+    // REPORT HEADING
+    $report_heading = 'Statewise GST Report';
+
+    if ($date_range == 'today') {
+
+        $report_heading =
+            'Today Statewise GST Report - ' .
+            date('d M Y');
+
+    } elseif ($date_range == 'week') {
+
+        $report_heading =
+            'Last 7 Days Statewise GST Report';
+
+    } elseif ($date_range == 'month') {
+
+        $report_heading =
+            'This Month Statewise GST Report - ' .
+            date('F Y');
+
+    } elseif ($date_range == 'custom') {
+
+        $report_heading =
+            'Custom Statewise GST Report (' .
+            date(
+                'd M Y',
+                strtotime($start_date)
+            ) .
+            ' to ' .
+            date(
+                'd M Y',
+                strtotime($end_date)
+            ) .
+            ')';
+    }
+
+    // HTML
+    $html = '
+
+    <style>
+
+        body{
+            font-family:sans-serif;
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        table th,
+        table td{
+            border:1px solid #000;
+            padding:8px;
+            font-size:12px;
+        }
+
+        table th{
+            background:#f2f2f2;
+        }
+
+    </style>
+
+    <h2>' . $report_heading . '</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>STATE</th>
+
+                <th>TAXABLE VALUE</th>
+
+                <th>GST COLLECTED</th>
+
+                <th>INVOICES</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+    ';
+
+    if (!empty($report)) {
+
+        foreach ($report as $row) {
+
+            $total_taxable +=
+                (float)$row['sub_total'];
+
+            $total_gst +=
+                (float)$row['tax'];
+
+            $total_invoices +=
+                (int)$row['invoices'];
+
+            $html .= '
+
+            <tr>
+
+                <td>' . $row['state'] . '</td>
+
+                <td>₹' .
+                    number_format(
+                        $row['sub_total'],
+                        2
+                    ) .
+                '</td>
+
+                <td>₹' .
+                    number_format(
+                        $row['tax'],
+                        2
+                    ) .
+                '</td>
+
+                <td>' .
+                    $row['invoices'] .
+                '</td>
+
+            </tr>
+            ';
+        }
+
+        // TOTAL ROW
+        $html .= '
+
+        <tr style="font-weight:bold;background:#f2f2f2;">
+
+            <td>TOTAL</td>
+
+            <td>₹' .
+                number_format(
+                    $total_taxable,
+                    2
+                ) .
+            '</td>
+
+            <td>₹' .
+                number_format(
+                    $total_gst,
+                    2
+                ) .
+            '</td>
+
+            <td>' .
+                $total_invoices .
+            '</td>
+
+        </tr>
+        ';
+    }
+
+    $html .= '
+
+        </tbody>
+
+    </table>
+    ';
+
+    require_once APPPATH .
+        '../vendor/autoload.php';
+
+    $mpdf = new \Mpdf\Mpdf();
+
+    $mpdf->WriteHTML($html);
+
+    $mpdf->Output(
+        'statewise_gst_report.pdf',
+        'D'
+    );
+}
+
+
+
+public function export_statewise_gst_excel()
+{
+
+    require_once APPPATH .
+        'third_party/PHPExcel/Classes/PHPExcel.php';
+
+    require_once APPPATH .
+        'third_party/PHPExcel/Classes/PHPExcel/Cell/DataType.php';
+
+    $excel = new PHPExcel();
+
+    $sheet =
+        $excel->setActiveSheetIndex(0);
+
+    // FILTERS
+    $date_range =
+        $this->input->get('date_range');
+
+    $start_date =
+        $this->input->get('start_date');
+
+    $end_date =
+        $this->input->get('end_date');
+
+    // LOAD MODEL
+    $this->load->model('Order_model');
+
+    // REPORT DATA
+    $report =
+        $this->Order_model
+            ->get_statewise_gst_report(
+                $date_range,
+                $start_date,
+                $end_date
+            );
+
+    // TITLE
+    $sheet->setCellValue(
+        'A1',
+        'Statewise GST Report'
+    );
+
+    // MERGE TITLE
+    $sheet->mergeCells('A1:D1');
+
+    // TITLE STYLE
+    $sheet->getStyle('A1')
+        ->getFont()
+        ->setBold(true);
+
+    $sheet->getStyle('A1')
+        ->getFont()
+        ->setSize(16);
+
+    // CENTER TITLE
+    $sheet->getStyle('A1')
+        ->getAlignment()
+        ->setHorizontal(
+            PHPExcel_Style_Alignment
+                ::HORIZONTAL_CENTER
+        );
+
+    // HEADERS
+    $sheet->setCellValue('A3', 'STATE');
+
+    $sheet->setCellValue('B3', 'TAXABLE VALUE');
+
+    $sheet->setCellValue('C3', 'GST COLLECTED');
+
+    $sheet->setCellValue('D3', 'INVOICES');
+
+    // HEADER STYLE
+    $sheet->getStyle('A3:D3')
+        ->getFont()
+        ->setBold(true);
+
+    // START ROW
+    $row = 4;
+
+    // TOTAL VARIABLES
+    $total_taxable = 0;
+
+    $total_gst = 0;
+
+    $total_invoices = 0;
+
+    // DATA LOOP
+    if (!empty($report)) {
+
+        foreach ($report as $data) {
+
+            // STATE
+            $sheet->setCellValueExplicit(
+                'A' . $row,
+                (string)$data['state'],
+                PHPExcel_Cell_DataType
+                    ::TYPE_STRING
+            );
+
+            // TAXABLE
+            $sheet->setCellValueExplicit(
+                'B' . $row,
+                (string)$data['sub_total'],
+                PHPExcel_Cell_DataType
+                    ::TYPE_STRING
+            );
+
+            // GST
+            $sheet->setCellValueExplicit(
+                'C' . $row,
+                (string)$data['tax'],
+                PHPExcel_Cell_DataType
+                    ::TYPE_STRING
+            );
+
+            // INVOICES
+            $sheet->setCellValueExplicit(
+                'D' . $row,
+                (string)$data['invoices'],
+                PHPExcel_Cell_DataType
+                    ::TYPE_STRING
+            );
+
+            // TOTALS
+            $total_taxable +=
+                (float)$data['sub_total'];
+
+            $total_gst +=
+                (float)$data['tax'];
+
+            $total_invoices +=
+                (int)$data['invoices'];
+
+            $row++;
+        }
+    }
+
+    // TOTAL ROW
+    $sheet->setCellValue(
+        'A' . $row,
+        'TOTAL'
+    );
+
+    $sheet->setCellValueExplicit(
+        'B' . $row,
+        (string)$total_taxable,
+        PHPExcel_Cell_DataType
+            ::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'C' . $row,
+        (string)$total_gst,
+        PHPExcel_Cell_DataType
+            ::TYPE_STRING
+    );
+
+    $sheet->setCellValueExplicit(
+        'D' . $row,
+        (string)$total_invoices,
+        PHPExcel_Cell_DataType
+            ::TYPE_STRING
+    );
+
+    // TOTAL ROW STYLE
+    $sheet->getStyle(
+        'A' . $row . ':D' . $row
+    )->getFont()->setBold(true);
+
+    // AUTO WIDTH
+    foreach (range('A', 'D') as $column) {
+
+        $sheet->getColumnDimension(
+            $column
+        )->setAutoSize(true);
+    }
+
+    // FILE NAME
+    $filename =
+        "statewise_gst_report.xls";
+
+    // DOWNLOAD HEADERS
+    header(
+        'Content-Type: application/vnd.ms-excel'
+    );
+
+    header(
+        'Content-Disposition: attachment;filename="' .
+        $filename .
+        '"'
+    );
+
+    header(
+        'Cache-Control: max-age=0'
+    );
+
+    // WRITER
+    $writer =
+        PHPExcel_IOFactory
+            ::createWriter(
+                $excel,
+                'Excel5'
+            );
+
+    $writer->save('php://output');
+
+    exit;
+}
 }

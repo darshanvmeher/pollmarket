@@ -169,6 +169,15 @@
                 <div class="col-md-5 d-grid">
                     <button class="btn btn-primary">Apply Filters</button>
                 </div>
+                 <div class="col-md-9">
+                <label class="form-label">Order Status</label>
+
+                <select class="form-select" id="orderStatus" name="order_status">
+                    <option value="all">All Orders</option>
+                    <option value="pending">Pending</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+            </div>
             </div>
 
             <div class="row g-3 mt-1 d-none" id="customRangeFields">
@@ -186,22 +195,22 @@
         <div class="sales-summary-grid mb-4">
             <div class="sales-summary-card">
                 <div class="sales-summary-card__label">Orders</div>
-                <div class="sales-summary-card__value"><?php echo html_escape($kpi['orders'] ?? 0); ?></div>
+                <div class="sales-summary-card__value" id="ordersCount"><?php echo html_escape($kpi['orders'] ?? 0); ?></div>
                 <p class="sales-summary-card__note">Total orders in selected period</p>
             </div>
             <div class="sales-summary-card">
                 <div class="sales-summary-card__label">Items</div>
-                <div class="sales-summary-card__value"><?php echo html_escape($kpi['items'] ?? 0); ?></div>
+                <div class="sales-summary-card__value" id="itemsCount"><?php echo html_escape($kpi['items'] ?? 0); ?></div>
                 <p class="sales-summary-card__note">Units sold</p>
             </div>
             <div class="sales-summary-card">
                 <div class="sales-summary-card__label">Gross Sales</div>
-                <div class="sales-summary-card__value">₹<?php echo html_escape($kpi['gross'] ?? 0); ?></div>
+                <div class="sales-summary-card__value" id="grossSales"><?php echo html_escape($kpi['gross'] ?? 0); ?></div>
                 <p class="sales-summary-card__note">Before discounts and tax</p>
             </div>
             <div class="sales-summary-card">
                 <div class="sales-summary-card__label">Net Sales</div>
-                <div class="sales-summary-card__value">₹<?php echo html_escape($kpi['net'] ?? 0); ?></div>
+                <div class="sales-summary-card__value" id="netSales"><?php echo html_escape($kpi['net'] ?? 0); ?></div>
                 <p class="sales-summary-card__note">After adjustments</p>
             </div>
         </div>
@@ -213,11 +222,19 @@
                     <p class="sales-report-panel__copy">Large review table with pagination for daily sales analysis.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2 justify-content-end">
-                    <a class="btn btn-outline-primary btn-sm" href="#">
+                    <!--<a class="btn btn-outline-primary btn-sm" href="#">
                         <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
                     </a>
                     <a class="btn btn-outline-secondary btn-sm" href="#">
                         <i class="bi bi-download me-1"></i>Download CSV
+                    </a>-->
+
+                        <a id="exportExcelBtn" href="<?= base_url('Api_handler/export_excel') ?>"
+                         class="btn btn-success">Export to Excel
+                    </a>
+
+                    <a id="downloadPdfBtn" href="<?= base_url('index.php/Api_handler/download_pdf') ?>"
+                    class="btn btn-secondary">Download PDF
                     </a>
                 </div>
             </div>
@@ -276,45 +293,10 @@ document.addEventListener('DOMContentLoaded', function () {
     toggleCustomFields();
 });
 </script>
-<<<<<<< HEAD
-
-<!--js date range and order status-->
-<!--
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
 
 
-<!--
-<script>
-
-    $(document).ready(function () {
-
-    $('.btn-primary').on('click', function () {
-
-        let dateRange   = $('#salesDateRange').val();
-        let orderStatus = $('#orderStatus').val();
-
-        $.ajax({
-            url: "<?=base_url('index.php/Api_handler/sales_report_by_today')?>",
-            type: 'POST',
-            dataType:'json',
-            data: {
-                date_range: dateRange,
-                order_status: orderStatus
-            },
-            success: function (response) {
-                $('#order_table').html(response);
-            }
-        });
-
-    });
-
-});
-
-</script>
-
-                        -->
-                        
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
 
 
 <script>
@@ -528,6 +510,262 @@ $(document).ready(function () {
 });
 
 </script>
+
+
+
+<<<<<<< HEAD
+
+<!--js date range and order status-->
+<!--
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+
+
+<!--
+<script>
+
+    $(document).ready(function () {
+
+    $('.btn-primary').on('click', function () {
+
+        let dateRange   = $('#salesDateRange').val();
+        let orderStatus = $('#orderStatus').val();
+
+        $.ajax({
+            url: "<?=base_url('index.php/Api_handler/sales_report_by_today')?>",
+            type: 'POST',
+            dataType:'json',
+            data: {
+                date_range: dateRange,
+                order_status: orderStatus
+            },
+            success: function (response) {
+                $('#order_table').html(response);
+            }
+        });
+
+    });
+
+});
+
+</script>
+
+                        
+                        
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+                        -->
+<!--
+<script>
+
+let table;
+
+$(document).ready(function () {
+
+    // Initialize DataTable only once
+    table = $('#myTable').DataTable({
+
+        pageLength: 5,
+
+        lengthMenu: [5, 10, 12, 50, 100],
+
+        ordering: true,
+
+        searching: true,
+
+        dom: 'Bfrtip',
+
+      /*  buttons: [
+            'copy',
+            'csv',
+            'excel',
+            'pdf',
+            'print'
+        ]*/
+    });
+
+    // Apply Filters Button
+    $('.btn-primary').on('click', function () {
+
+        let dateRange = $('#salesDateRange').val();
+
+        let orderStatus = $('#orderStatus').val();
+
+        let startDate = $('#fromDate').val();
+
+        let endDate = $('#toDate').val();
+
+        // Request Object
+        let requestData = {
+
+            date_range: dateRange,
+
+            order_status: orderStatus
+        };
+
+        // Custom Range
+        if (dateRange == 'custom') {
+
+            requestData.start_date = startDate;
+
+            requestData.end_date = endDate;
+        }
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/sales_report') ?>",
+
+            type: 'POST',
+
+            dataType: 'json',
+
+            data: requestData,
+
+            success: function (response) {
+
+                console.log(response);
+
+                // KPI Cards
+                $('#ordersCount').text(
+                    response.kpis.orders ?? 0
+                );
+
+                $('#itemsCount').text(
+                    response.kpis.items ?? 0
+                );
+
+                $('#grossSales').text(
+                    '₹' + (response.kpis.gross ?? 0)
+                );
+
+                $('#netSales').text(
+                    '₹' + (response.kpis.net ?? 0)
+                );
+
+                // Clear old rows
+                table.clear();
+
+                // Add rows dynamically
+                if (response.table_data && response.table_data.length > 0) {
+
+                    response.table_data.forEach(function (row) {
+
+                        table.row.add([
+
+                            row.date ?? '-',
+
+                            row.orders ?? 0,
+
+                            row.items ?? 0,
+
+                            row.gross ?? 0,
+
+                            row.discount ?? 0,
+
+                            row.net ?? 0,
+
+                            row.channel ?? 'Website'
+                        ]);
+                    });
+
+                } else {
+
+                    table.row.add([
+
+                        'No sales data found',
+
+                        '',
+
+                        '',
+
+                        '',
+
+                        '',
+
+                        '',
+
+                        ''
+                    ]);
+                }
+
+                // Update PDF URL dynamically
+                
+              /*  let pdfUrl =
+                "<?= base_url('index.php/Api_handler/download_pdf') ?>" +
+                '?date_range=' + dateRange +
+                '&order_status=' + orderStatus;
+                '&start_date=' + startDate +
+                '&end_date=' + endDate;
+
+
+                $('#downloadPdfBtn').attr('href', pdfUrl);
+
+                // Update Export Excel URL dynamically
+                let exportUrl =
+                "<?= base_url('index.php/Api_handler/export_excel') ?>" +
+                '?date_range=' + dateRange +
+                '&order_status=' + orderStatus;
+                '&start_date=' + startDate +
+                '&end_date=' + endDate;
+
+
+                $('#exportExcelBtn').attr('href', exportUrl);
+
+*/
+                
+
+                //new
+
+                // Export Excel URL
+                let exportUrl =
+                "<?= base_url('index.php/Api_handler/export_excel') ?>" +
+                '?date_range=' + dateRange +
+                '&order_status=' + orderStatus;
+
+                // PDF URL
+                let pdfUrl =
+                "<?= base_url('index.php/Api_handler/download_pdf') ?>" +
+                '?date_range=' + dateRange +
+                '&order_status=' + orderStatus;
+
+
+                // ADD CUSTOM DATES
+                if (dateRange == 'custom') {
+
+                    exportUrl +=
+                    '&start_date=' + startDate +
+                    '&end_date=' + endDate;
+
+                    pdfUrl +=
+                    '&start_date=' + startDate +
+                    '&end_date=' + endDate;
+                }
+
+
+                // SET BUTTON LINKS
+                $('#exportExcelBtn').attr('href', exportUrl);
+
+                $('#downloadPdfBtn').attr('href', pdfUrl);
+
+                // Redraw table
+                table.draw();
+                // Redraw table
+              //  table.draw();
+
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+            }
+
+        });
+
+    });
+
+});
+
+</script>
+                        -->
 
 <!--
 <script>

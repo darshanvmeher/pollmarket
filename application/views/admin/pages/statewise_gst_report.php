@@ -193,7 +193,7 @@
             </div>
         </div>
 
-        <div class="statewise-summary-grid mb-4">
+      <!--  <div class="statewise-summary-grid mb-4">
             <?php foreach ($summary_cards as $card): ?>
                 <div class="statewise-summary-card">
                     <div class="statewise-summary-card__label"><?php echo html_escape($card['label']); ?></div>
@@ -201,7 +201,7 @@
                     <p class="statewise-summary-card__note"><?php echo html_escape($card['note']); ?></p>
                 </div>
             <?php endforeach; ?>
-        </div>
+        </div>-->
 
         <div class="statewise-filter-card mb-4">
             <div class="row g-3 align-items-end">
@@ -215,7 +215,7 @@
                     </select>
                 </div>
                 <div class="col-md-5 d-grid">
-                    <button class="btn btn-primary">Apply Filters</button>
+                    <button class="btn btn-primary" id="applyFilter">Apply Filters</button>
                 </div>
             </div>
             <div class="row g-3 mt-1 d-none" id="statewiseCustomRange">
@@ -230,6 +230,16 @@
             </div>
         </div>
 
+         <div class="statewise-summary-grid mb-4">
+            <?php foreach ($summary_cards as $card): ?>
+                <div class="statewise-summary-card">
+                    <div class="statewise-summary-card__label"><?php echo html_escape($card['label']); ?></div>
+                    <div class="statewise-summary-card__value"><?php echo html_escape($card['value']); ?></div>
+                    <p class="statewise-summary-card__note"><?php echo html_escape($card['note']); ?></p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
         <div class="statewise-report-panel">
             <div class="statewise-report-panel__head">
                 <div>
@@ -237,12 +247,33 @@
                     <p class="statewise-report-panel__copy">Detailed state list for GST review with export-friendly table format.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2 justify-content-end">
-                    <a class="btn btn-outline-primary btn-sm" href="#">
+                   <!-- <a class="btn btn-outline-primary btn-sm" href="#">
                         <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
                     </a>
                     <a class="btn btn-outline-secondary btn-sm" href="#">
                         <i class="bi bi-download me-1"></i>Download CSV
+                    </a>-->
+
+                          <a
+                    href="javascript:void(0)"
+                    id="exportExcel"
+                    class="btn btn-outline-secondary btn-sm">
+
+                    <i class="bi bi-download me-1"></i>
+
+                    Export to Excel
+
                     </a>
+                      <a
+                    href="javascript:void(0)"
+                    id="downloadPdf"
+                    class="btn btn-outline-secondary btn-sm">
+
+                    <i class="bi bi-download me-1"></i>
+
+                    Download PDF
+
+                </a>
                 </div>
             </div>
             <div class="table-responsive">
@@ -259,9 +290,12 @@
                         <?php foreach ($state_wise_rows as $row): ?>
                             <tr>
                                 <td class="fw-semibold"><?php echo html_escape($row['state']); ?></td>
-                                <td><?php echo html_escape($row['taxable']); ?></td>
-                                <td><?php echo html_escape($row['gst']); ?></td>
+                                <td><?php echo html_escape($row['sub_total']); ?></td>
+                                <td><?php echo html_escape($row['tax']); ?></td>
                                 <td><?php echo html_escape($row['invoices']); ?></td>
+
+
+                                
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -287,4 +321,237 @@ document.addEventListener('DOMContentLoaded', function () {
     rangeSelect.addEventListener('change', toggleCustomFields);
     toggleCustomFields();
 });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<script>
+
+$(document).ready(function () {
+
+    // SHOW/HIDE CUSTOM DATE
+    $('#statewiseDateRange').change(function () {
+
+        let range = $(this).val();
+
+        if (range == 'custom') {
+
+            $('#customDateRange').show();
+
+        } else {
+
+            $('#customDateRange').hide();
+        }
+    });
+
+    // APPLY FILTER
+    $('#applyFilter').click(function () {
+
+        let date_range = $('#statewiseDateRange').val();
+
+        let start_date = $('#fromDate').val();
+
+        let end_date = $('#toDate').val();
+
+        // CUSTOM VALIDATION
+        if (
+            date_range == 'custom' &&
+            (
+                start_date == '' ||
+                end_date == ''
+            )
+        ) {
+
+            alert('Please select start and end date');
+
+            return;
+        }
+
+        $.ajax({
+
+            url: "<?= base_url('index.php/Api_handler/statewise_gst_report') ?>",
+
+            type: 'GET',
+
+            dataType: 'json',
+
+            data: {
+
+                date_range: date_range,
+
+                start_date: start_date,
+
+                end_date: end_date
+            },
+
+            beforeSend: function () {
+
+                $('#myTable tbody').html(`
+
+                    <tr>
+
+                        <td colspan="4" class="text-center">
+
+                            Loading...
+
+                        </td>
+
+                    </tr>
+
+                `);
+            },
+
+            success: function (response) {
+
+                console.log(response);
+
+                let html = '';
+
+                // SUMMARY CARD UPDATE
+                $('.kpi-total-states').text(
+                    response.summary.total_states
+                );
+
+                $('.kpi-highest-state').text(
+                    response.summary.highest_state
+                );
+
+                $('.kpi-igst-states').text(
+                    response.summary.igst_states
+                );
+
+                $('.kpi-gst-collected').text(
+                    '₹' + parseFloat(
+                        response.summary.gst_collected
+                    ).toFixed(2)
+                );
+
+                // TABLE DATA
+                if (response.data.length > 0) {
+
+                    $.each(response.data, function (i, row) {
+
+                        html += `
+
+                            <tr>
+
+                                <td class="fw-semibold">
+
+                                    ${row.state}
+
+                                </td>
+
+                                <td>
+
+                                    ₹${parseFloat(
+                                        row.sub_total
+                                    ).toFixed(2)}
+
+                                </td>
+
+                                <td>
+
+                                    ₹${parseFloat(
+                                        row.tax
+                                    ).toFixed(2)}
+
+                                </td>
+
+                                <td>
+
+                                    ${row.invoices}
+
+                                </td>
+
+                            </tr>
+
+                        `;
+                    });
+
+                } else {
+
+                    html = `
+
+                        <tr>
+
+                            <td colspan="4" class="text-center">
+
+                                No Records Found
+
+                            </td>
+
+                        </tr>
+
+                    `;
+                }
+
+                $('#myTable tbody').html(html);
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+                alert('Something went wrong');
+            }
+        });
+    });
+});
+
+</script>
+
+<script>
+
+$(document).ready(function () {
+
+    // PDF DOWNLOAD
+    $('#downloadPdf').click(function () {
+
+        let date_range =
+            $('#statewiseDateRange').val();
+
+        let start_date =
+            $('#fromDate').val();
+
+        let end_date =
+            $('#toDate').val();
+
+        let url =
+            "<?= base_url('index.php/Api_handler/download_statewise_gst_pdf') ?>";
+
+        url += '?date_range=' + date_range;
+
+        url += '&start_date=' + start_date;
+
+        url += '&end_date=' + end_date;
+
+        window.location.href = url;
+    });
+
+    // EXCEL EXPORT
+    $('#exportExcel').click(function () {
+
+        let date_range =
+            $('#statewiseDateRange').val();
+
+        let start_date =
+            $('#fromDate').val();
+
+        let end_date =
+            $('#toDate').val();
+
+        let url =
+            "<?= base_url('index.php/Api_handler/export_statewise_gst_excel') ?>";
+
+        url += '?date_range=' + date_range;
+
+        url += '&start_date=' + start_date;
+
+        url += '&end_date=' + end_date;
+
+        window.location.href = url;
+    });
+
+});
+
 </script>

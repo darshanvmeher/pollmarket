@@ -1420,4 +1420,570 @@ public function get_sales_report_excel($date_range = '', $order_status = '')
 
     return $this->db->get()->result_array();
 }
+
+//gst sales summary
+/*
+ public function get_gst_sales_summary(
+        $date_range = '',
+        $start_date = '',
+        $end_date = ''
+    )
+    {
+
+        $this->db->select('
+            i.invoice_no,
+
+            CONCAT(
+                u.firstname,
+                " ",
+                u.lastname
+            ) as customer_name,
+
+            u.state,
+
+            i.product_name,
+            i.quantity,
+            i.sub_total,
+            i.discount,
+            i.tax,
+            i.shipping,
+            i.grand_total,
+            i.invoice_date
+        ');
+
+        // invoice_tbl as i
+        $this->db->from('invoice_tbl as i');
+
+        // users_tbl as u
+        $this->db->join(
+            'users_tbl as u',
+            'u.id = i.fk_user_id',
+            'left'
+        );
+
+        $this->db->where(
+            'i.delete_status',
+            0
+        );
+
+        // TODAY
+        if ($date_range == 'today') {
+
+            $this->db->where(
+                'DATE(i.invoice_date)',
+                date('Y-m-d')
+            );
+        }
+
+        // LAST 7 DAYS
+        elseif ($date_range == 'last7days') {
+
+            $this->db->where(
+                'DATE(i.invoice_date) >=',
+                date('Y-m-d', strtotime('-6 days'))
+            );
+        }
+
+        // THIS MONTH
+        elseif ($date_range == 'thismonth') {
+
+            $this->db->where(
+                'MONTH(i.invoice_date)',
+                date('m')
+            );
+
+            $this->db->where(
+                'YEAR(i.invoice_date)',
+                date('Y')
+            );
+        }
+
+        // CUSTOM RANGE
+        elseif ($date_range == 'custom') {
+
+            if (
+                !empty($start_date)
+                && !empty($end_date)
+            ) {
+
+                $this->db->where(
+                    'DATE(i.invoice_date) >=',
+                    $start_date
+                );
+
+                $this->db->where(
+                    'DATE(i.invoice_date) <=',
+                    $end_date
+                );
+            }
+        }
+
+        $this->db->order_by(
+            'i.id',
+            'ASC'
+        );
+
+        return $this->db
+            ->get()
+            ->result_array();
+    }*/
+
+
+            public function get_gst_sales_summary(
+    $date_range = '',
+    $start_date = '',
+    $end_date = ''
+)
+{
+
+    $this->db->select('
+
+        i.invoice_no,
+
+        CONCAT(
+            u.firstname,
+            " ",
+            u.lastname
+        ) as customer_name,
+
+        u.state,
+
+        SUM(i.sub_total) as sub_total,
+
+        SUM(i.discount) as discount,
+
+        SUM(i.tax) as tax,
+
+        SUM(i.shipping) as shipping,
+
+        SUM(i.grand_total) as grand_total,
+
+        i.invoice_date
+    ');
+
+    // invoice table
+    $this->db->from('invoice_tbl as i');
+
+    // users table join
+    $this->db->join(
+        'users_tbl as u',
+        'u.id = i.fk_user_id',
+        'left'
+    );
+
+    // delete status
+    $this->db->where(
+        'i.delete_status',
+        0
+    );
+
+    // TODAY
+    if ($date_range == 'today') {
+
+        $this->db->where(
+            'DATE(i.invoice_date)',
+            date('Y-m-d')
+        );
+    }
+
+    // LAST 7 DAYS
+  /*  elseif ($date_range == 'last7days') {
+
+        $this->db->where(
+            'DATE(i.invoice_date) >=',
+            date(
+                'Y-m-d',
+                strtotime('-7 days')
+            )
+        );
+    }*/
+
+        elseif ($date_range == 'week') {
+
+    $this->db->where(
+        'DATE(i.invoice_date) >=',
+        date(
+            'Y-m-d',
+            strtotime('-6 days')
+        )
+    );
+
+    $this->db->where(
+        'DATE(i.invoice_date) <=',
+        date('Y-m-d')
+    );
+}
+
+    // THIS MONTH
+    elseif ($date_range == 'month') {
+
+        $this->db->where(
+            'MONTH(i.invoice_date)',
+            date('m')
+        );
+
+        $this->db->where(
+            'YEAR(i.invoice_date)',
+            date('Y')
+        );
+    }
+
+    // CUSTOM RANGE
+    elseif ($date_range == 'custom') {
+
+        if (
+            !empty($start_date)
+            && !empty($end_date)
+        ) {
+
+            $this->db->where(
+                'DATE(i.invoice_date) >=',
+                $start_date
+            );
+
+            $this->db->where(
+                'DATE(i.invoice_date) <=',
+                $end_date
+            );
+        }
+    }
+
+    // group by invoice
+    $this->db->group_by(
+        'i.invoice_no'
+    );
+
+    // latest first
+    $this->db->order_by(
+        'i.id',
+        'DESC'
+    );
+
+    return $this->db
+        ->get()
+        ->result_array();
+}
+
+//statewise gst report
+/*
+public function get_statewise_gst_report(
+    $date_range = '',
+    $start_date = '',
+    $end_date = ''
+)
+{
+
+    $this->db->select('
+
+        a.state,
+
+        SUM(i.sub_total) as taxable_value,
+
+        SUM(i.tax) as gst_collected,
+
+        COUNT(DISTINCT i.invoice_no) as invoices
+
+    ');
+
+    // INVOICE TABLE
+    $this->db->from(
+        'invoice_tbl as i'
+    );
+
+    // ADDRESS TABLE JOIN
+    $this->db->join(
+        'address_book_tbl as a',
+        'a.id = i.fk_address_id',
+        'left'
+    );
+
+    // DELETE STATUS
+    $this->db->where(
+        'i.delete_status',
+        0
+    );
+
+    // TODAY
+    if ($date_range == 'today') {
+
+        $this->db->where(
+            'DATE(i.invoice_date)',
+            date('Y-m-d')
+        );
+    }
+
+    // LAST 7 DAYS
+    elseif ($date_range == 'week') {
+
+        $this->db->where(
+            'DATE(i.invoice_date) >=',
+            date(
+                'Y-m-d',
+                strtotime('-6 days')
+            )
+        );
+
+        $this->db->where(
+            'DATE(i.invoice_date) <=',
+            date('Y-m-d')
+        );
+    }
+
+    // THIS MONTH
+    elseif ($date_range == 'month') {
+
+        $this->db->where(
+            'MONTH(i.invoice_date)',
+            date('m')
+        );
+
+        $this->db->where(
+            'YEAR(i.invoice_date)',
+            date('Y')
+        );
+    }
+
+    // CUSTOM DATE
+    elseif ($date_range == 'custom') {
+
+        if (
+            !empty($start_date)
+            && !empty($end_date)
+        ) {
+
+            $this->db->where(
+                'DATE(i.invoice_date) >=',
+                $start_date
+            );
+
+            $this->db->where(
+                'DATE(i.invoice_date) <=',
+                $end_date
+            );
+        }
+    }
+
+    // GROUP BY STATE
+    $this->db->group_by(
+        'a.state'
+    );
+
+    // ORDER BY GST
+    $this->db->order_by(
+        'gst_collected',
+        'DESC'
+    );
+
+    return $this->db
+        ->get()
+        ->result_array();
+}/*
+}
+/*
+public function get_statewise_gst_report(
+    $date_range = '',
+    $start_date = '',
+    $end_date = ''
+)
+{
+
+    $this->db->select('
+
+        a.state,
+
+        SUM(i.tax) as total_gst
+
+    ');
+
+    // invoice table
+    $this->db->from('invoice_tbl as i');
+
+    // address book table join
+    $this->db->join(
+        'address_book_tbl as a',
+        'a.id = i.fk_address_id',
+        'left'
+    );
+
+    // delete status
+    $this->db->where(
+        'i.delete_status',
+        0
+    );
+
+    // Date range filters (similar to previous function)
+    if ($date_range == 'today') {
+        $this->db->where(
+            'DATE(i.invoice_date)',
+            date('Y-m-d')
+        );
+    } elseif ($date_range == 'week') {
+        $this->db->where(
+            'DATE(i.invoice_date) >=',
+            date(
+                'Y-m-d',
+                strtotime('-6 days')
+            )
+        );
+        $this->db->where(
+            'DATE(i.invoice_date) <=',
+            date('Y-m-d')
+        );
+    } elseif ($date_range == 'month') {
+        $this->db->where(
+            'MONTH(i.invoice_date)',
+            date('m')
+        );
+        $this->db->where(
+            'YEAR(i.invoice_date)',
+            date('Y')
+        );
+    } elseif ($date_range == 'custom') {
+        if (
+            !empty($start_date)
+            && !empty($end_date)
+        ) {
+            $this->db->where(
+                'DATE(i.invoice_date) >=',
+                $start_date
+            );
+            $this->db->where(
+                'DATE(i.invoice_date) <=',
+                $end_date
+            );
+        }
+    }
+
+    // group by state
+    $this->db->group_by(
+        'a.state'
+    );
+
+    // order by total gst desc
+    $this->db->order_by(
+        'total_gst',
+        'DESC'
+    );
+
+    return $this->db
+        ->get()
+        ->result_array();
+}
+
+*/
+
+public function get_statewise_gst_report(
+    $date_range = '',
+    $start_date = '',
+    $end_date = ''
+)
+{
+
+    $this->db->select('
+
+        a.state,
+
+        SUM(i.sub_total) as sub_total,
+
+        SUM(i.tax) as tax,
+
+        COUNT(DISTINCT i.invoice_no) as invoices
+
+    ');
+
+    // INVOICE TABLE
+    $this->db->from(
+        'invoice_tbl as i'
+    );
+
+    // ADDRESS TABLE JOIN
+    $this->db->join(
+        'address_book_tbl as a',
+        'a.id = i.fk_address_id',
+        'left'
+    );
+
+    // DELETE STATUS
+    $this->db->where(
+        'i.delete_status',
+        0
+    );
+
+    // TODAY
+    if ($date_range == 'today') {
+
+        $this->db->where(
+            'DATE(i.invoice_date)',
+            date('Y-m-d')
+        );
+    }
+
+    // LAST 7 DAYS
+    elseif ($date_range == 'week') {
+
+        $this->db->where(
+            'DATE(i.invoice_date) >=',
+            date(
+                'Y-m-d',
+                strtotime('-6 days')
+            )
+        );
+
+        $this->db->where(
+            'DATE(i.invoice_date) <=',
+            date('Y-m-d')
+        );
+    }
+
+    // THIS MONTH
+    elseif ($date_range == 'month') {
+
+        $this->db->where(
+            'MONTH(i.invoice_date)',
+            date('m')
+        );
+
+        $this->db->where(
+            'YEAR(i.invoice_date)',
+            date('Y')
+        );
+    }
+
+    // CUSTOM RANGE
+    elseif ($date_range == 'custom') {
+
+        if (
+            !empty($start_date)
+            &&
+            !empty($end_date)
+        ) {
+
+            $this->db->where(
+                'DATE(i.invoice_date) >=',
+                $start_date
+            );
+
+            $this->db->where(
+                'DATE(i.invoice_date) <=',
+                $end_date
+            );
+        }
+    }
+
+    // GROUP BY STATE
+    $this->db->group_by(
+        'a.state'
+    );
+
+    // ORDER BY TAX DESC
+    $this->db->order_by(
+        'tax',
+        'DESC'
+    );
+
+    return $this->db
+        ->get()
+        ->result_array();
+}
+
 }
